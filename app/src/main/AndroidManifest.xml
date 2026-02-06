@@ -12,10 +12,10 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Horganized">
         <activity
-            android:name=".MainActivity"
+            android:name=".user.MainActivity"
             android:exported="false" />
         <activity
-            android:name=".activity_home_user"
+            android:name=".user.activity_home_user"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -24,7 +24,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".DetailBillActivity"
+            android:name=".user.DetailBillActivity"
             android:exported="false" />
     </application>
 
