@@ -1,6 +1,5 @@
 package com.example.horganized.admin
 
-import android.content.Intent
 import android.os.Bundle
 import android.widget.ImageView
 import androidx.activity.enableEdgeToEdge
@@ -9,23 +8,21 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.example.horganized.R
 
-class AdminHomeActivity : AppCompatActivity() {
+class ChatDetailActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        setContentView(R.layout.activity_admin_home)
-        
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content)) { v, insets ->
+        setContentView(R.layout.activity_chat_detail)
+
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.layout_top_bar_detail)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
 
-        // เชื่อมไอคอนกลางล่าง (nav_list) ไปยังหน้าเลือกห้องพัก
-        val navSelectRoom = findViewById<ImageView>(R.id.iv_nav_apartment)
-        navSelectRoom.setOnClickListener {
-            val intent = Intent(this, AdminSelectRoomActivity::class.java)
-            startActivity(intent)
+        val btnBack = findViewById<ImageView>(R.id.btn_back_chat_detail)
+        btnBack.setOnClickListener {
+            finish()
         }
     }
 }

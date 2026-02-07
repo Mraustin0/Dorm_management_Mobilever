@@ -11,27 +11,39 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Horganized">
+        
+        <!-- Admin Login is now the Launcher activity -->
+        <activity
+            android:name=".admin.AdminLoginActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
         <activity
             android:name=".user.MainActivity"
             android:exported="false" />
         <activity
             android:name=".user.activity_home_user"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
+            android:exported="false" />
         <activity
             android:name=".user.DetailBillActivity"
             android:exported="false" />
         <activity
-            android:name=".admin.AdminLoginActivity"
-            android:exported="true" />
-        <activity
             android:name=".admin.AdminHomeActivity"
             android:exported="false" />
+        <activity
+            android:name=".admin.AdminSelectRoomActivity"
+            android:exported="false" />
+        <activity
+            android:name=".admin.AdminCreateBillActivity"
+            android:exported="false" />
+        <activity
+            android:name=".admin.ChatListActivity"
+            android:exported="false" />
+            
     </application>
 
 </manifest>
