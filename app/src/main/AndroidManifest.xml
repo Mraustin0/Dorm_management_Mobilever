@@ -27,6 +27,10 @@
         <activity android:name=".user.UserProfileActivity" />
         <activity android:name=".user.UserProfileEditActivity" />
         <activity android:name=".user.ChatActivity" />
+        <activity android:name=".user.PayBillActivity" />
+        <activity android:name=".user.PayBillConfirmActivity" />
+        <activity android:name=".user.NotificationsActivity" />
+        <activity android:name=".user.RepairActivity" />
         <activity android:name=".MainActivity" />
 
     </application>
