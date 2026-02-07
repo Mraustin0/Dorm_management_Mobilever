@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "399751028942",
+    "firebase_url": "https://horganized-aa7d5-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "horganized-aa7d5",
+    "storage_bucket": "horganized-aa7d5.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:399751028942:android:e7afd25806ca83b30eb09f",
+        "android_client_info": {
+          "package_name": "com.horganzied.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD5thTDTjkwhhb5tyfhrzQoXqeoOFg8Wcs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

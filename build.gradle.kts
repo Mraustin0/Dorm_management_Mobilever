@@ -2,4 +2,7 @@
 plugins {
     alias(libs.plugins.android.application) apply false
     alias(libs.plugins.kotlin.android) apply false
+    
+    // เพิ่มบรรทัดนี้เพื่อให้โปรเจกต์รู้จัก Google Services
+    id("com.google.gms.google-services") version "4.4.2" apply false
 }

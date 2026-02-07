@@ -34,6 +34,7 @@
                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Online" android:textColor="#4CAF50" android:textSize="12sp"/>
             </LinearLayout>
             <ImageView
+                android:id="@+id/btn_call_admin"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:layout_alignParentEnd="true"
@@ -42,7 +43,6 @@
         </RelativeLayout>
     </androidx.cardview.widget.CardView>
 
-    <!-- Room Banner -->
     <TextView
         android:id="@+id/room_banner"
         android:layout_width="match_parent"
@@ -54,57 +54,15 @@
         android:gravity="center"
         app:layout_constraintTop_toBottomOf="@id/chat_header" />
 
-    <ScrollView
+    <!-- RecyclerView สำหรับแสดงข้อความแชท -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv_chat"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        app:layout_constraintBottom_toTopOf="@id/chat_input_area"
-        app:layout_constraintTop_toBottomOf="@id/room_banner">
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="16dp">
+        android:padding="8dp"
+        app:layout_constraintBottom_toTopOf="@id/quick_actions"
+        app:layout_constraintTop_toBottomOf="@id/room_banner" />
 
-            <!-- User Message -->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="end"
-                android:background="@drawable/shape_chat_bubble_user"
-                android:padding="12dp"
-                android:text="ติดต่อซื้อน้ำสิงห์ 2 แพ็คใหญ่ค่ะ"
-                android:textColor="#FFFFFF"
-                android:layout_marginBottom="16dp"/>
-
-            <!-- Admin Message -->
-            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:layout_marginBottom="16dp">
-                <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/shape_circle_black"/>
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:background="@drawable/shape_chat_bubble_admin"
-                    android:padding="12dp"
-                    android:text="สวัสดีค่ะ แอดมินรับเรื่องไว้แล้ว\nตอบภายใน 15 นาทีนี้ะคะ"
-                    android:textColor="#FFFFFF"/>
-            </LinearLayout>
-
-             <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:layout_marginBottom="16dp">
-                <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/shape_circle_black"/>
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:background="@drawable/shape_chat_bubble_admin"
-                    android:padding="12dp"
-                    android:text="จัดส่งรอบ 16.00 น. นะคะ"
-                    android:textColor="#FFFFFF"/>
-            </LinearLayout>
-
-        </LinearLayout>
-    </ScrollView>
-
-    <!-- Quick Action Buttons -->
     <LinearLayout
         android:id="@+id/quick_actions"
         android:layout_width="match_parent"
@@ -113,12 +71,11 @@
         android:gravity="center"
         android:padding="8dp"
         app:layout_constraintBottom_toTopOf="@id/chat_input_area">
-        <Button style="@style/Widget.MaterialComponents.Button.OutlinedButton" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="แจ้งซ่อม" android:textSize="10sp" android:layout_marginEnd="4dp"/>
-        <Button style="@style/Widget.MaterialComponents.Button.OutlinedButton" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="สรุปยอดค้างชำระ" android:textSize="10sp" android:layout_marginEnd="4dp"/>
-        <Button style="@style/Widget.MaterialComponents.Button.OutlinedButton" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="แจ้งทำความสะอาด" android:textSize="10sp"/>
+        <Button id="@+id/btn_repair" style="@style/Widget.MaterialComponents.Button.OutlinedButton" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="แจ้งซ่อม" android:textSize="10sp" android:layout_marginEnd="4dp"/>
+        <Button id="@+id/btn_summary" style="@style/Widget.MaterialComponents.Button.OutlinedButton" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="สรุปยอด" android:textSize="10sp" android:layout_marginEnd="4dp"/>
+        <Button id="@+id/btn_clean" style="@style/Widget.MaterialComponents.Button.OutlinedButton" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="แจ้งทำความสะอาด" android:textSize="10sp"/>
     </LinearLayout>
 
-    <!-- Chat Input -->
     <LinearLayout
         android:id="@+id/chat_input_area"
         android:layout_width="match_parent"
@@ -128,16 +85,16 @@
         android:orientation="horizontal"
         android:padding="8dp"
         app:layout_constraintBottom_toTopOf="@id/bottom_nav">
-        <ImageView android:layout_width="32dp" android:layout_height="32dp" android:src="@android:drawable/ic_input_add" />
+        <ImageView android:id="@+id/btn_add_file" android:layout_width="32dp" android:layout_height="32dp" android:src="@android:drawable/ic_input_add" />
         <EditText
+            android:id="@+id/et_chat_message"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:hint="แจ้งปัญหาหรือสอบถามแอดมิน"
             android:background="@android:color/transparent"
             android:padding="8dp" />
-        <ImageView android:layout_width="24dp" android:layout_height="24dp" android:layout_marginEnd="8dp" android:src="@android:drawable/ic_menu_save" />
-        <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@android:drawable/ic_menu_send" />
+        <ImageView android:id="@+id/btn_send_chat" android:layout_width="32dp" android:layout_height="32dp" android:src="@android:drawable/ic_menu_send" />
     </LinearLayout>
 
     <com.google.android.material.bottomnavigation.BottomNavigationView

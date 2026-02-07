@@ -12,6 +12,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.horganized.R
+import com.google.android.material.bottomnavigation.BottomNavigationView
 
 class DormInfoActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -23,7 +24,6 @@ class DormInfoActivity : AppCompatActivity() {
         val btnCall = findViewById<LinearLayout>(R.id.btn_call)
         val btnEmail = findViewById<LinearLayout>(R.id.btn_email)
 
-        // ฟังก์ชันคัดลอกที่อยู่
         btnCopy.setOnClickListener {
             val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
             val clip = ClipData.newPlainText("Dorm Address", tvAddress.text)
@@ -31,18 +31,44 @@ class DormInfoActivity : AppCompatActivity() {
             Toast.makeText(this, "คัดลอกที่อยู่เรียบร้อยแล้ว", Toast.LENGTH_SHORT).show()
         }
 
-        // ฟังก์ชันโทรออก
         btnCall.setOnClickListener {
             val intent = Intent(Intent.ACTION_DIAL)
             intent.data = Uri.parse("tel:0922787188")
             startActivity(intent)
         }
 
-        // ฟังก์ชันส่ง Email
         btnEmail.setOnClickListener {
             val intent = Intent(Intent.ACTION_SENDTO)
             intent.data = Uri.parse("mailto:goldenkeyapartment@gmail.com")
             startActivity(intent)
+        }
+
+        // Bottom Navigation Logic
+        val bottomNav = findViewById<BottomNavigationView>(R.id.bottom_nav)
+        bottomNav.selectedItemId = R.id.navigation_notifications
+        bottomNav.setOnItemSelectedListener { item ->
+            when (item.itemId) {
+                R.id.navigation_home -> {
+                    startActivity(Intent(this, HomeUserActivity::class.java))
+                    overridePendingTransition(0, 0)
+                    finish()
+                    true
+                }
+                R.id.navigation_bill -> {
+                    startActivity(Intent(this, DetailBillActivity::class.java))
+                    overridePendingTransition(0, 0)
+                    finish()
+                    true
+                }
+                R.id.navigation_notifications -> true
+                R.id.navigation_chat -> {
+                    startActivity(Intent(this, ChatActivity::class.java))
+                    overridePendingTransition(0, 0)
+                    finish()
+                    true
+                }
+                else -> false
+            }
         }
     }
 }

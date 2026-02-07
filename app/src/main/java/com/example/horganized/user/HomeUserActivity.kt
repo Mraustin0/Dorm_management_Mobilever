@@ -12,24 +12,33 @@ class HomeUserActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_home_user)
 
-        // ปุ่มดูและจ่ายบิล
         val viewAndPayBillButton = findViewById<Button>(R.id.btn_view_pay_bill)
         viewAndPayBillButton.setOnClickListener {
             startActivity(Intent(this, DetailBillActivity::class.java))
         }
 
-        // จัดการ Bottom Navigation
         val bottomNav = findViewById<BottomNavigationView>(R.id.bottom_nav)
         bottomNav.selectedItemId = R.id.navigation_home
+
         bottomNav.setOnItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.navigation_home -> true
                 R.id.navigation_bill -> {
                     startActivity(Intent(this, DetailBillActivity::class.java))
+                    overridePendingTransition(0, 0)
+                    finish()
                     true
                 }
-                R.id.navigation_notifications -> { // สมมติว่าเป็นหน้าข้อมูลหอพัก
+                R.id.navigation_notifications -> {
                     startActivity(Intent(this, DormInfoActivity::class.java))
+                    overridePendingTransition(0, 0)
+                    finish()
+                    true
+                }
+                R.id.navigation_chat -> {
+                    startActivity(Intent(this, ChatActivity::class.java))
+                    overridePendingTransition(0, 0)
+                    finish()
                     true
                 }
                 else -> false

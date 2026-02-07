@@ -13,7 +13,7 @@
         android:theme="@style/Theme.Horganized">
 
         <activity
-            android:name=".user.HomeUserActivity"
+            android:name=".LoginActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -21,6 +21,7 @@
             </intent-filter>
         </activity>
 
+        <activity android:name=".user.HomeUserActivity" />
         <activity android:name=".user.DetailBillActivity" />
         <activity android:name=".user.DormInfoActivity" />
         <activity android:name=".user.UserProfileActivity" />
