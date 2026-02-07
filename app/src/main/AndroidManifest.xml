@@ -11,21 +11,23 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Horganized">
+
         <activity
-            android:name=".user.MainActivity"
-            android:exported="false" />
-        <activity
-            android:name=".user.activity_home_user"
+            android:name=".user.HomeUserActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".user.DetailBillActivity"
-            android:exported="false" />
+
+        <activity android:name=".user.DetailBillActivity" />
+        <activity android:name=".user.DormInfoActivity" />
+        <activity android:name=".user.UserProfileActivity" />
+        <activity android:name=".user.UserProfileEditActivity" />
+        <activity android:name=".user.ChatActivity" />
+        <activity android:name=".MainActivity" />
+
     </application>
 
 </manifest>
