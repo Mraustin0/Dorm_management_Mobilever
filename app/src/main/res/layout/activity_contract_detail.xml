@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FFFFFF">
+
+    <!-- Header -->
+    <RelativeLayout
+        android:id="@+id/rl_header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="60dp"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingBottom="16dp">
+        <ImageView
+            android:id="@+id/btn_back"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:src="@drawable/ic_back_gg"
+            android:padding="4dp" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:text="เอกสารสัญญาฉบับที่ 1"
+            android:textColor="#000000"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+    </RelativeLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp"
+        app:layout_constraintTop_toBottomOf="@id/rl_header">
+
+        <!-- ดูสัญญาเช่า -->
+        <androidx.cardview.widget.CardView
+            android:id="@+id/menu_view_contract"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="4dp">
+            <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:padding="20dp">
+                <ImageView android:id="@+id/ic_f" android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/ic_file_gg" app:tint="#333333"/>
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_toEndOf="@id/ic_f" android:layout_marginStart="16dp" android:layout_centerVertical="true" android:text="ดูสัญญาเช่า" android:textColor="#333333" android:textSize="15sp"/>
+                <ImageView android:layout_width="20dp" android:layout_height="20dp" android:layout_alignParentEnd="true" android:layout_centerVertical="true" android:src="@android:drawable/ic_media_next" app:tint="#888888"/>
+            </RelativeLayout>
+        </androidx.cardview.widget.CardView>
+
+        <!-- ประวัติการทำสัญญา -->
+        <androidx.cardview.widget.CardView
+            android:id="@+id/menu_history"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="4dp">
+            <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:padding="20dp">
+                <ImageView android:id="@+id/ic_h" android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/ic_history_gg" app:tint="#333333"/>
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_toEndOf="@id/ic_h" android:layout_marginStart="16dp" android:layout_centerVertical="true" android:text="ประวัติการทำสัญญาออนไลน์" android:textColor="#333333" android:textSize="15sp"/>
+                <ImageView android:layout_width="20dp" android:layout_height="20dp" android:layout_alignParentEnd="true" android:layout_centerVertical="true" android:src="@android:drawable/ic_media_next" app:tint="#888888"/>
+            </RelativeLayout>
+        </androidx.cardview.widget.CardView>
+
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

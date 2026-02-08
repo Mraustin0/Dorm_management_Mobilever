@@ -2,18 +2,18 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
         android:id="@+id/navigation_home"
-        android:icon="@android:drawable/ic_menu_today"
+        android:icon="@drawable/ic_home_gg"
         android:title="Home" />
     <item
         android:id="@+id/navigation_bill"
-        android:icon="@android:drawable/ic_menu_agenda"
+        android:icon="@drawable/ic_bill_gg"
         android:title="Bill" />
     <item
         android:id="@+id/navigation_notifications"
-        android:icon="@android:drawable/ic_menu_camera"
-        android:title="Camera" />
+        android:icon="@drawable/ic_bell_gg"
+        android:title="Alert" />
     <item
         android:id="@+id/navigation_chat"
-        android:icon="@android:drawable/ic_menu_call"
+        android:icon="@drawable/ic_chat_gg"
         android:title="Chat" />
 </menu>

@@ -31,6 +31,8 @@
         <activity android:name=".user.PayBillConfirmActivity" />
         <activity android:name=".user.NotificationsActivity" />
         <activity android:name=".user.RepairActivity" />
+        <activity android:name=".user.ContractListActivity" />
+        <activity android:name=".user.ContractDetailActivity" />
         <activity android:name=".MainActivity" />
 
     </application>

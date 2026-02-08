@@ -3,7 +3,10 @@ package com.example.horganized.user
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.FrameLayout
+import android.widget.ImageView
 import android.widget.TextView
+import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.horganized.R
 import com.example.horganized.model.Notification
@@ -13,9 +16,13 @@ class NotificationAdapter(
 ) : RecyclerView.Adapter<NotificationAdapter.ViewHolder>() {
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        val cardView: CardView = view as CardView
         val tvNotifTitle: TextView = view.findViewById(R.id.tv_notif_title)
         val tvNotifBody: TextView = view.findViewById(R.id.tv_notif_body)
         val tvNotifTime: TextView = view.findViewById(R.id.tv_notif_time)
+        val viewUnreadDot: View = view.findViewById(R.id.view_unread_dot)
+        val flIcon: FrameLayout = view.findViewById(R.id.fl_icon)
+        val ivNotifIcon: ImageView = view.findViewById(R.id.iv_notif_icon)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -28,12 +35,20 @@ class NotificationAdapter(
         val notification = notifications[position]
         holder.tvNotifTitle.text = if (notification.title.isNotEmpty()) notification.title else notification.senderName
         holder.tvNotifBody.text = notification.message
-        
-        // แสดงเวลา (รองรับทั้ง Mock และ Real data)
+
         holder.tvNotifTime.text = if (notification.timestamp > 0) {
             getTimeAgo(notification.timestamp)
         } else {
-            notification.time // ถ้ามีฟิลด์ time ให้ใช้ค่านั้นเลย
+            notification.time
+        }
+
+        // Handle read/unread state
+        if (!notification.isRead) {
+            holder.viewUnreadDot.visibility = View.VISIBLE
+            holder.cardView.setCardBackgroundColor(0xFFF0F0FF.toInt())
+        } else {
+            holder.viewUnreadDot.visibility = View.GONE
+            holder.cardView.setCardBackgroundColor(0xFFFFFFFF.toInt())
         }
     }
 
@@ -48,10 +63,10 @@ class NotificationAdapter(
         val weeks = days / 7
 
         return when {
-            weeks > 0 -> "${weeks}w ago."
-            days > 0 -> "${days}d ago."
-            hours > 0 -> "${hours}h ago."
-            minutes > 0 -> "${minutes}m ago."
+            weeks > 0 -> "${weeks}w ago"
+            days > 0 -> "${days}d ago"
+            hours > 0 -> "${hours}h ago"
+            minutes > 0 -> "${minutes}m ago"
             else -> "Just now"
         }
     }

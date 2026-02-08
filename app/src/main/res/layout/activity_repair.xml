@@ -11,7 +11,7 @@
         android:id="@+id/rl_header"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingTop="60dp"
+        android:paddingTop="50dp"
         android:paddingStart="16dp"
         android:paddingEnd="16dp"
         android:paddingBottom="16dp">
@@ -19,14 +19,15 @@
             android:id="@+id/btn_back"
             android:layout_width="32dp"
             android:layout_height="32dp"
-            android:src="@android:drawable/ic_menu_revert" />
+            android:padding="4dp"
+            android:src="@drawable/ic_back_gg" />
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
             android:text="แจ้งซ่อม"
             android:textColor="#000000"
-            android:textSize="20sp"
+            android:textSize="18sp"
             android:textStyle="bold" />
         <TextView
             android:id="@+id/btn_send_repair"
@@ -56,40 +57,46 @@
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="2dp">
+                app:cardCornerRadius="16dp"
+                app:cardElevation="2dp"
+                app:cardBackgroundColor="#F8F9FA">
                 <RelativeLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:padding="16dp">
+                    <Spinner
+                        android:id="@+id/spinner_subject"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@android:color/transparent" />
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="เรื่องแจ้งซ่อม"
-                        android:textColor="#000000"
+                        android:textColor="#333333"
                         android:textStyle="bold" />
                     <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
                         android:layout_alignParentEnd="true"
-                        android:src="@android:drawable/arrow_down_float" />
+                        android:src="@drawable/ic_chevron_down_gg" />
                 </RelativeLayout>
             </androidx.cardview.widget.CardView>
 
-            <!-- Details Section -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="24dp"
                 android:text="รายละเอียดการแจ้งซ่อม"
-                android:textColor="#000000"
+                android:textColor="#333333"
                 android:textStyle="bold" />
+
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="2dp">
+                app:cardCornerRadius="16dp"
+                app:cardElevation="4dp">
                 <EditText
                     android:id="@+id/et_repair_details"
                     android:layout_width="match_parent"
@@ -101,20 +108,20 @@
                     android:textSize="14sp" />
             </androidx.cardview.widget.CardView>
 
-            <!-- Upload Section -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="24dp"
                 android:text="อัพโหลดรูปภาพ"
-                android:textColor="#000000"
+                android:textColor="#333333"
                 android:textStyle="bold" />
+
             <androidx.cardview.widget.CardView
-                android:id="@+id/btn_select_repair_image"
+                android:id="@+id/btn_select_image"
                 android:layout_width="match_parent"
                 android:layout_height="180dp"
                 android:layout_marginTop="8dp"
-                app:cardCornerRadius="12dp"
+                app:cardCornerRadius="16dp"
                 app:cardElevation="0dp"
                 app:cardBackgroundColor="#F8F9FA">
                 <LinearLayout
@@ -123,11 +130,13 @@
                     android:gravity="center"
                     android:orientation="vertical">
                     <ImageView
-                        android:id="@+id/iv_repair_preview"
+                        android:id="@+id/iv_preview"
                         android:layout_width="48dp"
                         android:layout_height="48dp"
-                        android:src="@android:drawable/ic_menu_upload" />
+                        android:src="@drawable/ic_parcel_gg"
+                        app:tint="#888888" />
                     <TextView
+                        android:id="@+id/tv_upload_label"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="12dp"

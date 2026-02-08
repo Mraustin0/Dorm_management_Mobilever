@@ -9,6 +9,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.cardview.widget.CardView
 import com.example.horganized.R
 
 class RepairActivity : AppCompatActivity() {
@@ -20,10 +21,11 @@ class RepairActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_repair)
 
-        ivPreview = findViewById(R.id.iv_repair_preview)
+        // แก้ไข ID ให้ตรงกับไฟล์ activity_repair.xml
+        ivPreview = findViewById(R.id.iv_preview)
         val btnBack = findViewById<ImageView>(R.id.btn_back)
         val btnSend = findViewById<TextView>(R.id.btn_send_repair)
-        val btnSelectImage = findViewById<androidx.cardview.widget.CardView>(R.id.btn_select_repair_image)
+        val btnSelectImage = findViewById<CardView>(R.id.btn_select_image)
 
         btnBack.setOnClickListener { finish() }
 

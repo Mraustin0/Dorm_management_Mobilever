@@ -2,8 +2,8 @@ package com.example.horganized
 
 import android.content.Intent
 import android.os.Bundle
-import android.widget.Button
 import android.widget.EditText
+import android.widget.RelativeLayout
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.horganized.user.HomeUserActivity
@@ -24,7 +24,7 @@ class LoginActivity : AppCompatActivity() {
 
         val etEmail = findViewById<EditText>(R.id.et_email)
         val etPassword = findViewById<EditText>(R.id.et_password)
-        val btnLogin = findViewById<Button>(R.id.btn_login_submit)
+        val btnLogin = findViewById<RelativeLayout>(R.id.btn_login_submit_custom)
 
         btnLogin.setOnClickListener {
             val email = etEmail.text.toString().trim()
@@ -39,7 +39,6 @@ class LoginActivity : AppCompatActivity() {
             }
 
             if (email.isNotEmpty() && password.isNotEmpty()) {
-                // พยายาม Login ผ่าน Firebase จริง (ถ้ามีการสมัครไว้แล้ว)
                 auth.signInWithEmailAndPassword(email, password)
                     .addOnCompleteListener { task ->
                         if (task.isSuccessful) {
@@ -56,7 +55,6 @@ class LoginActivity : AppCompatActivity() {
 
     private fun checkUserRole(uid: String?) {
         if (uid == null) return
-
         db.collection("users").document(uid).get()
             .addOnSuccessListener { document ->
                 if (document != null && document.exists()) {
@@ -67,12 +65,7 @@ class LoginActivity : AppCompatActivity() {
                         startActivity(Intent(this, HomeUserActivity::class.java))
                     }
                     finish()
-                } else {
-                    Toast.makeText(this, "User data not found", Toast.LENGTH_SHORT).show()
                 }
-            }
-            .addOnFailureListener {
-                Toast.makeText(this, "Error fetching user data", Toast.LENGTH_SHORT).show()
             }
     }
 }
