@@ -15,16 +15,18 @@
         android:background="@color/white"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <com.google.android.material.imageview.ShapeableImageView
+    <!-- Changed ShapeableImageView to regular ImageView with person.xml icon -->
+    <ImageView
         android:id="@+id/iv_admin_profile"
         android:layout_width="50dp"
         android:layout_height="50dp"
         android:layout_marginStart="16dp"
-        android:background="@color/black"
+        android:padding="8dp"
+        android:src="@drawable/ic_person"
+        android:background="#E0E0E0"
         app:layout_constraintBottom_toBottomOf="@id/header_bg"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@id/header_bg"
-        app:shapeAppearanceOverlay="@style/ShapeAppearance.MaterialComponents.SmallComponent" />
+        app:layout_constraintTop_toTopOf="@id/header_bg" />
 
     <LinearLayout
         android:layout_width="wrap_content"
@@ -66,7 +68,7 @@
         android:layout_width="24dp"
         android:layout_height="24dp"
         android:layout_marginEnd="16dp"
-        android:src="@drawable/ic_person"
+        android:src="@drawable/setting"
         app:layout_constraintBottom_toBottomOf="@id/iv_admin_profile"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@id/iv_admin_profile" />
@@ -86,6 +88,7 @@
 
             <!-- Card 1: ห้องว่าง -->
             <androidx.cardview.widget.CardView
+                android:id="@+id/cv_room_vacant"
                 android:layout_width="0dp"
                 android:layout_height="140dp"
                 android:layout_columnWeight="1"
@@ -123,6 +126,7 @@
 
             <!-- Card 2: สแกนรับพัสดุ -->
             <androidx.cardview.widget.CardView
+                android:id="@+id/cv_scan"
                 android:layout_width="0dp"
                 android:layout_height="140dp"
                 android:layout_columnWeight="1"
@@ -153,6 +157,7 @@
 
             <!-- Card 3: สร้างบิล -->
             <androidx.cardview.widget.CardView
+                android:id="@+id/cv_create_bill"
                 android:layout_width="0dp"
                 android:layout_height="140dp"
                 android:layout_columnWeight="1"
@@ -183,6 +188,7 @@
 
             <!-- Card 4: ตรวจสอบสลิป -->
             <androidx.cardview.widget.CardView
+                android:id="@+id/cv_check_slip"
                 android:layout_width="0dp"
                 android:layout_height="140dp"
                 android:layout_columnWeight="1"
@@ -213,6 +219,7 @@
 
             <!-- Card 5: จดมิเตอร์ -->
             <androidx.cardview.widget.CardView
+                android:id="@+id/cv_meter"
                 android:layout_width="0dp"
                 android:layout_height="140dp"
                 android:layout_columnWeight="1"
@@ -243,6 +250,7 @@
 
             <!-- Card 6: ติดต่อช่าง -->
             <androidx.cardview.widget.CardView
+                android:id="@+id/cv_technician"
                 android:layout_width="0dp"
                 android:layout_height="140dp"
                 android:layout_columnWeight="1"
@@ -273,6 +281,7 @@
 
             <!-- Card 7: ประกาศ -->
             <androidx.cardview.widget.CardView
+                android:id="@+id/cv_announce"
                 android:layout_width="0dp"
                 android:layout_height="140dp"
                 android:layout_columnWeight="1"
@@ -303,6 +312,7 @@
 
             <!-- Card 8: ย้ายเข้า/ออก -->
             <androidx.cardview.widget.CardView
+                android:id="@+id/cv_move"
                 android:layout_width="0dp"
                 android:layout_height="140dp"
                 android:layout_columnWeight="1"

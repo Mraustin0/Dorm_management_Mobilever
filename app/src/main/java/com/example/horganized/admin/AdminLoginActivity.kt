@@ -3,6 +3,8 @@ package com.example.horganized.admin
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
+import android.widget.EditText
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
@@ -15,18 +17,13 @@ class AdminLoginActivity : AppCompatActivity() {
         enableEdgeToEdge()
         setContentView(R.layout.activity_admin_login)
         
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content)) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-            insets
-        }
-
         val btnLogin = findViewById<Button>(R.id.btn_login)
+
         btnLogin.setOnClickListener {
-            // เชื่อมปุ่ม Login ไปยังหน้า Admin Home
+            // ข้ามการตรวจสอบรหัสผ่าน นำทางไปยังหน้า AdminHomeActivity ทันที
             val intent = Intent(this, AdminHomeActivity::class.java)
             startActivity(intent)
-            // finish() // ปลดคอมเมนต์ถ้าต้องการปิดหน้า Login ทันทีหลังจากเข้าสู่ระบบ
+            finish()
         }
     }
 }

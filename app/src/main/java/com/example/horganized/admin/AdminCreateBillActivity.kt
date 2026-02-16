@@ -31,6 +31,7 @@ class AdminCreateBillActivity : AppCompatActivity() {
     private lateinit var etAdditional: EditText
     private lateinit var tvTotalPrice: TextView
     private lateinit var tvRoomPrice: TextView
+    private lateinit var tvBillRoomNumber: TextView
     private lateinit var llDynamicItemsContainer: LinearLayout
     private lateinit var btnAddItem: LinearLayout
 
@@ -49,6 +50,13 @@ class AdminCreateBillActivity : AppCompatActivity() {
         }
 
         initViews()
+        
+        // รับค่าหมายเลขห้องจาก Intent และแสดงผล
+        val roomName = intent.getStringExtra("ROOM_NAME")
+        if (roomName != null) {
+            tvBillRoomNumber.text = "บิลค่าเช่า $roomName"
+        }
+
         setupListeners()
         setupElecRateSpinner()
         calculateTotal()
@@ -67,6 +75,7 @@ class AdminCreateBillActivity : AppCompatActivity() {
     }
 
     private fun initViews() {
+        tvBillRoomNumber = findViewById(R.id.tv_bill_room_number)
         etElecAfter = findViewById(R.id.et_elec_after)
         etElecBefore = findViewById(R.id.et_elec_before)
         tvElecUnits = findViewById(R.id.tv_elec_units_result)
@@ -186,7 +195,7 @@ class AdminCreateBillActivity : AppCompatActivity() {
     private fun showConfirmDialog() {
         AlertDialog.Builder(this)
             .setTitle("ยืนยันการส่งบิล")
-            .setMessage("คุณต้องการส่งบิลสำหรับ ${findViewById<TextView>(R.id.tv_bill_room_number).text} ใช่หรือไม่?")
+            .setMessage("คุณต้องการส่งบิลสำหรับ ${tvBillRoomNumber.text} ใช่หรือไม่?")
             .setPositiveButton("ตกลง") { _, _ ->
                 AlertDialog.Builder(this)
                     .setMessage("ส่งบิลเรียบร้อยแล้ว")

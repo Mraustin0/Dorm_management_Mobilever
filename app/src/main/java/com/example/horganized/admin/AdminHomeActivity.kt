@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.widget.ImageView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.cardview.widget.CardView
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.example.horganized.R
@@ -25,6 +26,55 @@ class AdminHomeActivity : AppCompatActivity() {
         val navSelectRoom = findViewById<ImageView>(R.id.iv_nav_apartment)
         navSelectRoom.setOnClickListener {
             val intent = Intent(this, AdminSelectRoomActivity::class.java)
+            startActivity(intent)
+        }
+
+        // เชื่อมไอคอนแชท (ขวาล่าง) ไปยังหน้า Chat List
+        val navChat = findViewById<ImageView>(R.id.iv_nav_chat)
+        navChat.setOnClickListener {
+            val intent = Intent(this, ChatListActivity::class.java)
+            startActivity(intent)
+        }
+
+        // เชื่อมปุ่มประกาศ
+        val cvAnnounce = findViewById<CardView>(R.id.cv_announce)
+        cvAnnounce.setOnClickListener {
+            val intent = Intent(this, AdminAnnounceActivity::class.java)
+            startActivity(intent)
+        }
+
+        // เชื่อมปุ่มจดมิเตอร์
+        val cvMeter = findViewById<CardView>(R.id.cv_meter)
+        cvMeter.setOnClickListener {
+            val intent = Intent(this, AdminMeterActivity::class.java)
+            startActivity(intent)
+        }
+
+        // เชื่อมปุ่มตรวจสอบสลิป ไปยังหน้า AdminSelectRoomActivity ตามคำขอใหม่
+        val cvCheckSlip = findViewById<CardView>(R.id.cv_check_slip)
+        cvCheckSlip.setOnClickListener {
+            val intent = Intent(this, AdminSelectRoomActivity::class.java)
+            startActivity(intent)
+        }
+
+        // เชื่อมปุ่มติดต่อช่าง
+        val cvTechnician = findViewById<CardView>(R.id.cv_technician)
+        cvTechnician.setOnClickListener {
+            val intent = Intent(this, AdminTechnicianActivity::class.java)
+            startActivity(intent)
+        }
+
+        // เชื่อมปุ่มย้ายเข้า/ออก (cv_move) ไปหน้าเลือกห้องเพื่ออัปเดตข้อมูล
+        val cvMove = findViewById<CardView>(R.id.cv_move)
+        cvMove.setOnClickListener {
+            val intent = Intent(this, AdminMoveSelectionActivity::class.java)
+            startActivity(intent)
+        }
+
+        // เชื่อมไอคอนตั้งค่า (ขวาบน) ไปยังหน้า AdminSettingActivity
+        val ivSetting = findViewById<ImageView>(R.id.iv_menu)
+        ivSetting.setOnClickListener {
+            val intent = Intent(this, AdminSettingActivity::class.java)
             startActivity(intent)
         }
     }

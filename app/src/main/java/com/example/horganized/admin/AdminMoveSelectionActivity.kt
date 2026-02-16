@@ -7,8 +7,8 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.ImageView
 import android.widget.Spinner
+import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -16,15 +16,16 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.horganized.R
 
-class AdminSelectRoomActivity : AppCompatActivity() {
+class AdminMoveSelectionActivity : AppCompatActivity() {
 
     private lateinit var rvRooms: RecyclerView
     private lateinit var spinnerFloor: Spinner
+    private lateinit var btnBack: ImageView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        setContentView(R.layout.activity_admin_select_room)
+        setContentView(R.layout.activity_admin_move_selection)
         
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
@@ -32,31 +33,16 @@ class AdminSelectRoomActivity : AppCompatActivity() {
             insets
         }
 
-        rvRooms = findViewById(R.id.rv_rooms)
-        spinnerFloor = findViewById(R.id.spinner_floor)
+        rvRooms = findViewById(R.id.rv_rooms_move_selection)
+        spinnerFloor = findViewById(R.id.spinner_floor_move_selection)
+        btnBack = findViewById(R.id.btn_back_move_selection)
+
+        btnBack.setOnClickListener { finish() }
 
         setupSpinner()
         setupRecyclerView()
-        setupBottomNavigation()
         
-        // เริ่มต้นแสดงผลชั้น 1 ทันที
         updateRoomList(1)
-    }
-
-    private fun setupBottomNavigation() {
-        val navHome = findViewById<ImageView>(R.id.iv_nav_home)
-        val navChat = findViewById<ImageView>(R.id.iv_nav_chat)
-
-        navHome.setOnClickListener {
-            val intent = Intent(this, AdminHomeActivity::class.java)
-            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
-            startActivity(intent)
-        }
-
-        navChat.setOnClickListener {
-            val intent = Intent(this, ChatListActivity::class.java)
-            startActivity(intent)
-        }
     }
 
     private fun setupSpinner() {
@@ -90,16 +76,16 @@ class AdminSelectRoomActivity : AppCompatActivity() {
         }
 
         rvRooms.adapter = RoomAdapter(rooms) { room ->
-            if (!room.isVacant) {
-                val intent = Intent(this, AdminCreateBillActivity::class.java)
+            if (room.isVacant) {
+                // ห้องว่าง -> ไปหน้าย้ายเข้า
+                val intent = Intent(this, AdminMoveInActivity::class.java)
                 intent.putExtra("ROOM_NAME", room.name)
                 startActivity(intent)
             } else {
-                AlertDialog.Builder(this)
-                    .setTitle("สถานะห้องพัก")
-                    .setMessage("${room.name} เป็นห้องว่าง")
-                    .setPositiveButton("ตกลง", null)
-                    .show()
+                // ห้องไม่ว่าง -> ไปหน้าย้ายออก
+                val intent = Intent(this, AdminMoveOutActivity::class.java)
+                intent.putExtra("ROOM_NAME", room.name)
+                startActivity(intent)
             }
         }
     }
