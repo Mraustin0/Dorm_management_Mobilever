@@ -10,8 +10,8 @@
         android:title="Bill" />
     <item
         android:id="@+id/navigation_notifications"
-        android:icon="@drawable/ic_bell_gg"
-        android:title="Alert" />
+        android:icon="@drawable/ic_grid_gg"
+        android:title="Info" />
     <item
         android:id="@+id/navigation_chat"
         android:icon="@drawable/ic_chat_gg"

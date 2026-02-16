@@ -1,10 +1,8 @@
 package com.example.horganized.model
 
 data class ChatMessage(
-    val messageId: String = "",
     val senderId: String = "",
     val receiverId: String = "",
-    val text: String = "",
-    val timestamp: Long = 0,
-    val imageUrl: String? = null
+    val message: String = "",
+    val timestamp: com.google.firebase.Timestamp? = null
 )

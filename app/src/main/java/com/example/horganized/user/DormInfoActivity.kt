@@ -19,39 +19,34 @@ class DormInfoActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_dorm_info)
 
-        val tvAddress = findViewById<TextView>(R.id.tv_address)
-        val btnCall = findViewById<LinearLayout>(R.id.btn_call)
-
-        // ปุ่มย้อนกลับ
-        findViewById<ImageView>(R.id.btn_back)?.setOnClickListener { 
-            finish()
-            overridePendingTransition(R.anim.fade_in, R.anim.fade_out)
-        }
-
-        // ปุ่มกระดิ่งแจ้งเตือน
-        findViewById<ImageView>(R.id.notification_icon)?.setOnClickListener {
-            startActivity(Intent(this, NotificationsActivity::class.java))
-            overridePendingTransition(R.anim.fade_in, R.anim.fade_out)
-        }
-
-        // ปุ่มเมนู 3 ขีด
-        findViewById<ImageView>(R.id.menu_icon)?.setOnClickListener {
-            startActivity(Intent(this, UserProfileActivity::class.java))
-            overridePendingTransition(R.anim.fade_in, R.anim.fade_out)
-        }
-
-        // ฟังก์ชันคัดลอกที่อยู่ (เปลี่ยนมาใช้กดที่ตัวที่อยู่แทนเนื่องจากลบปุ่มเก่าออก)
-        tvAddress?.setOnClickListener {
+        // ปุ่มคัดลอกที่อยู่
+        findViewById<ImageView>(R.id.btn_copy_address)?.setOnClickListener {
+            val tvAddress = findViewById<TextView>(R.id.tv_address)
             val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
             val clip = ClipData.newPlainText("Dorm Address", tvAddress.text)
             clipboard.setPrimaryClip(clip)
             Toast.makeText(this, "คัดลอกที่อยู่เรียบร้อยแล้ว", Toast.LENGTH_SHORT).show()
         }
 
-        btnCall?.setOnClickListener {
+        // ปุ่มโทร
+        findViewById<LinearLayout>(R.id.btn_call)?.setOnClickListener {
             val intent = Intent(Intent.ACTION_DIAL)
             intent.data = Uri.parse("tel:0922787188")
             startActivity(intent)
+        }
+
+        // ปุ่มอีเมล
+        findViewById<LinearLayout>(R.id.btn_email)?.setOnClickListener {
+            val intent = Intent(Intent.ACTION_SENDTO)
+            intent.data = Uri.parse("mailto:goldenkeyapartment@gmail.com")
+            startActivity(intent)
+        }
+
+        // ปุ่มดูเอกสารสัญญาเช่า
+        findViewById<TextView>(R.id.btn_view_contract)?.setOnClickListener {
+            val intent = Intent(this, ContractListActivity::class.java)
+            startActivity(intent)
+            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
         }
 
         setupBottomNavigation()
@@ -59,7 +54,7 @@ class DormInfoActivity : AppCompatActivity() {
 
     private fun setupBottomNavigation() {
         val bottomNav = findViewById<BottomNavigationView>(R.id.bottom_nav)
-        bottomNav.selectedItemId = 0 // ลบการเลือกสถานะหากหน้านี้ไม่ได้อยู่ในเมนูหลัก หรือเลือกไอคอนที่เหมาะสม
+        bottomNav.selectedItemId = R.id.navigation_notifications
         bottomNav.setOnItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.navigation_home -> {
@@ -74,13 +69,7 @@ class DormInfoActivity : AppCompatActivity() {
                     finish()
                     true
                 }
-                R.id.navigation_notifications -> {
-                    // ถ้าคุณอยากให้ไอคอนแจ้งเตือนใน Nav เปิดหน้า NotificationActivity
-                    startActivity(Intent(this, NotificationsActivity::class.java))
-                    overridePendingTransition(0, 0)
-                    finish()
-                    true
-                }
+                R.id.navigation_notifications -> true
                 R.id.navigation_chat -> {
                     startActivity(Intent(this, ChatActivity::class.java))
                     overridePendingTransition(0, 0)

@@ -40,13 +40,13 @@ class ChatAdapter(private val chatList: List<ChatMessage>) :
 
     inner class SentMessageViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         fun bind(message: ChatMessage) {
-            itemView.findViewById<TextView>(R.id.tv_sent_message).text = message.text
+            itemView.findViewById<TextView>(R.id.tv_sent_message).text = message.message
         }
     }
 
     inner class ReceivedMessageViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         fun bind(message: ChatMessage) {
-            itemView.findViewById<TextView>(R.id.tv_received_message).text = message.text
+            itemView.findViewById<TextView>(R.id.tv_received_message).text = message.message
         }
     }
 }

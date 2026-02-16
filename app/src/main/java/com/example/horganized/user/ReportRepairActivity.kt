@@ -4,13 +4,14 @@ import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.view.View
 import android.widget.EditText
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.RelativeLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
 import com.example.horganized.R
@@ -26,19 +27,23 @@ class ReportRepairActivity : AppCompatActivity() {
 
     private var selectedImageUri: Uri? = null
     private var selectedRepairType: String = ""
+    private var isDropdownOpen = false
+
     private lateinit var ivPreview: ImageView
     private lateinit var tvUploadLabel: TextView
     private lateinit var tvRepairType: TextView
+    private lateinit var layoutDropdown: LinearLayout
+    private lateinit var ivDropdownArrow: ImageView
 
-    private val repairTypes = arrayOf(
-        "ไฟฟ้า / หลอดไฟ",
-        "ประปา / ท่อน้ำ",
-        "แอร์ / เครื่องปรับอากาศ",
-        "ประตู / หน้าต่าง",
-        "เฟอร์นิเจอร์",
-        "อินเทอร์เน็ต",
-        "อื่นๆ"
-    )
+    private val pickImage = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            selectedImageUri = result.data?.data
+            ivPreview.setImageURI(selectedImageUri)
+            ivPreview.layoutParams.width = resources.getDimensionPixelSize(android.R.dimen.thumbnail_width)
+            ivPreview.layoutParams.height = resources.getDimensionPixelSize(android.R.dimen.thumbnail_height)
+            tvUploadLabel.text = "เปลี่ยนรูปภาพ"
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -47,34 +52,32 @@ class ReportRepairActivity : AppCompatActivity() {
         db = FirebaseFirestore.getInstance()
         auth = FirebaseAuth.getInstance()
 
+        tvRepairType = findViewById(R.id.tv_repair_type)
+        ivPreview = findViewById(R.id.iv_preview)
+        tvUploadLabel = findViewById(R.id.tv_upload_label)
+        layoutDropdown = findViewById(R.id.layout_dropdown_list)
+        ivDropdownArrow = findViewById(R.id.iv_dropdown_arrow)
+
         val btnBack = findViewById<ImageView>(R.id.btn_back)
         val btnSubmit = findViewById<TextView>(R.id.btn_submit)
         val rlRepairType = findViewById<RelativeLayout>(R.id.rl_repair_type)
         val btnSelectImage = findViewById<CardView>(R.id.btn_select_image)
         val etDescription = findViewById<EditText>(R.id.et_description)
 
-        tvRepairType = findViewById(R.id.tv_repair_type)
-        ivPreview = findViewById(R.id.iv_preview)
-        tvUploadLabel = findViewById(R.id.tv_upload_label)
-
         btnBack.setOnClickListener { finish() }
 
-        // Repair Type Dropdown
+        // Toggle dropdown
         rlRepairType.setOnClickListener {
-            showRepairTypeDialog()
+            toggleDropdown()
         }
+
+        // ตัวเลือก dropdown
+        findViewById<TextView>(R.id.option_electric).setOnClickListener { selectType("ไฟฟ้า") }
+        findViewById<TextView>(R.id.option_water).setOnClickListener { selectType("ประปา") }
+        findViewById<TextView>(R.id.option_internet).setOnClickListener { selectType("อินเทอร์เน็ต") }
+        findViewById<TextView>(R.id.option_other).setOnClickListener { selectType("อื่น ๆ") }
 
         // Image Picker
-        val pickImage = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            if (result.resultCode == Activity.RESULT_OK) {
-                selectedImageUri = result.data?.data
-                ivPreview.setImageURI(selectedImageUri)
-                ivPreview.layoutParams.width = resources.getDimensionPixelSize(android.R.dimen.thumbnail_width)
-                ivPreview.layoutParams.height = resources.getDimensionPixelSize(android.R.dimen.thumbnail_height)
-                tvUploadLabel.text = "เปลี่ยนรูปภาพ"
-            }
-        }
-
         btnSelectImage.setOnClickListener {
             val intent = Intent(Intent.ACTION_PICK)
             intent.type = "image/*"
@@ -99,15 +102,25 @@ class ReportRepairActivity : AppCompatActivity() {
         }
     }
 
-    private fun showRepairTypeDialog() {
-        AlertDialog.Builder(this)
-            .setTitle("เลือกประเภทการแจ้งซ่อม")
-            .setItems(repairTypes) { _, which ->
-                selectedRepairType = repairTypes[which]
-                tvRepairType.text = selectedRepairType
-                tvRepairType.setTextColor(resources.getColor(android.R.color.black, null))
-            }
-            .show()
+    private fun toggleDropdown() {
+        isDropdownOpen = !isDropdownOpen
+        if (isDropdownOpen) {
+            layoutDropdown.visibility = View.VISIBLE
+            ivDropdownArrow.setImageResource(R.drawable.ic_chevron_up_gg)
+        } else {
+            layoutDropdown.visibility = View.GONE
+            ivDropdownArrow.setImageResource(R.drawable.ic_chevron_down_gg)
+        }
+    }
+
+    private fun selectType(type: String) {
+        selectedRepairType = type
+        tvRepairType.text = type
+        tvRepairType.setTextColor(resources.getColor(android.R.color.black, null))
+        // ปิด dropdown
+        isDropdownOpen = false
+        layoutDropdown.visibility = View.GONE
+        ivDropdownArrow.setImageResource(R.drawable.ic_chevron_down_gg)
     }
 
     private fun submitRepairRequest(description: String) {

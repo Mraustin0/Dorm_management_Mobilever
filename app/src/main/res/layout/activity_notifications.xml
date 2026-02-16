@@ -4,15 +4,14 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FFFFFF"
-    android:fitsSystemWindows="true">
+    android:background="#FFFFFF">
 
     <!-- Header -->
     <RelativeLayout
         android:id="@+id/rl_header"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingTop="16dp"
+        android:paddingTop="32dp"
         android:paddingStart="16dp"
         android:paddingEnd="16dp"
         android:paddingBottom="16dp">
@@ -23,7 +22,7 @@
             android:layout_height="32dp"
             android:layout_centerVertical="true"
             android:padding="4dp"
-            android:src="@android:drawable/ic_menu_revert" />
+            android:src="@drawable/ic_back_gg" />
 
         <TextView
             android:layout_width="wrap_content"

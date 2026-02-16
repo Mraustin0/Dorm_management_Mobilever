@@ -4,7 +4,6 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true"
     android:background="#FFFFFF">
 
     <ImageView
@@ -12,8 +11,9 @@
         android:layout_width="32dp"
         android:layout_height="32dp"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
-        android:src="@android:drawable/ic_menu_revert"
+        android:layout_marginTop="32dp"
+        android:src="@drawable/ic_back_gg"
+        android:padding="4dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -23,6 +23,7 @@
         android:layout_height="100dp"
         android:layout_marginTop="24dp"
         android:src="@drawable/shape_circle_black"
+        android:scaleType="centerCrop"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/btn_back" />
@@ -52,20 +53,14 @@
             android:orientation="vertical"
             android:padding="24dp">
 
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Username" android:textStyle="bold" android:textColor="#000000"/>
-            <EditText android:id="@+id/et_username" android:layout_width="match_parent" android:layout_height="wrap_content" android:background="@drawable/shape_edittext_bg" android:padding="12dp" android:layout_marginTop="8dp" android:text="Tzoey" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Name" android:textStyle="bold" android:textColor="#000000"/>
+            <EditText android:id="@+id/et_name" android:layout_width="match_parent" android:layout_height="wrap_content" android:background="@drawable/shape_edittext_bg" android:padding="12dp" android:layout_marginTop="8dp" android:hint="ชื่อ-นามสกุล" />
 
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="16dp" android:text="First Name" android:textStyle="bold" android:textColor="#000000"/>
-            <EditText android:id="@+id/et_first_name" android:layout_width="match_parent" android:layout_height="wrap_content" android:background="@drawable/shape_edittext_bg" android:padding="12dp" android:layout_marginTop="8dp" android:text="ธนันต์" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="16dp" android:text="Phone" android:textStyle="bold" android:textColor="#000000"/>
+            <EditText android:id="@+id/et_phone" android:layout_width="match_parent" android:layout_height="wrap_content" android:background="@drawable/shape_edittext_bg" android:padding="12dp" android:layout_marginTop="8dp" android:hint="เบอร์โทร" android:inputType="phone" />
 
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="16dp" android:text="Last Name" android:textStyle="bold" android:textColor="#000000"/>
-            <EditText android:id="@+id/et_last_name" android:layout_width="match_parent" android:layout_height="wrap_content" android:background="@drawable/shape_edittext_bg" android:padding="12dp" android:layout_marginTop="8dp" android:text="สาวิกิน" />
-
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="16dp" android:text="Email" android:textStyle="bold" android:textColor="#000000"/>
-            <EditText android:id="@+id/et_email" android:layout_width="match_parent" android:layout_height="wrap_content" android:background="@drawable/shape_edittext_bg" android:padding="12dp" android:layout_marginTop="8dp" android:text="Thananan@gmail..com" />
-
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="16dp" android:text="Tel." android:textStyle="bold" android:textColor="#000000"/>
-            <EditText android:id="@+id/et_tel" android:layout_width="match_parent" android:layout_height="wrap_content" android:background="@drawable/shape_edittext_bg" android:padding="12dp" android:layout_marginTop="8dp" android:text="0819091145" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="16dp" android:text="Room Number" android:textStyle="bold" android:textColor="#000000"/>
+            <EditText android:id="@+id/et_room_number" android:layout_width="match_parent" android:layout_height="wrap_content" android:background="@drawable/shape_edittext_bg" android:padding="12dp" android:layout_marginTop="8dp" android:hint="เลขห้อง" android:enabled="false" />
 
         </LinearLayout>
     </ScrollView>

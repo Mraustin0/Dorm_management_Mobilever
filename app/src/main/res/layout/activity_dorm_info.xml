@@ -6,64 +6,30 @@
     android:layout_height="match_parent"
     android:background="#F5F5F5">
 
-    <!-- Header Section -->
-    <View
-        android:id="@+id/header_bg"
-        android:layout_width="match_parent"
-        android:layout_height="100dp"
-        android:background="#FFFFFF"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <ImageView
-        android:id="@+id/btn_back"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="50dp"
-        android:src="@drawable/ic_back_gg"
-        android:padding="4dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"/>
-
+    <!-- Header -->
     <TextView
         android:id="@+id/tv_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
         android:text="ข้อมูลหอพัก"
         android:textColor="#000000"
         android:textSize="18sp"
         android:textStyle="bold"
-        app:layout_constraintBottom_toBottomOf="@id/header_bg"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@id/btn_back" />
+        app:layout_constraintTop_toTopOf="parent" />
 
-    <ImageView
-        android:id="@+id/notification_icon"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
-        android:layout_marginEnd="20dp"
-        android:src="@drawable/ic_bell_gg"
-        app:layout_constraintBottom_toBottomOf="@id/tv_title"
-        app:layout_constraintEnd_toStartOf="@id/menu_icon"
-        app:layout_constraintTop_toTopOf="@id/tv_title" />
-
-    <ImageView
-        android:id="@+id/menu_icon"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
-        android:layout_marginEnd="16dp"
-        android:src="@drawable/ic_menu_gg"
-        app:layout_constraintBottom_toBottomOf="@id/tv_title"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@id/tv_title" />
-
-    <ScrollView
-        android:layout_width="match_parent"
+    <!-- Scrollable Content -->
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="0dp"
         android:layout_height="0dp"
+        android:layout_marginTop="24dp"
         android:clipToPadding="false"
-        app:layout_constraintTop_toBottomOf="@id/header_bg"
-        app:layout_constraintBottom_toTopOf="@id/bottom_nav">
+        app:layout_constraintBottom_toTopOf="@id/bottom_nav"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tv_title">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -77,20 +43,199 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
                 app:cardCornerRadius="16dp"
-                app:cardElevation="4dp">
+                app:cardElevation="2dp">
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="20dp"
-                    android:background="@drawable/shape_blue_border">
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="ห้อง 201" android:textStyle="bold" android:textSize="18sp" android:textColor="#000000"/>
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="หอพัก โกลด์เดนคีย์ 2" android:textColor="#666666"/>
-                    <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#F0F0F0" android:layout_marginTop="16dp" android:layout_marginBottom="16dp"/>
-                    <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content">
-                        <ImageView android:id="@+id/ic_loc" android:layout_width="24dp" android:layout_height="24dp" android:src="@android:drawable/ic_dialog_map" app:tint="#2E4A88"/>
-                        <TextView android:id="@+id/tv_address" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_toEndOf="@id/ic_loc" android:layout_marginStart="12dp" android:text="140/408 หมู่ที่ 14 ซอย 7/6 ถนนอุบลรายาม ต. ในเมือง อ.เมืองขอนแก่น จ.ขอนแก่น 40000" android:textColor="#333333"/>
+                    android:padding="20dp">
+
+                    <!-- Room Number & Dorm Name -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <ImageView
+                            android:layout_width="28dp"
+                            android:layout_height="28dp"
+                            android:src="@drawable/ic_building_gg"
+                            app:tint="#333333" />
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="12dp"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:id="@+id/tv_room_number"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="ห้อง 201"
+                                android:textColor="#000000"
+                                android:textSize="16sp"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:id="@+id/tv_dorm_name"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="หอพัก โกลด์เดนคีย์ 2"
+                                android:textColor="#666666"
+                                android:textSize="14sp" />
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:layout_marginTop="16dp"
+                        android:layout_marginBottom="16dp"
+                        android:background="#F0F0F0" />
+
+                    <!-- Address -->
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <ImageView
+                            android:id="@+id/ic_loc"
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:layout_alignParentStart="true"
+                            android:src="@drawable/ic_location_gg"
+                            app:tint="#666666" />
+
+                        <TextView
+                            android:id="@+id/tv_address"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="12dp"
+                            android:layout_marginEnd="8dp"
+                            android:layout_toEndOf="@id/ic_loc"
+                            android:layout_toStartOf="@id/btn_copy_address"
+                            android:text="140/408 หมู่ที่ 14 ซอย 7/6 ถนนอุลยรายาม\nต. ในเมือง อ.เมืองขอนแก่น จ.ขอนแก่น 40000"
+                            android:textColor="#333333"
+                            android:textSize="14sp" />
+
+                        <ImageView
+                            android:id="@+id/btn_copy_address"
+                            android:layout_width="36dp"
+                            android:layout_height="36dp"
+                            android:layout_alignParentEnd="true"
+                            android:layout_centerVertical="true"
+                            android:background="?attr/selectableItemBackgroundBorderless"
+                            android:padding="6dp"
+                            android:src="@drawable/ic_copy_gg" />
                     </RelativeLayout>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- Contract Card -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="2dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="20dp">
+
+                    <!-- Title -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <ImageView
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:src="@drawable/ic_contract_gg"
+                            app:tint="#333333" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="12dp"
+                            android:text="สัญญาเช่า"
+                            android:textColor="#000000"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+
+                    <!-- Contract Dates -->
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="36dp"
+                        android:layout_marginTop="12dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="วันที่เริ่ม"
+                            android:textColor="#666666"
+                            android:textSize="14sp" />
+
+                        <TextView
+                            android:id="@+id/tv_contract_start"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentEnd="true"
+                            android:text="1/12/2025"
+                            android:textColor="#333333"
+                            android:textSize="14sp" />
+                    </RelativeLayout>
+
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="36dp"
+                        android:layout_marginTop="8dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="วันที่สิ้นสุด"
+                            android:textColor="#666666"
+                            android:textSize="14sp" />
+
+                        <TextView
+                            android:id="@+id/tv_contract_end"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentEnd="true"
+                            android:text="31/5/2026"
+                            android:textColor="#333333"
+                            android:textSize="14sp" />
+                    </RelativeLayout>
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:layout_marginTop="16dp"
+                        android:layout_marginBottom="12dp"
+                        android:background="#F0F0F0" />
+
+                    <!-- View Contract Link -->
+                    <TextView
+                        android:id="@+id/btn_view_contract"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="?attr/selectableItemBackground"
+                        android:paddingVertical="4dp"
+                        android:text="ดูเอกสารสัญญาเช่า"
+                        android:textColor="#333333"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
@@ -98,29 +243,109 @@
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
                 app:cardCornerRadius="16dp"
-                app:cardElevation="4dp">
-                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="20dp">
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="ติดต่อหอพัก" android:textStyle="bold" android:textColor="#333333"/>
-                    <LinearLayout android:id="@+id/btn_call" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="16dp" android:gravity="center_vertical">
-                        <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/ic_parcel_gg" app:tint="#2E4A88"/>
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="12dp" android:text="0922787188" android:textColor="#000000"/>
+                app:cardElevation="2dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="20dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="ติดต่อหอพัก"
+                        android:textColor="#000000"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:layout_marginTop="12dp"
+                        android:layout_marginBottom="12dp"
+                        android:background="#F0F0F0" />
+
+                    <!-- Phone -->
+                    <LinearLayout
+                        android:id="@+id/btn_call"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="?attr/selectableItemBackground"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:paddingVertical="8dp">
+
+                        <ImageView
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:src="@drawable/ic_phone_gg"
+                            app:tint="#333333" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="16dp"
+                            android:text="0922787188"
+                            android:textColor="#000000"
+                            android:textSize="16sp" />
+                    </LinearLayout>
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:layout_marginTop="4dp"
+                        android:layout_marginBottom="4dp"
+                        android:background="#F0F0F0" />
+
+                    <!-- Email -->
+                    <LinearLayout
+                        android:id="@+id/btn_email"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="?attr/selectableItemBackground"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:paddingVertical="8dp">
+
+                        <ImageView
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:src="@drawable/ic_email_gg"
+                            app:tint="#333333" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="16dp"
+                            android:text="goldenkeyapartment@gmail.com"
+                            android:textColor="#000000"
+                            android:textSize="16sp" />
                     </LinearLayout>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
         </LinearLayout>
-    </ScrollView>
+    </androidx.core.widget.NestedScrollView>
 
+    <!-- Bottom Navigation -->
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottom_nav"
-        android:layout_width="match_parent"
-        android:layout_height="60dp"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
         android:background="#FFFFFF"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:menu="@menu/bottom_navigation_menu"
+        app:elevation="8dp"
         app:itemIconSize="24dp"
         app:labelVisibilityMode="unlabeled"
-        app:elevation="0dp"/>
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:menu="@menu/bottom_navigation_menu" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

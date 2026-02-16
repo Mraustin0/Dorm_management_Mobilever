@@ -12,9 +12,9 @@
         android:layout_width="32dp"
         android:layout_height="32dp"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="60dp"
+        android:layout_marginTop="32dp"
         android:padding="4dp"
-        android:src="@android:drawable/ic_menu_revert"
+        android:src="@drawable/ic_back_gg"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -63,7 +63,6 @@
             <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:padding="18dp">
                 <ImageView android:id="@+id/ic1" android:layout_width="24dp" android:layout_height="24dp" android:src="@android:drawable/ic_menu_myplaces" app:tint="#333333"/>
                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_toEndOf="@id/ic1" android:layout_marginStart="16dp" android:layout_centerVertical="true" android:text="แก้ไขข้อมูลส่วนตัว" android:textColor="#333333" android:textSize="15sp"/>
-                <ImageView android:layout_width="20dp" android:layout_height="20dp" android:layout_alignParentEnd="true" android:layout_centerVertical="true" android:src="@android:drawable/ic_media_next" app:tint="#888888"/>
             </RelativeLayout>
         </androidx.cardview.widget.CardView>
 
@@ -78,7 +77,6 @@
             <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:padding="18dp">
                 <ImageView android:id="@+id/ic2" android:layout_width="24dp" android:layout_height="24dp" android:src="@android:drawable/ic_lock_lock" app:tint="#333333"/>
                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_toEndOf="@id/ic2" android:layout_marginStart="16dp" android:layout_centerVertical="true" android:text="เปลี่ยนรหัสผ่าน" android:textColor="#333333" android:textSize="15sp"/>
-                <ImageView android:layout_width="20dp" android:layout_height="20dp" android:layout_alignParentEnd="true" android:layout_centerVertical="true" android:src="@android:drawable/ic_media_next" app:tint="#888888"/>
             </RelativeLayout>
         </androidx.cardview.widget.CardView>
 
@@ -93,7 +91,6 @@
             <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:padding="18dp">
                 <ImageView android:id="@+id/ic3" android:layout_width="24dp" android:layout_height="24dp" android:src="@android:drawable/ic_menu_agenda" app:tint="#333333"/>
                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_toEndOf="@id/ic3" android:layout_marginStart="16dp" android:layout_centerVertical="true" android:text="เอกสารและสัญญาเช่า" android:textColor="#333333" android:textSize="15sp"/>
-                <ImageView android:layout_width="20dp" android:layout_height="20dp" android:layout_alignParentEnd="true" android:layout_centerVertical="true" android:src="@android:drawable/ic_media_next" app:tint="#888888"/>
             </RelativeLayout>
         </androidx.cardview.widget.CardView>
 
@@ -108,7 +105,6 @@
             <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:padding="18dp">
                 <ImageView android:id="@+id/ic4" android:layout_width="24dp" android:layout_height="24dp" android:src="@android:drawable/ic_dialog_map" app:tint="#333333"/>
                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_toEndOf="@id/ic4" android:layout_marginStart="16dp" android:layout_centerVertical="true" android:text="แจ้งย้ายออก" android:textColor="#333333" android:textSize="15sp"/>
-                <ImageView android:layout_width="20dp" android:layout_height="20dp" android:layout_alignParentEnd="true" android:layout_centerVertical="true" android:src="@android:drawable/ic_media_next" app:tint="#888888"/>
             </RelativeLayout>
         </androidx.cardview.widget.CardView>
 
@@ -123,7 +119,6 @@
             <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:padding="18dp">
                 <ImageView android:id="@+id/ic5" android:layout_width="24dp" android:layout_height="24dp" android:src="@android:drawable/ic_lock_power_off" app:tint="#333333"/>
                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_toEndOf="@id/ic5" android:layout_marginStart="16dp" android:layout_centerVertical="true" android:text="ออกจากระบบ" android:textColor="#333333" android:textSize="15sp"/>
-                <ImageView android:layout_width="20dp" android:layout_height="20dp" android:layout_alignParentEnd="true" android:layout_centerVertical="true" android:src="@android:drawable/ic_media_next" app:tint="#888888"/>
             </RelativeLayout>
         </androidx.cardview.widget.CardView>
 

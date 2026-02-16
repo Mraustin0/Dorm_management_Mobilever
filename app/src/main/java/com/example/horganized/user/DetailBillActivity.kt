@@ -2,6 +2,7 @@ package com.example.horganized.user
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
 import android.widget.Button
 import android.widget.ImageView
@@ -14,11 +15,15 @@ import com.example.horganized.model.Bill
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 class DetailBillActivity : AppCompatActivity() {
 
     private lateinit var db: FirebaseFirestore
     private lateinit var auth: FirebaseAuth
+    private lateinit var billsContainer: LinearLayout
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -27,82 +32,141 @@ class DetailBillActivity : AppCompatActivity() {
         db = FirebaseFirestore.getInstance()
         auth = FirebaseAuth.getInstance()
 
-        setupToggles()
-        setupBottomNavigation()
-        fetchLatestBill()
+        billsContainer = findViewById(R.id.bills_container)
 
-        // ปุ่มกระดิ่งแจ้งเตือน
+        // Header icons
         findViewById<ImageView>(R.id.notification_icon).setOnClickListener {
-            val intent = Intent(this, NotificationsActivity::class.java)
-            startActivity(intent)
+            startActivity(Intent(this, NotificationsActivity::class.java))
             overridePendingTransition(R.anim.fade_in, R.anim.fade_out)
         }
 
-        // ปุ่มเมนู 3 ขีด
         findViewById<ImageView>(R.id.menu_icon).setOnClickListener {
-            val intent = Intent(this, UserProfileActivity::class.java)
-            startActivity(intent)
+            startActivity(Intent(this, UserProfileActivity::class.java))
             overridePendingTransition(R.anim.fade_in, R.anim.fade_out)
         }
 
-        // ปุ่มย้อนกลับ
-        findViewById<ImageView>(R.id.btn_back).setOnClickListener { 
-            finish()
-            overridePendingTransition(R.anim.fade_in, R.anim.fade_out)
-        }
-
-        // ปุ่มจ่ายเงิน
-        findViewById<Button>(R.id.btn_pay_now).setOnClickListener {
-            val intent = Intent(this, PayBillActivity::class.java)
-            startActivity(intent)
-            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
-        }
+        loadUserData()
+        loadAllBills()
+        setupBottomNavigation()
     }
 
-    private fun setupToggles() {
-        setupSingleToggle(R.id.btn_toggle_april, R.id.layout_content_april, R.id.iv_chevron_april)
-        setupSingleToggle(R.id.btn_toggle_march, R.id.layout_content_march, R.id.iv_chevron_march)
-        setupSingleToggle(R.id.btn_toggle_feb, R.id.layout_content_feb, R.id.iv_chevron_feb)
-    }
-
-    private fun setupSingleToggle(btnId: Int, contentId: Int, chevronId: Int) {
-        val btn = findViewById<RelativeLayout>(btnId)
-        val content = findViewById<LinearLayout>(contentId)
-        val chevron = findViewById<ImageView>(chevronId)
-
-        btn?.setOnClickListener {
-            if (content.visibility == View.VISIBLE) {
-                content.visibility = View.GONE
-                chevron.setImageResource(R.drawable.ic_chevron_down_gg)
-            } else {
-                content.visibility = View.VISIBLE
-                chevron.setImageResource(R.drawable.ic_chevron_up_gg)
-            }
-        }
-    }
-
-    private fun fetchLatestBill() {
-        val userId = auth.currentUser?.uid ?: return
-        db.collection("bills").whereEqualTo("userId", userId).limit(1)
-            .addSnapshotListener { snapshots, _ ->
-                if (snapshots != null && !snapshots.isEmpty) {
-                    val bill = snapshots.documents[0].toObject(Bill::class.java)
-                    bill?.let { updateUI(it) }
+    private fun loadUserData() {
+        val uid = auth.currentUser?.uid ?: return
+        db.collection("users").document(uid).get()
+            .addOnSuccessListener { doc ->
+                if (doc != null && doc.exists()) {
+                    val name = doc.getString("name") ?: ""
+                    val room = doc.getString("roomNumber") ?: ""
+                    findViewById<TextView>(R.id.user_name)?.text = "$name ห้อง $room"
                 }
             }
     }
 
-    private fun updateUI(bill: Bill) {
-        val btnPay = findViewById<Button>(R.id.btn_pay_now)
+    private fun loadAllBills() {
+        val uid = auth.currentUser?.uid ?: return
+
+        db.collection("bills")
+            .whereEqualTo("userId", uid)
+            .orderBy("dueDate", Query.Direction.DESCENDING)
+            .addSnapshotListener { snapshots, _ ->
+                if (snapshots == null) return@addSnapshotListener
+
+                billsContainer.removeAllViews()
+
+                val bills = snapshots.documents.mapNotNull { it.toObject(Bill::class.java) }
+
+                bills.forEachIndexed { index, bill ->
+                    val isLatest = index == 0
+                    addBillCard(bill, isLatest)
+                }
+            }
+    }
+
+    private fun addBillCard(bill: Bill, isLatest: Boolean) {
+        val cardView = LayoutInflater.from(this)
+            .inflate(R.layout.item_bill_card, billsContainer, false)
+
+        val btnToggle = cardView.findViewById<RelativeLayout>(R.id.btn_toggle)
+        val ivChevron = cardView.findViewById<ImageView>(R.id.iv_chevron)
+        val layoutContent = cardView.findViewById<LinearLayout>(R.id.layout_content)
+        val tvMonthTitle = cardView.findViewById<TextView>(R.id.tv_bill_month_title)
+        val tvSubtitle = cardView.findViewById<TextView>(R.id.tv_bill_subtitle)
+        val tvAmount = cardView.findViewById<TextView>(R.id.tv_bill_amount)
+        val tvDue = cardView.findViewById<TextView>(R.id.tv_bill_due)
+        val btnPay = cardView.findViewById<Button>(R.id.btn_pay)
+
+        // Usage details
+        val tvRoomPrice = cardView.findViewById<TextView>(R.id.tv_room_price)
+        val tvElectricPrice = cardView.findViewById<TextView>(R.id.tv_electric_price)
+        val tvWaterPrice = cardView.findViewById<TextView>(R.id.tv_water_price)
+        val tvOtherPrice = cardView.findViewById<TextView>(R.id.tv_other_price)
+        val tvTotalPrice = cardView.findViewById<TextView>(R.id.tv_total_price)
+
+        // Month title
+        val monthName = bill.month.ifEmpty { "ไม่ระบุ" }
+        tvMonthTitle.text = "บิลประจำเดือน $monthName"
+
+        // Subtitle
+        tvSubtitle.text = "ยอดค่าบริการ เดือน$monthName"
+
+        // Amount
+        tvAmount.text = String.format("%,.2f บาท", bill.amount)
+
+        // Due date
+        if (bill.dueDate != null) {
+            val sdf = SimpleDateFormat("d MMM yyyy", Locale("th", "TH"))
+            val dueDateStr = sdf.format(bill.dueDate.toDate())
+            if (bill.isPaid) {
+                tvDue.text = "ชำระแล้ว"
+                tvDue.setTextColor(resources.getColor(android.R.color.holo_green_dark, null))
+            } else {
+                tvDue.text = "เกินกำหนดชำระ $dueDateStr"
+            }
+        }
+
+        // Pay button
         if (bill.isPaid) {
             btnPay.text = "จ่ายแล้ว"
-            btnPay.setBackgroundColor(android.graphics.Color.parseColor("#1B9E44"))
+            btnPay.backgroundTintList = android.content.res.ColorStateList.valueOf(
+                android.graphics.Color.parseColor("#1B9E44")
+            )
             btnPay.isEnabled = false
         } else {
             btnPay.text = "จ่ายเลย"
-            btnPay.setBackgroundColor(android.graphics.Color.parseColor("#E53935"))
-            btnPay.isEnabled = true
+            btnPay.setOnClickListener {
+                startActivity(Intent(this, PayBillActivity::class.java))
+                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
+            }
         }
+
+        // Usage details
+        tvRoomPrice.text = String.format("%,.0f บาท", bill.details.roomPrice)
+        tvElectricPrice.text = "${bill.details.electricUnit} = ${String.format("%,.0f", bill.details.electricPrice)} บาท"
+        tvWaterPrice.text = String.format("%,.0f บาท", bill.details.waterPrice)
+        tvOtherPrice.text = String.format("%,.0f บาท", bill.details.otherPrice)
+        tvTotalPrice.text = String.format("%,.0f บาท", bill.amount)
+
+        // Latest bill: expanded, others: collapsed
+        if (isLatest) {
+            layoutContent.visibility = View.VISIBLE
+            ivChevron.setImageResource(R.drawable.ic_chevron_up_gg)
+        } else {
+            layoutContent.visibility = View.GONE
+            ivChevron.setImageResource(R.drawable.ic_chevron_down_gg)
+        }
+
+        // Toggle
+        btnToggle.setOnClickListener {
+            if (layoutContent.visibility == View.VISIBLE) {
+                layoutContent.visibility = View.GONE
+                ivChevron.setImageResource(R.drawable.ic_chevron_down_gg)
+            } else {
+                layoutContent.visibility = View.VISIBLE
+                ivChevron.setImageResource(R.drawable.ic_chevron_up_gg)
+            }
+        }
+
+        billsContainer.addView(cardView)
     }
 
     private fun setupBottomNavigation() {
@@ -110,24 +174,24 @@ class DetailBillActivity : AppCompatActivity() {
         bottomNav.selectedItemId = R.id.navigation_bill
         bottomNav.setOnItemSelectedListener { item ->
             when (item.itemId) {
-                R.id.navigation_home -> { 
+                R.id.navigation_home -> {
                     startActivity(Intent(this, HomeUserActivity::class.java))
                     overridePendingTransition(0, 0)
                     finish()
-                    true 
+                    true
                 }
                 R.id.navigation_bill -> true
-                R.id.navigation_notifications -> { 
+                R.id.navigation_notifications -> {
                     startActivity(Intent(this, DormInfoActivity::class.java))
                     overridePendingTransition(0, 0)
                     finish()
-                    true 
+                    true
                 }
-                R.id.navigation_chat -> { 
+                R.id.navigation_chat -> {
                     startActivity(Intent(this, ChatActivity::class.java))
                     overridePendingTransition(0, 0)
                     finish()
-                    true 
+                    true
                 }
                 else -> false
             }
