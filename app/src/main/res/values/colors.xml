@@ -2,4 +2,9 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="blue_primary">#2B5091</color>
+    <color name="gray_light">#E0E0E0</color>
+    <color name="gray_text">#8E8E8E</color>
+    <color name="room_vacant">#00C853</color>
+    <color name="room_occupied">#FF5252</color>
 </resources>

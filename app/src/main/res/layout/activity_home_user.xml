@@ -104,7 +104,21 @@
                     android:orientation="vertical"
                     android:padding="20dp">
 
+                    <!-- แสดงเมื่อไม่มีบิล -->
+                    <TextView
+                        android:id="@+id/tv_no_bill"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:padding="24dp"
+                        android:text="ยังไม่มีบิลค้างชำระ"
+                        android:textColor="#888888"
+                        android:textSize="16sp"
+                        android:visibility="gone" />
+
+                    <!-- แสดงเมื่อมีบิล -->
                     <RelativeLayout
+                        android:id="@+id/layout_bill_info"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content">
 
@@ -127,15 +141,16 @@
                                 android:id="@+id/outstanding_amount"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="6,064.00 บาท"
+                                android:text="0.00 บาท"
                                 android:textColor="#E53935"
                                 android:textSize="22sp"
                                 android:textStyle="bold" />
 
                             <TextView
+                                android:id="@+id/tv_due_date"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="เกินกำหนดชำระ 5 พ.ค. 2026"
+                                android:text=""
                                 android:textColor="#E53935"
                                 android:textSize="11sp" />
                         </LinearLayout>

@@ -1,0 +1,148 @@
+package com.example.horganized.admin
+
+import android.content.Intent
+import android.os.Bundle
+import android.util.Log
+import android.view.View
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
+import android.widget.ImageView
+import android.widget.Spinner
+import androidx.activity.enableEdgeToEdge
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.example.horganized.R
+import com.google.firebase.firestore.FirebaseFirestore
+
+class AdminMoveSelectionActivity : AppCompatActivity() {
+
+    private lateinit var rvRooms: RecyclerView
+    private lateinit var spinnerFloor: Spinner
+    private lateinit var btnBack: ImageView
+    private val db = FirebaseFirestore.getInstance()
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+        setContentView(R.layout.activity_admin_move_selection)
+
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content)) { v, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
+            insets
+        }
+
+        rvRooms = findViewById(R.id.rv_rooms_move_selection)
+        spinnerFloor = findViewById(R.id.spinner_floor_move_selection)
+        btnBack = findViewById(R.id.btn_back_move_selection)
+
+        btnBack.setOnClickListener { finish() }
+
+        setupSpinner()
+        setupRecyclerView()
+
+        updateRoomList(1)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        val currentFloor = spinnerFloor.selectedItemPosition + 1
+        updateRoomList(currentFloor)
+    }
+
+    private fun setupSpinner() {
+        val floors = arrayOf("ชั้น 1", "ชั้น 2", "ชั้น 3", "ชั้น 4")
+        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, floors)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinnerFloor.adapter = adapter
+
+        spinnerFloor.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                updateRoomList(position + 1)
+            }
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
+        }
+    }
+
+    private fun setupRecyclerView() {
+        rvRooms.layoutManager = GridLayoutManager(this, 2)
+    }
+
+    private fun updateRoomList(floor: Int) {
+        // สร้างห้อง default 10 ห้อง (ว่างหมด) แสดงก่อนทันที
+        val defaultRooms = List(10) { i ->
+            val roomNumber = "${floor}${String.format("%02d", i + 1)}"
+            Room("ห้อง $roomNumber", isVacant = true)
+        }
+        showRooms(defaultRooms)
+
+        // แล้วโหลดจาก Firestore มา overlay สถานะจริง
+        db.collection("rooms")
+            .whereEqualTo("floor", floor)
+            .get()
+            .addOnSuccessListener { documents ->
+                if (documents.isEmpty) {
+                    // ยังไม่มีใน Firestore → สร้างห้องเริ่มต้นให้
+                    createDefaultRooms(floor)
+                    return@addOnSuccessListener
+                }
+
+                // สร้าง map ของสถานะห้องจาก Firestore
+                val firestoreStatus = mutableMapOf<String, Boolean>()
+                for (doc in documents) {
+                    val roomNum = doc.getString("roomNumber") ?: continue
+                    firestoreStatus[roomNum] = doc.getBoolean("isVacant") ?: true
+                }
+
+                // อัปเดตสถานะห้องจาก Firestore
+                val updatedRooms = List(10) { i ->
+                    val roomNumber = "${floor}${String.format("%02d", i + 1)}"
+                    val isVacant = firestoreStatus[roomNumber] ?: true
+                    Room("ห้อง $roomNumber", isVacant)
+                }
+                showRooms(updatedRooms)
+            }
+            .addOnFailureListener { e ->
+                Log.e("MoveSelection", "Error loading rooms", e)
+                // ถ้า Firestore โหลดไม่ได้ ก็ยังแสดง default rooms อยู่
+            }
+    }
+
+    private fun showRooms(rooms: List<Room>) {
+        rvRooms.adapter = RoomAdapter(rooms) { room ->
+            if (room.isVacant) {
+                val intent = Intent(this, AdminMoveInActivity::class.java)
+                intent.putExtra("ROOM_NAME", room.name)
+                startActivity(intent)
+            } else {
+                val intent = Intent(this, AdminMoveOutActivity::class.java)
+                intent.putExtra("ROOM_NAME", room.name)
+                startActivity(intent)
+            }
+        }
+    }
+
+    private fun createDefaultRooms(floor: Int) {
+        val batch = db.batch()
+        for (i in 1..10) {
+            val roomNumber = "${floor}${String.format("%02d", i)}"
+            val roomRef = db.collection("rooms").document(roomNumber)
+            batch.set(roomRef, mapOf(
+                "roomNumber" to roomNumber,
+                "floor" to floor,
+                "isVacant" to true,
+                "tenantId" to ""
+            ))
+        }
+        batch.commit()
+            .addOnSuccessListener {
+                Log.d("MoveSelection", "สร้างห้องชั้น $floor เรียบร้อย")
+            }
+            .addOnFailureListener { e ->
+                Log.e("MoveSelection", "Error creating rooms", e)
+            }
+    }
+}

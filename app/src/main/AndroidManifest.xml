@@ -2,11 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-
     <application
-        android:usesCleartextTraffic="true"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -15,31 +11,52 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Horganized">
-
-        <activity
-            android:name=".LoginActivity"
-            android:exported="true">
+        <!-- Login (หน้าเปิดแอป) -->
+        <activity android:name=".LoginActivity" android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
-        <activity android:name=".user.HomeUserActivity" />
-        <activity android:name=".user.DetailBillActivity" />
-        <activity android:name=".user.DormInfoActivity" />
-        <activity android:name=".user.UserProfileActivity" />
-        <activity android:name=".user.UserProfileEditActivity" />
-        <activity android:name=".user.ChatActivity" />
-        <activity android:name=".user.PayBillActivity" />
-        <activity android:name=".user.PayBillConfirmActivity" />
-        <activity android:name=".user.NotificationsActivity" />
-        <activity android:name=".user.RepairActivity" />
-        <activity android:name=".user.AnnouncementActivity" />
-        <activity android:name=".user.ContractListActivity" />
-        <activity android:name=".user.ContractDetailActivity" />
-        <activity android:name=".MainActivity" />
+        <!-- User Activities -->
+        <activity android:name=".user.MainActivity" android:exported="false" />
+        <activity android:name=".user.activity_home_user" android:exported="false" />
+        <activity android:name=".user.DetailBillActivity" android:exported="false" />
+        <activity android:name=".user.HomeUserActivity" android:exported="false" />
+        <activity android:name=".user.ChatActivity" android:exported="false" />
+        <activity android:name=".user.PayBillActivity" android:exported="false" />
+        <activity android:name=".user.PayBillConfirmActivity" android:exported="false" />
+        <activity android:name=".user.NotificationsActivity" android:exported="false" />
+        <activity android:name=".user.NotificationActivity" android:exported="false" />
+        <activity android:name=".user.ContractListActivity" android:exported="false" />
+        <activity android:name=".user.ContractDetailActivity" android:exported="false" />
+        <activity android:name=".user.DormInfoActivity" android:exported="false" />
+        <activity android:name=".user.AnnouncementActivity" android:exported="false" />
+        <activity android:name=".user.UserProfileActivity" android:exported="false" />
+        <activity android:name=".user.UserProfileEditActivity" android:exported="false" />
+        <activity android:name=".user.ReportRepairActivity" android:exported="false" />
+        <activity android:name=".user.RepairActivity" android:exported="false" />
 
+        <!-- Admin Activities -->
+        <activity android:name=".admin.AdminLoginActivity" android:exported="false" />
+        <activity android:name=".admin.AdminHomeActivity" android:exported="false" />
+        <activity android:name=".admin.AdminAnnounceActivity" android:exported="false" />
+        <activity android:name=".admin.AdminCheckSlipActivity" android:exported="false" />
+        <activity android:name=".admin.AdminCreateBillActivity" android:exported="false" />
+        <activity android:name=".admin.AdminEditProfileActivity" android:exported="false" />
+        <activity android:name=".admin.AdminMeterActivity" android:exported="false" />
+        <activity android:name=".admin.AdminMoveInActivity" android:exported="false" />
+        <activity android:name=".admin.AdminMoveOutActivity" android:exported="false" />
+        <activity android:name=".admin.AdminMoveSelectionActivity" android:exported="false" />
+        <activity android:name=".admin.AdminOtpVerificationActivity" android:exported="false" />
+        <activity android:name=".admin.AdminResetPasswordActivity" android:exported="false" />
+        <activity android:name=".admin.AdminSelectRoomActivity" android:exported="false" />
+        <activity android:name=".admin.AdminSettingActivity" android:exported="false" />
+        <activity android:name=".admin.AdminTechnicianActivity" android:exported="false" />
+        <activity android:name=".admin.ChangePasswordActivity" android:exported="false" />
+        <activity android:name=".admin.ChatDetailActivity" android:exported="false" />
+        <activity android:name=".admin.ChatListActivity" android:exported="false" />
     </application>
 
 </manifest>

@@ -84,6 +84,33 @@
                     android:src="@drawable/ic_bell_gg" />
             </RelativeLayout>
 
+            <!-- แสดงเมื่อไม่มีบิล -->
+            <LinearLayout
+                android:id="@+id/layout_no_bill"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:padding="64dp"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="ยังไม่มีบิล"
+                    android:textColor="#888888"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="เมื่อมีบิลจะแสดงที่นี่"
+                    android:textColor="#AAAAAA"
+                    android:textSize="14sp" />
+            </LinearLayout>
+
             <!-- Bill Cards Container -->
             <LinearLayout
                 android:id="@+id/bills_container"

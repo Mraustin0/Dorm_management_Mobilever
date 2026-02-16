@@ -144,6 +144,7 @@ class LoginActivity : AppCompatActivity() {
                     Log.d(TAG, "User role: $role")
                     if (role == "admin") {
                         Toast.makeText(this, "Welcome Admin", Toast.LENGTH_SHORT).show()
+                        startActivity(Intent(this, com.example.horganized.admin.AdminHomeActivity::class.java))
                     } else {
                         startActivity(Intent(this, HomeUserActivity::class.java))
                     }

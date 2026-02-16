@@ -75,9 +75,17 @@ class DetailBillActivity : AppCompatActivity() {
 
                 val bills = snapshots.documents.mapNotNull { it.toObject(Bill::class.java) }
 
-                bills.forEachIndexed { index, bill ->
-                    val isLatest = index == 0
-                    addBillCard(bill, isLatest)
+                val layoutNoBill = findViewById<View>(R.id.layout_no_bill)
+                if (bills.isEmpty()) {
+                    layoutNoBill?.visibility = View.VISIBLE
+                    billsContainer.visibility = View.GONE
+                } else {
+                    layoutNoBill?.visibility = View.GONE
+                    billsContainer.visibility = View.VISIBLE
+                    bills.forEachIndexed { index, bill ->
+                        val isLatest = index == 0
+                        addBillCard(bill, isLatest)
+                    }
                 }
             }
     }

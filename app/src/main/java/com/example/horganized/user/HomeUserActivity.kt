@@ -149,11 +149,32 @@ class HomeUserActivity : AppCompatActivity() {
         db.collection("bills").whereEqualTo("userId", uid)
             .orderBy("dueDate", Query.Direction.DESCENDING).limit(1)
             .addSnapshotListener { snapshots, _ ->
-                if (snapshots != null && !snapshots.isEmpty) {
-                    val bill = snapshots.documents[0].toObject(Bill::class.java)
-                    bill?.let { updateBillUI(it) }
+                if (snapshots == null || snapshots.isEmpty) {
+                    // ไม่มีบิล
+                    showNoBill()
+                    return@addSnapshotListener
+                }
+                val bill = snapshots.documents[0].toObject(Bill::class.java)
+                if (bill != null) {
+                    showHasBill()
+                    updateBillUI(bill)
+                } else {
+                    showNoBill()
                 }
             }
+    }
+
+    private fun showNoBill() {
+        findViewById<View>(R.id.tv_no_bill)?.visibility = View.VISIBLE
+        findViewById<View>(R.id.layout_bill_info)?.visibility = View.GONE
+        findViewById<View>(R.id.btn_toggle_usage)?.visibility = View.GONE
+        findViewById<View>(R.id.layout_usage_details)?.visibility = View.GONE
+    }
+
+    private fun showHasBill() {
+        findViewById<View>(R.id.tv_no_bill)?.visibility = View.GONE
+        findViewById<View>(R.id.layout_bill_info)?.visibility = View.VISIBLE
+        findViewById<View>(R.id.btn_toggle_usage)?.visibility = View.VISIBLE
     }
 
     private fun updateBillUI(bill: Bill) {
