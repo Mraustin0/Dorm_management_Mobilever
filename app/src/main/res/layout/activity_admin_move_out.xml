@@ -109,7 +109,7 @@
 
                 <View android:layout_width="match_parent" android:layout_height="1dp" android:layout_marginTop="16dp" android:background="#E0E0E0" />
 
-                <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="16dp">
+                <RelativeLayout android:id="@+id/layout_contract" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="16dp" android:clickable="true" android:focusable="true">
                     <TextView android:id="@+id/tv_contract_label" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="เอกสารสัญญาฉบับที่ 1" android:textColor="@color/black" android:textSize="16sp" android:textStyle="bold" />
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="8dp" android:layout_toEndOf="@id/tv_contract_label" android:background="@drawable/button_background" android:backgroundTint="#4CAF50" android:paddingHorizontal="8dp" android:paddingVertical="2dp" android:text="เสร็จสิ้น" android:textColor="@color/white" android:textSize="12sp" />
                     <ImageView android:layout_width="24dp" android:layout_height="24dp" android:layout_alignParentEnd="true" android:src="@drawable/ic_list" android:rotation="270" app:tint="@color/gray_text" />

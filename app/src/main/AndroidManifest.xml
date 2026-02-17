@@ -58,6 +58,7 @@
         <activity android:name=".admin.AdminResetPasswordActivity" android:exported="false" />
         <activity android:name=".admin.AdminSelectRoomActivity" android:exported="false" />
         <activity android:name=".admin.AdminSettingActivity" android:exported="false" />
+        <activity android:name=".admin.AdminVacantRoomActivity" android:exported="false" />
         <activity android:name=".admin.AdminTechnicianActivity" android:exported="false" />
         <activity android:name=".admin.ChangePasswordActivity" android:exported="false" />
         <activity android:name=".admin.ChatDetailActivity" android:exported="false" />

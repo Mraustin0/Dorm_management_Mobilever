@@ -29,6 +29,13 @@ class AdminHomeActivity : AppCompatActivity() {
 
         loadVacantRoomCount()
 
+        // เชื่อมการ์ดห้องว่าง
+        val cvVacant = findViewById<CardView>(R.id.cv_room_vacant)
+        cvVacant.setOnClickListener {
+            val intent = Intent(this, AdminVacantRoomActivity::class.java)
+            startActivity(intent)
+        }
+
         // เชื่อมไอคอนกลางล่าง (nav_list) ไปยังหน้าเลือกห้องพัก
         val navSelectRoom = findViewById<ImageView>(R.id.iv_nav_apartment)
         navSelectRoom.setOnClickListener {

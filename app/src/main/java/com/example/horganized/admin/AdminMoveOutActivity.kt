@@ -1,5 +1,7 @@
 package com.example.horganized.admin
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.widget.ImageView
@@ -73,6 +75,17 @@ class AdminMoveOutActivity : AppCompatActivity() {
                         val email = userDoc.getString("email") ?: "-"
                         val contractTerm = userDoc.getString("contractTerm") ?: "-"
                         val moveInDate = userDoc.getTimestamp("moveInDate")
+                        val contractUrl = userDoc.getString("contractUrl") ?: ""
+
+                        // กดดูเอกสารสัญญา
+                        findViewById<android.widget.RelativeLayout>(R.id.layout_contract).setOnClickListener {
+                            if (contractUrl.isNotEmpty()) {
+                                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(contractUrl))
+                                startActivity(intent)
+                            } else {
+                                Toast.makeText(this, "ยังไม่มีเอกสารสัญญา", Toast.LENGTH_SHORT).show()
+                            }
+                        }
 
                         findViewById<TextView>(R.id.tv_move_out_name).text = name
                         findViewById<TextView>(R.id.tv_move_out_surname).text = surname
