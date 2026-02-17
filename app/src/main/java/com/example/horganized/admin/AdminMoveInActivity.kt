@@ -15,10 +15,12 @@ import androidx.appcompat.widget.AppCompatButton
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.example.horganized.R
-import com.google.firebase.FirebaseApp
 import com.google.firebase.Timestamp
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import org.json.JSONObject
+import java.io.OutputStreamWriter
+import java.net.HttpURLConnection
+import java.net.URL
 
 class AdminMoveInActivity : AppCompatActivity() {
 
@@ -34,6 +36,10 @@ class AdminMoveInActivity : AppCompatActivity() {
 
     private var roomName = ""
     private var roomNumber = ""
+
+    companion object {
+        private const val FIREBASE_API_KEY = "AIzaSyD5thTDTjkwhhb5tyfhrzQoXqeoOFg8Wcs"
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -131,6 +137,58 @@ class AdminMoveInActivity : AppCompatActivity() {
             .show()
     }
 
+    /**
+     * สร้าง Firebase Auth account ผ่าน REST API
+     * ไม่กระทบ admin session เลย เพราะเป็นแค่ HTTP request
+     */
+    private fun createAuthAccountViaRest(
+        email: String,
+        password: String,
+        onSuccess: (uid: String) -> Unit,
+        onFailure: (errorMessage: String) -> Unit
+    ) {
+        Thread {
+            try {
+                val url = URL("https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=$FIREBASE_API_KEY")
+                val conn = url.openConnection() as HttpURLConnection
+                conn.requestMethod = "POST"
+                conn.setRequestProperty("Content-Type", "application/json")
+                conn.doOutput = true
+
+                val body = JSONObject().apply {
+                    put("email", email)
+                    put("password", password)
+                    put("returnSecureToken", false)
+                }
+
+                OutputStreamWriter(conn.outputStream).use { writer ->
+                    writer.write(body.toString())
+                    writer.flush()
+                }
+
+                val responseCode = conn.responseCode
+                if (responseCode == HttpURLConnection.HTTP_OK) {
+                    val response = conn.inputStream.bufferedReader().readText()
+                    val json = JSONObject(response)
+                    val uid = json.getString("localId")
+                    runOnUiThread { onSuccess(uid) }
+                } else {
+                    val errorResponse = conn.errorStream.bufferedReader().readText()
+                    val errorJson = JSONObject(errorResponse)
+                    val errorMessage = errorJson
+                        .getJSONObject("error")
+                        .getString("message")
+                    runOnUiThread { onFailure(errorMessage) }
+                }
+
+                conn.disconnect()
+            } catch (e: Exception) {
+                Log.e("MoveIn", "REST API error", e)
+                runOnUiThread { onFailure(e.message ?: "Unknown error") }
+            }
+        }.start()
+    }
+
     private fun saveTenantToFirestore() {
         val name = etName.text.toString().trim()
         val surname = etSurname.text.toString().trim()
@@ -140,33 +198,14 @@ class AdminMoveInActivity : AppCompatActivity() {
         val electricMeter = etElectric.text.toString().trim().toIntOrNull() ?: 0
         val contractTerm = spinnerContract.selectedItem.toString()
 
-        // รหัสผ่านเริ่มต้น = เบอร์โทร
         val defaultPassword = phone
 
-        // ใช้ secondary FirebaseApp เพื่อสร้าง account ผู้เช่า
-        // โดยไม่กระทบ admin session ของ FirebaseAuth หลัก
-        val secondaryApp = try {
-            FirebaseApp.initializeApp(
-                this,
-                FirebaseApp.getInstance().options,
-                "secondaryAuth"
-            )
-        } catch (e: IllegalStateException) {
-            // App ชื่อนี้มีอยู่แล้ว ใช้ตัวเดิม
-            FirebaseApp.getInstance("secondaryAuth")
-        }
-
-        val secondaryAuth = FirebaseAuth.getInstance(secondaryApp)
-
-        // 1) สร้าง Firebase Auth account ให้ผู้เช่า (ผ่าน secondary auth)
-        secondaryAuth.createUserWithEmailAndPassword(email, defaultPassword)
-            .addOnSuccessListener { result ->
-                val newUserId = result.user?.uid ?: return@addOnSuccessListener
-
-                // Sign out จาก secondary auth ทันที (ไม่ต้องค้างไว้)
-                secondaryAuth.signOut()
-
-                // 2) บันทึกข้อมูลผู้เช่าใน Firestore (ยังเป็น admin อยู่)
+        // 1) สร้าง Auth account ผ่าน REST API (ไม่กระทบ admin session)
+        createAuthAccountViaRest(
+            email = email,
+            password = defaultPassword,
+            onSuccess = { newUserId ->
+                // 2) บันทึกข้อมูลผู้เช่าใน Firestore (admin ยังอยู่ครบ)
                 val userData = hashMapOf(
                     "name" to name,
                     "surname" to surname,
@@ -181,49 +220,49 @@ class AdminMoveInActivity : AppCompatActivity() {
                     "profileImage" to ""
                 )
 
-                db.collection("users").document(newUserId)
-                    .set(userData)
+                // ใช้ batch write เพื่อให้ทั้ง user data + room update สำเร็จพร้อมกัน
+                val batch = db.batch()
+
+                val userRef = db.collection("users").document(newUserId)
+                batch.set(userRef, userData)
+
+                val roomRef = db.collection("rooms").document(roomNumber)
+                batch.update(roomRef, mapOf(
+                    "isVacant" to false,
+                    "tenantId" to newUserId
+                ))
+
+                batch.commit()
                     .addOnSuccessListener {
-                        // 3) อัปเดตสถานะห้อง
-                        db.collection("rooms").document(roomNumber)
-                            .update(
-                                "isVacant", false,
-                                "tenantId", newUserId
-                            )
-                            .addOnSuccessListener {
-                                Toast.makeText(
-                                    this,
-                                    "บันทึกข้อมูลย้ายเข้าเรียบร้อย\nรหัสผ่านเริ่มต้น: $defaultPassword",
-                                    Toast.LENGTH_LONG
-                                ).show()
-                                finish()
-                            }
-                            .addOnFailureListener { e ->
-                                Log.e("MoveIn", "Error updating room", e)
-                                Toast.makeText(
-                                    this,
-                                    "บันทึกผู้เช่าแล้ว แต่อัปเดตห้องไม่สำเร็จ: ${e.message}",
-                                    Toast.LENGTH_LONG
-                                ).show()
-                            }
+                        Toast.makeText(
+                            this,
+                            "บันทึกข้อมูลย้ายเข้าเรียบร้อย\nรหัสผ่านเริ่มต้น: $defaultPassword",
+                            Toast.LENGTH_LONG
+                        ).show()
+                        finish()
                     }
                     .addOnFailureListener { e ->
-                        Log.e("MoveIn", "Error saving user data", e)
-                        Toast.makeText(this, "เกิดข้อผิดพลาด: ${e.message}", Toast.LENGTH_SHORT).show()
+                        Log.e("MoveIn", "Error saving to Firestore", e)
+                        Toast.makeText(
+                            this,
+                            "เกิดข้อผิดพลาดบันทึก Firestore: ${e.message}",
+                            Toast.LENGTH_LONG
+                        ).show()
                     }
-            }
-            .addOnFailureListener { e ->
-                Log.e("MoveIn", "Error creating auth account", e)
+            },
+            onFailure = { errorMessage ->
+                Log.e("MoveIn", "Auth error: $errorMessage")
                 val msg = when {
-                    e.message?.contains("email address is already in use") == true ->
+                    errorMessage.contains("EMAIL_EXISTS") ->
                         "อีเมลนี้ถูกใช้งานแล้ว"
-                    e.message?.contains("badly formatted") == true ->
+                    errorMessage.contains("INVALID_EMAIL") ->
                         "รูปแบบอีเมลไม่ถูกต้อง"
-                    e.message?.contains("at least 6 characters") == true ->
+                    errorMessage.contains("WEAK_PASSWORD") ->
                         "เบอร์โทร (รหัสผ่านเริ่มต้น) ต้องมีอย่างน้อย 6 ตัว"
-                    else -> "สร้างบัญชีไม่สำเร็จ: ${e.message}"
+                    else -> "สร้างบัญชีไม่สำเร็จ: $errorMessage"
                 }
                 Toast.makeText(this, msg, Toast.LENGTH_LONG).show()
             }
+        )
     }
 }

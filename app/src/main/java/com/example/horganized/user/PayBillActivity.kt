@@ -19,6 +19,7 @@ class PayBillActivity : AppCompatActivity() {
 
     private var selectedImageUri: Uri? = null
     private lateinit var ivPreview: ImageView
+    private var billId: String = ""
     private var billAmount: Double = 0.0
     private var billMonth: String = ""
 
@@ -27,6 +28,7 @@ class PayBillActivity : AppCompatActivity() {
         setContentView(R.layout.activity_pay_bill)
 
         // รับข้อมูลบิลจากหน้าก่อนหน้า
+        billId = intent.getStringExtra("BILL_ID") ?: ""
         billAmount = intent.getDoubleExtra("BILL_AMOUNT", 0.0)
         billMonth = intent.getStringExtra("BILL_MONTH") ?: ""
 
@@ -68,6 +70,7 @@ class PayBillActivity : AppCompatActivity() {
         btnNext.setOnClickListener {
             if (selectedImageUri != null) {
                 val intent = Intent(this, PayBillConfirmActivity::class.java)
+                intent.putExtra("BILL_ID", billId)
                 intent.putExtra("IMAGE_URI", selectedImageUri.toString())
                 intent.putExtra("BILL_AMOUNT", billAmount)
                 intent.putExtra("BILL_MONTH", billMonth)

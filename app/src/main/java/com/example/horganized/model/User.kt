@@ -11,5 +11,6 @@ data class User(
     val contractTerm: String = "",
     val waterMeter: Int = 0,
     val electricMeter: Int = 0,
+    val contractUrl: String = "",
     val moveInDate: com.google.firebase.Timestamp? = null
 )

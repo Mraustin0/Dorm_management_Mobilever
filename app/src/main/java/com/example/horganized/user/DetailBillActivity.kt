@@ -73,7 +73,9 @@ class DetailBillActivity : AppCompatActivity() {
 
                 billsContainer.removeAllViews()
 
-                val bills = snapshots.documents.mapNotNull { it.toObject(Bill::class.java) }
+                val billDocs = snapshots.documents
+                val bills = billDocs.mapNotNull { it.toObject(Bill::class.java) }
+                val billIds = billDocs.map { it.id }
 
                 val layoutNoBill = findViewById<View>(R.id.layout_no_bill)
                 if (bills.isEmpty()) {
@@ -84,13 +86,13 @@ class DetailBillActivity : AppCompatActivity() {
                     billsContainer.visibility = View.VISIBLE
                     bills.forEachIndexed { index, bill ->
                         val isLatest = index == 0
-                        addBillCard(bill, isLatest)
+                        addBillCard(bill, billIds[index], isLatest)
                     }
                 }
             }
     }
 
-    private fun addBillCard(bill: Bill, isLatest: Boolean) {
+    private fun addBillCard(bill: Bill, billId: String, isLatest: Boolean) {
         val cardView = LayoutInflater.from(this)
             .inflate(R.layout.item_bill_card, billsContainer, false)
 
@@ -142,7 +144,11 @@ class DetailBillActivity : AppCompatActivity() {
         } else {
             btnPay.text = "จ่ายเลย"
             btnPay.setOnClickListener {
-                startActivity(Intent(this, PayBillActivity::class.java))
+                val payIntent = Intent(this, PayBillActivity::class.java)
+                payIntent.putExtra("BILL_ID", billId)
+                payIntent.putExtra("BILL_AMOUNT", bill.amount)
+                payIntent.putExtra("BILL_MONTH", bill.month)
+                startActivity(payIntent)
                 overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
             }
         }

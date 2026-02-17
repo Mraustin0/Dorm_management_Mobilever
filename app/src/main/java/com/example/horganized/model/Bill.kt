@@ -14,8 +14,11 @@ data class Bill(
     val details: BillDetails = BillDetails(),
     val dueDate: com.google.firebase.Timestamp? = null,
     val month: String = "",
-    val status: String = ""
+    val status: String = "",
+    val slipUrl: String = "",
+    val paymentDate: com.google.firebase.Timestamp? = null,
+    val roomNumber: String = ""
 ) {
-    // helper เพื่อเช็คว่าจ่ายแล้วหรือยัง
     val isPaid: Boolean get() = status == "paid"
+    val isPending: Boolean get() = status == "pending"
 }
