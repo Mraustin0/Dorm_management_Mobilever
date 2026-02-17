@@ -9,7 +9,7 @@ android {
     compileSdk = 36
 
     defaultConfig {
-        // เปลี่ยน applicationId ให้ตรงกับใน google-services.json
+        // ใช้ applicationId ให้ตรงกับที่ลงทะเบียนไว้ใน Firebase (google-services.json)
         applicationId = "com.horganzied.app" 
         minSdk = 29
         targetSdk = 36
@@ -48,6 +48,7 @@ dependencies {
     implementation(platform("com.google.firebase:firebase-bom:33.1.0"))
     implementation("com.google.firebase:firebase-auth-ktx")
     implementation("com.google.firebase:firebase-firestore-ktx")
+    implementation("com.google.firebase:firebase-storage-ktx") // เพิ่ม Firebase Storage
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
