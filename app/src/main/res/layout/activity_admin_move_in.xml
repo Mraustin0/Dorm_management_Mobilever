@@ -35,16 +35,6 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
-
-        <ImageView
-            android:id="@+id/btn_chat_move_in"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:src="@drawable/ic_chat"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:tint="@color/black" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <ScrollView
@@ -85,76 +75,48 @@
                     android:textSize="18sp"
                     android:textStyle="bold" />
 
-                <!-- Details Rows with Boxes -->
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
-                    android:text="ชื่อ"
-                    android:textSize="14sp" />
+                <!-- ข้อมูลผู้พักปกติ... (ชื่อ, นามสกุล, เบอร์, อีเมล) -->
                 <EditText
                     android:id="@+id/et_move_in_name"
                     android:layout_width="match_parent"
                     android:layout_height="45dp"
-                    android:layout_marginTop="4dp"
-                    android:background="@drawable/edittext_background"
-                    android:hint="กรอกชื่อ"
-                    android:paddingStart="12dp"
-                    android:paddingEnd="12dp"
-                    android:textSize="14sp" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:text="นามสกุล"
-                    android:textSize="14sp" />
+                    android:background="@drawable/edittext_background"
+                    android:hint="ชื่อ"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="12dp" />
+
                 <EditText
                     android:id="@+id/et_move_in_surname"
                     android:layout_width="match_parent"
                     android:layout_height="45dp"
-                    android:layout_marginTop="4dp"
-                    android:background="@drawable/edittext_background"
-                    android:hint="กรอกนามสกุล"
-                    android:paddingStart="12dp"
-                    android:paddingEnd="12dp"
-                    android:textSize="14sp" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:text="เบอร์โทรศัพท์"
-                    android:textSize="14sp" />
+                    android:background="@drawable/edittext_background"
+                    android:hint="นามสกุล"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="12dp" />
+
                 <EditText
                     android:id="@+id/et_move_in_phone"
                     android:layout_width="match_parent"
                     android:layout_height="45dp"
-                    android:layout_marginTop="4dp"
+                    android:layout_marginTop="8dp"
                     android:background="@drawable/edittext_background"
-                    android:hint="กรอกเบอร์โทร"
+                    android:hint="เบอร์โทร"
                     android:inputType="phone"
                     android:paddingStart="12dp"
-                    android:paddingEnd="12dp"
-                    android:textSize="14sp" />
+                    android:paddingEnd="12dp" />
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:text="E-mail"
-                    android:textSize="14sp" />
                 <EditText
                     android:id="@+id/et_move_in_email"
                     android:layout_width="match_parent"
                     android:layout_height="45dp"
-                    android:layout_marginTop="4dp"
+                    android:layout_marginTop="8dp"
                     android:background="@drawable/edittext_background"
-                    android:hint="กรอกอีเมล"
+                    android:hint="อีเมล"
                     android:inputType="textEmailAddress"
                     android:paddingStart="12dp"
-                    android:paddingEnd="12dp"
-                    android:textSize="14sp" />
+                    android:paddingEnd="12dp" />
 
                 <View
                     android:layout_width="match_parent"
@@ -162,31 +124,31 @@
                     android:layout_marginTop="16dp"
                     android:background="#E0E0E0" />
 
-                <!-- Contract Row -->
-                <RelativeLayout
-                    android:layout_width="match_parent"
+                <!-- ช่องใส่ลิงก์ Google Drive -->
+                <TextView
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp">
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="เอกสารสัญญาฉบับที่ 1"
-                        android:textColor="@color/black"
-                        android:textSize="16sp"
-                        android:textStyle="bold" />
-                    <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:layout_alignParentEnd="true"
-                        android:rotation="270"
-                        android:src="@drawable/ic_list"
-                        app:tint="@color/gray_text" />
-                </RelativeLayout>
+                    android:layout_marginTop="16dp"
+                    android:text="ลิงก์สัญญา (Google Drive)"
+                    android:textColor="@color/black"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <EditText
+                    android:id="@+id/et_contract_link"
+                    android:layout_width="match_parent"
+                    android:layout_height="45dp"
+                    android:layout_marginTop="8dp"
+                    android:background="@drawable/edittext_background"
+                    android:hint="วางลิงก์ Google Drive ที่แชร์แล้วที่นี่"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="12dp"
+                    android:textSize="12sp" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
+                    android:layout_marginTop="16dp"
                     android:gravity="center_vertical"
                     android:orientation="horizontal">
                     <TextView
@@ -194,7 +156,6 @@
                         android:layout_height="wrap_content"
                         android:text="ระยะสัญญา"
                         android:textSize="14sp" />
-
                     <Spinner
                         android:id="@+id/spinner_contract_term"
                         android:layout_width="match_parent"
@@ -204,62 +165,28 @@
                         android:padding="8dp" />
                 </LinearLayout>
 
-                <View
+                <!-- เลขมิเตอร์... -->
+                <EditText
+                    android:id="@+id/et_move_in_water"
                     android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:layout_marginTop="16dp"
-                    android:background="#E0E0E0" />
-
-                <!-- Meter Rows with Boxes -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal">
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="เลขมิเตอร์น้ำล่าสุด"
-                        android:textColor="@color/black"
-                        android:textSize="14sp"
-                        android:textStyle="bold" />
-                    <EditText
-                        android:id="@+id/et_move_in_water"
-                        android:layout_width="100dp"
-                        android:layout_height="40dp"
-                        android:background="@drawable/edittext_background"
-                        android:gravity="center"
-                        android:hint="XXXX"
-                        android:inputType="number"
-                        android:textSize="14sp" />
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="45dp"
                     android:layout_marginTop="12dp"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal">
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="เลขมิเตอร์ไฟล่าสุด"
-                        android:textColor="@color/black"
-                        android:textSize="14sp"
-                        android:textStyle="bold" />
-                    <EditText
-                        android:id="@+id/et_move_in_electric"
-                        android:layout_width="100dp"
-                        android:layout_height="40dp"
-                        android:background="@drawable/edittext_background"
-                        android:gravity="center"
-                        android:hint="XXXX"
-                        android:inputType="number"
-                        android:textSize="14sp" />
-                </LinearLayout>
+                    android:background="@drawable/edittext_background"
+                    android:hint="เลขมิเตอร์น้ำล่าสุด"
+                    android:inputType="number"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="12dp" />
+
+                <EditText
+                    android:id="@+id/et_move_in_electric"
+                    android:layout_width="match_parent"
+                    android:layout_height="45dp"
+                    android:layout_marginTop="8dp"
+                    android:background="@drawable/edittext_background"
+                    android:hint="เลขมิเตอร์ไฟล่าสุด"
+                    android:inputType="number"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="12dp" />
 
             </LinearLayout>
         </androidx.cardview.widget.CardView>

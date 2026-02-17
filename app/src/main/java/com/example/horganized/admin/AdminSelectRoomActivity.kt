@@ -17,12 +17,14 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.horganized.R
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ListenerRegistration
 
 class AdminSelectRoomActivity : AppCompatActivity() {
 
     private lateinit var rvRooms: RecyclerView
     private lateinit var spinnerFloor: Spinner
     private val db = FirebaseFirestore.getInstance()
+    private var roomListener: ListenerRegistration? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,13 +44,8 @@ class AdminSelectRoomActivity : AppCompatActivity() {
         setupRecyclerView()
         setupBottomNavigation()
 
-        updateRoomList(1)
-    }
-
-    override fun onResume() {
-        super.onResume()
-        val currentFloor = spinnerFloor.selectedItemPosition + 1
-        updateRoomList(currentFloor)
+        // เริ่มต้นฟังการเปลี่ยนแปลงข้อมูลที่ชั้น 1
+        listenToRoomChanges(1)
     }
 
     private fun setupBottomNavigation() {
@@ -75,7 +72,7 @@ class AdminSelectRoomActivity : AppCompatActivity() {
 
         spinnerFloor.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                updateRoomList(position + 1)
+                listenToRoomChanges(position + 1)
             }
             override fun onNothingSelected(parent: AdapterView<*>?) {}
         }
@@ -85,27 +82,28 @@ class AdminSelectRoomActivity : AppCompatActivity() {
         rvRooms.layoutManager = GridLayoutManager(this, 2)
     }
 
-    private fun updateRoomList(floor: Int) {
-        // แสดงห้อง default ก่อนทันที
-        val defaultRooms = List(10) { i ->
-            val roomNumber = "${floor}${String.format("%02d", i + 1)}"
-            Room("ห้อง $roomNumber", isVacant = true)
-        }
-        showRooms(defaultRooms)
+    private fun listenToRoomChanges(floor: Int) {
+        // ยกเลิก Listener ตัวเก่าก่อน (ถ้ามี)
+        roomListener?.remove()
 
-        // โหลดสถานะจริงจาก Firestore
-        db.collection("rooms")
+        // ฟังการเปลี่ยนแปลงข้อมูลแบบ Real-time
+        roomListener = db.collection("rooms")
             .whereEqualTo("floor", floor)
-            .get()
-            .addOnSuccessListener { documents ->
-                if (documents.isEmpty) return@addOnSuccessListener
-
-                val firestoreStatus = mutableMapOf<String, Boolean>()
-                for (doc in documents) {
-                    val roomNum = doc.getString("roomNumber") ?: continue
-                    firestoreStatus[roomNum] = doc.getBoolean("isVacant") ?: true
+            .addSnapshotListener { snapshots, e ->
+                if (e != null) {
+                    Log.e("SelectRoom", "Listen failed.", e)
+                    return@addSnapshotListener
                 }
 
+                val firestoreStatus = mutableMapOf<String, Boolean>()
+                if (snapshots != null) {
+                    for (doc in snapshots) {
+                        val roomNum = doc.getString("roomNumber") ?: continue
+                        firestoreStatus[roomNum] = doc.getBoolean("isVacant") ?: true
+                    }
+                }
+
+                // สร้างรายการห้องและอัปเดตสี
                 val updatedRooms = List(10) { i ->
                     val roomNumber = "${floor}${String.format("%02d", i + 1)}"
                     val isVacant = firestoreStatus[roomNumber] ?: true
@@ -113,24 +111,50 @@ class AdminSelectRoomActivity : AppCompatActivity() {
                 }
                 showRooms(updatedRooms)
             }
-            .addOnFailureListener { e ->
-                Log.e("SelectRoom", "Error loading rooms", e)
-            }
     }
 
     private fun showRooms(rooms: List<Room>) {
         rvRooms.adapter = RoomAdapter(rooms) { room ->
-            if (!room.isVacant) {
-                val intent = Intent(this, AdminCreateBillActivity::class.java)
+            if (room.isVacant) {
+                // ห้องว่าง (สีเขียว) -> ไปหน้าย้ายเข้า
+                val intent = Intent(this, AdminMoveInActivity::class.java)
                 intent.putExtra("ROOM_NAME", room.name)
                 startActivity(intent)
             } else {
-                AlertDialog.Builder(this)
-                    .setTitle("สถานะห้องพัก")
-                    .setMessage("${room.name} เป็นห้องว่าง")
-                    .setPositiveButton("ตกลง", null)
-                    .show()
+                // ห้องมีคนพัก (สีแดง) -> เลือกทำกิจกรรม
+                showOccupiedRoomOptions(room)
             }
         }
+    }
+
+    private fun showOccupiedRoomOptions(room: Room) {
+        val options = arrayOf("สร้างบิลค่าเช่า", "ตรวจสอบสลิป", "ทำเรื่องย้ายออก")
+        AlertDialog.Builder(this)
+            .setTitle(room.name)
+            .setItems(options) { _, which ->
+                when (which) {
+                    0 -> {
+                        val intent = Intent(this, AdminCreateBillActivity::class.java)
+                        intent.putExtra("ROOM_NAME", room.name)
+                        startActivity(intent)
+                    }
+                    1 -> {
+                        val intent = Intent(this, AdminCheckSlipActivity::class.java)
+                        intent.putExtra("ROOM_NAME", room.name)
+                        startActivity(intent)
+                    }
+                    2 -> {
+                        val intent = Intent(this, AdminMoveOutActivity::class.java)
+                        intent.putExtra("ROOM_NAME", room.name)
+                        startActivity(intent)
+                    }
+                }
+            }
+            .show()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        roomListener?.remove() // หยุดฟังเมื่อปิดหน้าจอ
     }
 }

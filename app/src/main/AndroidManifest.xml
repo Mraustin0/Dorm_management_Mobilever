@@ -13,8 +13,11 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Horganized">
-        <!-- Login (หน้าเปิดแอป) -->
-        <activity android:name=".LoginActivity" android:exported="true">
+        
+        <!-- แก้ไข LoginActivity ให้ชี้ไปยังตำแหน่งที่ถูกต้อง -->
+        <activity 
+            android:name="com.example.horganized.LoginActivity" 
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
