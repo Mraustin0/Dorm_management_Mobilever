@@ -3,24 +3,31 @@ package com.example.horganized.admin
 import android.content.Intent
 import android.os.Bundle
 import android.widget.ImageView
+import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.example.horganized.R
+import com.google.firebase.firestore.FirebaseFirestore
 
 class AdminHomeActivity : AppCompatActivity() {
+
+    private val db = FirebaseFirestore.getInstance()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_admin_home)
-        
+
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+
+        loadVacantRoomCount()
 
         // เชื่อมไอคอนกลางล่าง (nav_list) ไปยังหน้าเลือกห้องพัก
         val navSelectRoom = findViewById<ImageView>(R.id.iv_nav_apartment)
@@ -77,5 +84,27 @@ class AdminHomeActivity : AppCompatActivity() {
             val intent = Intent(this, AdminSettingActivity::class.java)
             startActivity(intent)
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        loadVacantRoomCount()
+    }
+
+    private fun loadVacantRoomCount() {
+        val tvVacantCount = findViewById<TextView>(R.id.tv_vacant_count)
+
+        db.collection("rooms")
+            .get()
+            .addOnSuccessListener { documents ->
+                val totalRooms = documents.size()
+                val vacantRooms = documents.count { doc ->
+                    doc.getBoolean("isVacant") ?: true
+                }
+                tvVacantCount.text = "$vacantRooms/$totalRooms"
+            }
+            .addOnFailureListener {
+                tvVacantCount.text = "--/--"
+            }
     }
 }

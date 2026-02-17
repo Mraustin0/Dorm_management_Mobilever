@@ -116,9 +116,10 @@
                         android:textSize="16sp" />
 
                     <TextView
+                        android:id="@+id/tv_vacant_count"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="13/40"
+                        android:text="--/--"
                         android:textColor="@color/gray_text"
                         android:textSize="12sp" />
                 </LinearLayout>

@@ -15,6 +15,7 @@ import androidx.appcompat.widget.AppCompatButton
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.example.horganized.R
+import com.google.firebase.FirebaseApp
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -22,7 +23,6 @@ import com.google.firebase.firestore.FirebaseFirestore
 class AdminMoveInActivity : AppCompatActivity() {
 
     private val db = FirebaseFirestore.getInstance()
-    private val auth = FirebaseAuth.getInstance()
 
     private lateinit var etName: EditText
     private lateinit var etSurname: EditText
@@ -140,18 +140,33 @@ class AdminMoveInActivity : AppCompatActivity() {
         val electricMeter = etElectric.text.toString().trim().toIntOrNull() ?: 0
         val contractTerm = spinnerContract.selectedItem.toString()
 
-        // รหัสผ่านเริ่มต้น = เบอร์โทร (ผู้เช่าเปลี่ยนทีหลังได้)
+        // รหัสผ่านเริ่มต้น = เบอร์โทร
         val defaultPassword = phone
 
-        // จำ admin ที่กำลัง login อยู่ เพราะ createUser จะเปลี่ยน currentUser
-        val adminUser = auth.currentUser
+        // ใช้ secondary FirebaseApp เพื่อสร้าง account ผู้เช่า
+        // โดยไม่กระทบ admin session ของ FirebaseAuth หลัก
+        val secondaryApp = try {
+            FirebaseApp.initializeApp(
+                this,
+                FirebaseApp.getInstance().options,
+                "secondaryAuth"
+            )
+        } catch (e: IllegalStateException) {
+            // App ชื่อนี้มีอยู่แล้ว ใช้ตัวเดิม
+            FirebaseApp.getInstance("secondaryAuth")
+        }
 
-        // 1) สร้าง Firebase Auth account ให้ผู้เช่า
-        auth.createUserWithEmailAndPassword(email, defaultPassword)
+        val secondaryAuth = FirebaseAuth.getInstance(secondaryApp)
+
+        // 1) สร้าง Firebase Auth account ให้ผู้เช่า (ผ่าน secondary auth)
+        secondaryAuth.createUserWithEmailAndPassword(email, defaultPassword)
             .addOnSuccessListener { result ->
                 val newUserId = result.user?.uid ?: return@addOnSuccessListener
 
-                // 2) บันทึกข้อมูลผู้เช่าใน Firestore โดยใช้ UID เป็น document ID
+                // Sign out จาก secondary auth ทันที (ไม่ต้องค้างไว้)
+                secondaryAuth.signOut()
+
+                // 2) บันทึกข้อมูลผู้เช่าใน Firestore (ยังเป็น admin อยู่)
                 val userData = hashMapOf(
                     "name" to name,
                     "surname" to surname,
@@ -176,16 +191,20 @@ class AdminMoveInActivity : AppCompatActivity() {
                                 "tenantId", newUserId
                             )
                             .addOnSuccessListener {
-                                // 4) กลับไป login เป็น admin เหมือนเดิม
-                                if (adminUser != null) {
-                                    auth.updateCurrentUser(adminUser)
-                                }
-                                Toast.makeText(this, "บันทึกข้อมูลย้ายเข้าเรียบร้อย\nรหัสผ่านเริ่มต้น: $defaultPassword", Toast.LENGTH_LONG).show()
+                                Toast.makeText(
+                                    this,
+                                    "บันทึกข้อมูลย้ายเข้าเรียบร้อย\nรหัสผ่านเริ่มต้น: $defaultPassword",
+                                    Toast.LENGTH_LONG
+                                ).show()
                                 finish()
                             }
                             .addOnFailureListener { e ->
                                 Log.e("MoveIn", "Error updating room", e)
-                                Toast.makeText(this, "บันทึกผู้เช่าแล้ว แต่อัปเดตห้องไม่สำเร็จ", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(
+                                    this,
+                                    "บันทึกผู้เช่าแล้ว แต่อัปเดตห้องไม่สำเร็จ: ${e.message}",
+                                    Toast.LENGTH_LONG
+                                ).show()
                             }
                     }
                     .addOnFailureListener { e ->
