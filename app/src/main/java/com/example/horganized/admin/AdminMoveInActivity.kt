@@ -30,6 +30,7 @@ class AdminMoveInActivity : AppCompatActivity() {
     private lateinit var etSurname: EditText
     private lateinit var etPhone: EditText
     private lateinit var etEmail: EditText
+    private lateinit var etContractLink: EditText
     private lateinit var etWater: EditText
     private lateinit var etElectric: EditText
     private lateinit var spinnerContract: Spinner
@@ -61,6 +62,7 @@ class AdminMoveInActivity : AppCompatActivity() {
         etSurname = findViewById(R.id.et_move_in_surname)
         etPhone = findViewById(R.id.et_move_in_phone)
         etEmail = findViewById(R.id.et_move_in_email)
+        etContractLink = findViewById(R.id.et_contract_link)
         etWater = findViewById(R.id.et_move_in_water)
         etElectric = findViewById(R.id.et_move_in_electric)
         spinnerContract = findViewById(R.id.spinner_contract_term)
@@ -86,43 +88,13 @@ class AdminMoveInActivity : AppCompatActivity() {
     }
 
     private fun validateInputs(): Boolean {
-        val name = etName.text.toString().trim()
-        val surname = etSurname.text.toString().trim()
-        val phone = etPhone.text.toString().trim()
-        val email = etEmail.text.toString().trim()
-        val water = etWater.text.toString().trim()
-        val electric = etElectric.text.toString().trim()
-
-        if (name.isEmpty()) {
-            etName.error = "กรุณากรอกชื่อ"
-            etName.requestFocus()
-            return false
-        }
-        if (surname.isEmpty()) {
-            etSurname.error = "กรุณากรอกนามสกุล"
-            etSurname.requestFocus()
-            return false
-        }
-        if (phone.isEmpty()) {
-            etPhone.error = "กรุณากรอกเบอร์โทร"
-            etPhone.requestFocus()
-            return false
-        }
-        if (email.isEmpty()) {
-            etEmail.error = "กรุณากรอกอีเมล"
-            etEmail.requestFocus()
-            return false
-        }
-        if (water.isEmpty()) {
-            etWater.error = "กรุณากรอกเลขมิเตอร์น้ำ"
-            etWater.requestFocus()
-            return false
-        }
-        if (electric.isEmpty()) {
-            etElectric.error = "กรุณากรอกเลขมิเตอร์ไฟ"
-            etElectric.requestFocus()
-            return false
-        }
+        if (etName.text.toString().trim().isEmpty()) { etName.error = "กรุณากรอกชื่อ"; return false }
+        if (etSurname.text.toString().trim().isEmpty()) { etSurname.error = "กรุณากรอกนามสกุล"; return false }
+        if (etPhone.text.toString().trim().isEmpty()) { etPhone.error = "กรุณากรอกเบอร์โทร"; return false }
+        if (etEmail.text.toString().trim().isEmpty()) { etEmail.error = "กรุณากรอกอีเมล"; return false }
+        if (etContractLink.text.toString().trim().isEmpty()) { etContractLink.error = "กรุณาใส่ลิงก์สัญญา"; return false }
+        if (etWater.text.toString().trim().isEmpty()) { etWater.error = "กรุณากรอกเลขมิเตอร์น้ำ"; return false }
+        if (etElectric.text.toString().trim().isEmpty()) { etElectric.error = "กรุณากรอกเลขมิเตอร์ไฟ"; return false }
         return true
     }
 
@@ -130,9 +102,7 @@ class AdminMoveInActivity : AppCompatActivity() {
         AlertDialog.Builder(this)
             .setTitle("ยืนยันการบันทึก")
             .setMessage("คุณต้องการบันทึกข้อมูลการย้ายเข้าใช่หรือไม่?")
-            .setPositiveButton("ตกลง") { _, _ ->
-                saveTenantToFirestore()
-            }
+            .setPositiveButton("ตกลง") { _, _ -> saveTenantToFirestore() }
             .setNegativeButton("ยกเลิก", null)
             .show()
     }
@@ -190,13 +160,9 @@ class AdminMoveInActivity : AppCompatActivity() {
     }
 
     private fun saveTenantToFirestore() {
-        val name = etName.text.toString().trim()
-        val surname = etSurname.text.toString().trim()
-        val phone = etPhone.text.toString().trim()
         val email = etEmail.text.toString().trim()
-        val waterMeter = etWater.text.toString().trim().toIntOrNull() ?: 0
-        val electricMeter = etElectric.text.toString().trim().toIntOrNull() ?: 0
-        val contractTerm = spinnerContract.selectedItem.toString()
+        val phone = etPhone.text.toString().trim()
+        val contractUrl = etContractLink.text.toString().trim()
 
         val defaultPassword = phone
 
@@ -207,17 +173,17 @@ class AdminMoveInActivity : AppCompatActivity() {
             onSuccess = { newUserId ->
                 // 2) บันทึกข้อมูลผู้เช่าใน Firestore (admin ยังอยู่ครบ)
                 val userData = hashMapOf(
-                    "name" to name,
-                    "surname" to surname,
+                    "name" to etName.text.toString().trim(),
+                    "surname" to etSurname.text.toString().trim(),
                     "phone" to phone,
                     "email" to email,
+                    "contractUrl" to contractUrl, // บันทึกลิงก์สัญญา
                     "role" to "user",
                     "roomNumber" to roomNumber,
-                    "contractTerm" to contractTerm,
-                    "waterMeter" to waterMeter,
-                    "electricMeter" to electricMeter,
-                    "moveInDate" to Timestamp.now(),
-                    "profileImage" to ""
+                    "contractTerm" to spinnerContract.selectedItem.toString(),
+                    "waterMeter" to etWater.text.toString().trim().toIntOrNull(),
+                    "electricMeter" to etElectric.text.toString().trim().toIntOrNull(),
+                    "moveInDate" to Timestamp.now()
                 )
 
                 // ใช้ batch write เพื่อให้ทั้ง user data + room update สำเร็จพร้อมกัน

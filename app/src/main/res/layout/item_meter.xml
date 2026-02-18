@@ -30,7 +30,7 @@
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:gravity="center"
-        android:text="1000" />
+        android:text="0" />
 
     <EditText
         android:id="@+id/et_meter_latest"
@@ -40,7 +40,7 @@
         android:background="@drawable/edittext_background"
         android:gravity="center"
         android:inputType="number"
-        android:text="1000"
+        android:text="0"
         android:textSize="14sp" />
 
     <TextView

@@ -25,10 +25,8 @@ class AnnouncementActivity : AppCompatActivity() {
 
         db = FirebaseFirestore.getInstance()
 
-        // ปุ่มย้อนกลับ
         findViewById<ImageView>(R.id.btn_back)?.setOnClickListener {
             finish()
-            overridePendingTransition(R.anim.slide_out_left, R.anim.slide_in_right)
         }
 
         val rv = findViewById<RecyclerView>(R.id.rv_announcements)
@@ -36,48 +34,29 @@ class AnnouncementActivity : AppCompatActivity() {
         adapter = AnnouncementAdapter(announcementList)
         rv.adapter = adapter
 
+        // ดึงประกาศจริงจาก Firebase แบบ Real-time
         fetchAnnouncements()
         setupBottomNavigation()
     }
 
     private fun fetchAnnouncements() {
         db.collection("announcements")
-            .orderBy("timestamp", Query.Direction.DESCENDING)
-            .get()
-            .addOnSuccessListener { documents ->
-                announcementList.clear()
-                for (document in documents) {
-                    val announcement = document.toObject(Announcement::class.java)
-                    announcementList.add(announcement)
+            .orderBy("timestamp", Query.Direction.DESCENDING) // เอาประกาศล่าสุดขึ้นก่อน
+            .addSnapshotListener { snapshots, e ->
+                if (e != null) {
+                    Log.e("AnnouncementActivity", "Listen failed.", e)
+                    return@addSnapshotListener
                 }
 
-                // ถ้าไม่มีข้อมูลใน Firestore ใช้ข้อมูลจำลอง
-                if (announcementList.isEmpty()) {
-                    addSampleAnnouncements()
+                if (snapshots != null) {
+                    announcementList.clear()
+                    for (document in snapshots) {
+                        val announcement = document.toObject(Announcement::class.java)
+                        announcementList.add(announcement)
+                    }
+                    adapter.notifyDataSetChanged()
                 }
-
-                adapter.notifyDataSetChanged()
             }
-            .addOnFailureListener { e ->
-                Log.e("AnnouncementActivity", "Error fetching announcements: ${e.message}")
-                addSampleAnnouncements()
-                adapter.notifyDataSetChanged()
-            }
-    }
-
-    private fun addSampleAnnouncements() {
-        announcementList.add(
-            Announcement(
-                title = "เรื่องวันปิดทำการออฟฟิศ",
-                detail = "ออฟฟิศปิดทำการ\n5 ธันวาคม 2568"
-            )
-        )
-        announcementList.add(
-            Announcement(
-                title = "เรื่องวันปิดทำการออฟฟิศ",
-                detail = ""
-            )
-        )
     }
 
     private fun setupBottomNavigation() {

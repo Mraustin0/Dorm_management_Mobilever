@@ -8,6 +8,7 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.ImageView
 import android.widget.Spinner
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -23,13 +24,19 @@ class AdminSelectRoomActivity : AppCompatActivity() {
 
     private lateinit var rvRooms: RecyclerView
     private lateinit var spinnerFloor: Spinner
+    private lateinit var spinnerMonth: Spinner
+    private lateinit var spinnerYear: Spinner
+
     private val db = FirebaseFirestore.getInstance()
     private var roomListener: ListenerRegistration? = null
+    private var mode = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_admin_select_room)
+
+        mode = intent.getStringExtra("MODE") ?: ""
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
@@ -37,124 +44,96 @@ class AdminSelectRoomActivity : AppCompatActivity() {
             insets
         }
 
-        rvRooms = findViewById(R.id.rv_rooms)
-        spinnerFloor = findViewById(R.id.spinner_floor)
-
-        setupSpinner()
+        initViews()
+        setupSpinners()
         setupRecyclerView()
         setupBottomNavigation()
 
-        // เริ่มต้นฟังการเปลี่ยนแปลงข้อมูลที่ชั้น 1
-        listenToRoomChanges(1)
+        refreshData()
+    }
+
+    private fun initViews() {
+        rvRooms = findViewById(R.id.rv_rooms)
+        spinnerFloor = findViewById(R.id.spinner_floor)
+        spinnerMonth = findViewById(R.id.spinner_month_select)
+        spinnerYear = findViewById(R.id.spinner_year_select)
     }
 
     private fun setupBottomNavigation() {
-        val navHome = findViewById<ImageView>(R.id.iv_nav_home)
-        val navChat = findViewById<ImageView>(R.id.iv_nav_chat)
-
-        navHome.setOnClickListener {
-            val intent = Intent(this, AdminHomeActivity::class.java)
-            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
-            startActivity(intent)
+        findViewById<ImageView>(R.id.iv_nav_home).setOnClickListener {
+            startActivity(Intent(this, AdminHomeActivity::class.java).apply { flags = Intent.FLAG_ACTIVITY_CLEAR_TOP })
         }
-
-        navChat.setOnClickListener {
-            val intent = Intent(this, ChatListActivity::class.java)
-            startActivity(intent)
+        findViewById<ImageView>(R.id.iv_nav_chat).setOnClickListener {
+            startActivity(Intent(this, ChatListActivity::class.java))
         }
     }
 
-    private fun setupSpinner() {
+    private fun setupSpinners() {
         val floors = arrayOf("ชั้น 1", "ชั้น 2", "ชั้น 3", "ชั้น 4")
-        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, floors)
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        spinnerFloor.adapter = adapter
+        val months = arrayOf("มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม")
+        val years = arrayOf("2024", "2025", "2026")
 
-        spinnerFloor.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                listenToRoomChanges(position + 1)
-            }
-            override fun onNothingSelected(parent: AdapterView<*>?) {}
+        spinnerFloor.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, floors)
+        spinnerMonth.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, months)
+        spinnerYear.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, years).apply { setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item) }
+        spinnerYear.setSelection(1)
+
+        val listener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) { refreshData() }
+            override fun onNothingSelected(p0: AdapterView<*>?) {}
         }
+        spinnerFloor.onItemSelectedListener = listener
+        spinnerMonth.onItemSelectedListener = listener
+        spinnerYear.onItemSelectedListener = listener
     }
 
     private fun setupRecyclerView() {
         rvRooms.layoutManager = GridLayoutManager(this, 2)
     }
 
+    private fun refreshData() {
+        listenToRoomChanges(spinnerFloor.selectedItemPosition + 1)
+    }
+
     private fun listenToRoomChanges(floor: Int) {
-        // ยกเลิก Listener ตัวเก่าก่อน (ถ้ามี)
         roomListener?.remove()
-
-        // ฟังการเปลี่ยนแปลงข้อมูลแบบ Real-time
-        roomListener = db.collection("rooms")
-            .whereEqualTo("floor", floor)
+        roomListener = db.collection("rooms").whereEqualTo("floor", floor)
             .addSnapshotListener { snapshots, e ->
-                if (e != null) {
-                    Log.e("SelectRoom", "Listen failed.", e)
-                    return@addSnapshotListener
-                }
+                if (e != null) { Log.e("SelectRoom", "Listen failed.", e); return@addSnapshotListener }
 
-                val firestoreStatus = mutableMapOf<String, Boolean>()
-                if (snapshots != null) {
-                    for (doc in snapshots) {
-                        val roomNum = doc.getString("roomNumber") ?: continue
-                        firestoreStatus[roomNum] = doc.getBoolean("isVacant") ?: true
-                    }
-                }
-
-                // สร้างรายการห้องและอัปเดตสี
-                val updatedRooms = List(10) { i ->
-                    val roomNumber = "${floor}${String.format("%02d", i + 1)}"
-                    val isVacant = firestoreStatus[roomNumber] ?: true
-                    Room("ห้อง $roomNumber", isVacant)
-                }
-                showRooms(updatedRooms)
+                val statusMap = snapshots?.documents?.associate { it.getString("roomNumber") to (it.getBoolean("isVacant") ?: true) } ?: emptyMap()
+                val rooms = List(10) { Room("ห้อง ${floor}${String.format("%02d", it + 1)}", statusMap["${floor}${String.format("%02d", it + 1)}"] ?: true) }
+                
+                showRooms(rooms)
             }
     }
 
     private fun showRooms(rooms: List<Room>) {
         rvRooms.adapter = RoomAdapter(rooms) { room ->
             if (room.isVacant) {
-                // ห้องว่าง (สีเขียว) -> ไปหน้าย้ายเข้า
-                val intent = Intent(this, AdminMoveInActivity::class.java)
-                intent.putExtra("ROOM_NAME", room.name)
-                startActivity(intent)
+                Toast.makeText(this, "${room.name} เป็นห้องว่าง", Toast.LENGTH_SHORT).show()
             } else {
-                // ห้องมีคนพัก (สีแดง) -> เลือกทำกิจกรรม
-                showOccupiedRoomOptions(room)
-            }
-        }
-    }
-
-    private fun showOccupiedRoomOptions(room: Room) {
-        val options = arrayOf("สร้างบิลค่าเช่า", "ตรวจสอบสลิป", "ทำเรื่องย้ายออก")
-        AlertDialog.Builder(this)
-            .setTitle(room.name)
-            .setItems(options) { _, which ->
-                when (which) {
-                    0 -> {
-                        val intent = Intent(this, AdminCreateBillActivity::class.java)
-                        intent.putExtra("ROOM_NAME", room.name)
+                // ไม่มี Pop-up: ทำงานตามโหมดที่ได้รับมาทันที
+                when (mode) {
+                    "CREATE_BILL" -> {
+                        val intent = Intent(this, AdminCreateBillActivity::class.java).putExtra("ROOM_NAME", room.name)
                         startActivity(intent)
                     }
-                    1 -> {
-                        val intent = Intent(this, AdminCheckSlipActivity::class.java)
-                        intent.putExtra("ROOM_NAME", room.name)
+                    "CHECK_SLIP" -> {
+                        val intent = Intent(this, AdminCheckSlipActivity::class.java).putExtra("ROOM_NAME", room.name)
                         startActivity(intent)
                     }
-                    2 -> {
-                        val intent = Intent(this, AdminMoveOutActivity::class.java)
-                        intent.putExtra("ROOM_NAME", room.name)
+                    else -> { // กรณีอื่นๆ หรือกดจากเมนูย้ายเข้า/ออกโดยตรง
+                        val intent = Intent(this, AdminMoveOutActivity::class.java).putExtra("ROOM_NAME", room.name)
                         startActivity(intent)
                     }
                 }
             }
-            .show()
+        }
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        roomListener?.remove() // หยุดฟังเมื่อปิดหน้าจอ
+        roomListener?.remove()
     }
 }

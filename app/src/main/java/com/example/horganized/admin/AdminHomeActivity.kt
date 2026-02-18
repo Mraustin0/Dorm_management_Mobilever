@@ -53,7 +53,7 @@ class AdminHomeActivity : AppCompatActivity() {
         // เชื่อมปุ่มประกาศ
         val cvAnnounce = findViewById<CardView>(R.id.cv_announce)
         cvAnnounce.setOnClickListener {
-            val intent = Intent(this, AdminAnnounceActivity::class.java)
+            val intent = Intent(this, AdminAddAnnouncementActivity::class.java)
             startActivity(intent)
         }
 
@@ -71,6 +71,14 @@ class AdminHomeActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
+        // เชื่อมปุ่มสร้างบิล (Card 3) ไปยังหน้า AdminSelectRoomActivity พร้อมบอกโหมด
+        val cvCreateBill = findViewById<CardView>(R.id.cv_create_bill)
+        cvCreateBill.setOnClickListener {
+            val intent = Intent(this, AdminSelectRoomActivity::class.java)
+            intent.putExtra("MODE", "CREATE_BILL")
+            startActivity(intent)
+        }
+
         // เชื่อมปุ่มติดต่อช่าง
         val cvTechnician = findViewById<CardView>(R.id.cv_technician)
         cvTechnician.setOnClickListener {
@@ -78,7 +86,7 @@ class AdminHomeActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
-        // เชื่อมปุ่มย้ายเข้า/ออก (cv_move) ไปหน้าเลือกห้องเพื่ออัปเดตข้อมูล
+        // เชื่อมปุ่มย้ายเข้า/ออก (cv_move) ไปหน้า AdminMoveSelectionActivity
         val cvMove = findViewById<CardView>(R.id.cv_move)
         cvMove.setOnClickListener {
             val intent = Intent(this, AdminMoveSelectionActivity::class.java)
@@ -104,6 +112,7 @@ class AdminHomeActivity : AppCompatActivity() {
         db.collection("rooms")
             .get()
             .addOnSuccessListener { documents ->
+                if (tvVacantCount == null) return@addOnSuccessListener
                 val totalRooms = documents.size()
                 val vacantRooms = documents.count { doc ->
                     doc.getBoolean("isVacant") ?: true
@@ -111,7 +120,7 @@ class AdminHomeActivity : AppCompatActivity() {
                 tvVacantCount.text = "$vacantRooms/$totalRooms"
             }
             .addOnFailureListener {
-                tvVacantCount.text = "--/--"
+                tvVacantCount?.text = "--/--"
             }
     }
 }

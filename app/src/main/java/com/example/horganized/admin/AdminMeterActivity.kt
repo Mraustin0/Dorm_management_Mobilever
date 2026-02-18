@@ -126,8 +126,8 @@ class AdminMeterActivity : AppCompatActivity() {
     private fun updateList(floor: Int) {
         val list = List(10) { i ->
             val roomNumber = floor * 100 + (i + 1)
-            val baseValue = if (isWaterTab) 500 else 1000
-            MeterItem("$roomNumber", (i + floor) % 2 == 0, baseValue + (i * 10), baseValue + (i * 10))
+            // กำหนดค่า default เป็น 0 ตามคำขอ
+            MeterItem("$roomNumber", (i + floor) % 2 == 0, 0, 0)
         }
         rvMeter.layoutManager = LinearLayoutManager(this)
         rvMeter.adapter = MeterAdapter(list)
