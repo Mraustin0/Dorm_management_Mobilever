@@ -3,6 +3,8 @@ package com.example.horganized.user
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.util.Base64
+import android.util.Log
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
@@ -11,7 +13,10 @@ import androidx.appcompat.app.AppCompatActivity
 import com.example.horganized.R
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.storage.FirebaseStorage
+import org.json.JSONObject
+import java.io.OutputStreamWriter
+import java.net.HttpURLConnection
+import java.net.URL
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -19,11 +24,14 @@ import java.util.Locale
 class PayBillConfirmActivity : AppCompatActivity() {
 
     private val db = FirebaseFirestore.getInstance()
-    private val storage = FirebaseStorage.getInstance()
 
     private var billId = ""
     private var imageUriString: String? = null
     private var billAmount = 0.0
+
+    companion object {
+        private const val IMGBB_API_KEY = "03c7b6aeebf7b62f78427d1d28a7a7b4"  // ← ใส่ API Key จาก https://api.imgbb.com/
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -71,49 +79,101 @@ class PayBillConfirmActivity : AppCompatActivity() {
             return
         }
 
-        // อัพรูปไป Firebase Storage
-        val fileName = "slips/${billId}_${System.currentTimeMillis()}.jpg"
-        val storageRef = storage.reference.child(fileName)
+        // แปลงรูปเป็น Base64 แล้วอัพไป ImgBB
+        try {
+            val inputStream = contentResolver.openInputStream(uri)
+            val bytes = inputStream?.readBytes()
+            inputStream?.close()
 
-        storageRef.putFile(uri)
-            .addOnSuccessListener {
-                // ดึง download URL
-                storageRef.downloadUrl.addOnSuccessListener { downloadUrl ->
-                    // อัปเดต bill ใน Firestore
-                    db.collection("bills").document(billId)
-                        .update(
-                            mapOf(
-                                "slipUrl" to downloadUrl.toString(),
-                                "paymentDate" to Timestamp.now(),
-                                "status" to "pending"
-                            )
-                        )
-                        .addOnSuccessListener {
-                            Toast.makeText(
-                                this,
-                                "แจ้งชำระเงินเรียบร้อยแล้ว!",
-                                Toast.LENGTH_LONG
-                            ).show()
+            if (bytes == null) {
+                Toast.makeText(this, "อ่านไฟล์รูปไม่สำเร็จ", Toast.LENGTH_SHORT).show()
+                resetButton()
+                return
+            }
 
-                            val intent = Intent(this, HomeUserActivity::class.java)
-                            intent.flags =
-                                Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                            startActivity(intent)
-                        }
-                        .addOnFailureListener { e ->
-                            Toast.makeText(
-                                this,
-                                "อัปเดตบิลไม่สำเร็จ: ${e.message}",
-                                Toast.LENGTH_LONG
-                            ).show()
-                            resetButton()
-                        }
+            val base64Image = Base64.encodeToString(bytes, Base64.NO_WRAP)
+            uploadToImgBB(base64Image)
+        } catch (e: Exception) {
+            Log.e("PayBillConfirm", "Error reading image", e)
+            Toast.makeText(this, "อ่านไฟล์รูปไม่สำเร็จ: ${e.message}", Toast.LENGTH_SHORT).show()
+            resetButton()
+        }
+    }
+
+    /**
+     * อัพโหลดรูปไป ImgBB ผ่าน REST API (ฟรี ไม่ต้องใช้ Firebase Storage)
+     */
+    private fun uploadToImgBB(base64Image: String) {
+        Thread {
+            try {
+                val url = URL("https://api.imgbb.com/1/upload?key=$IMGBB_API_KEY")
+                val conn = url.openConnection() as HttpURLConnection
+                conn.requestMethod = "POST"
+                conn.doOutput = true
+
+                // ImgBB ใช้ form-urlencoded
+                val postData = "image=${java.net.URLEncoder.encode(base64Image, "UTF-8")}"
+
+                conn.outputStream.use { os ->
+                    os.write(postData.toByteArray())
+                    os.flush()
                 }
+
+                val responseCode = conn.responseCode
+                if (responseCode == HttpURLConnection.HTTP_OK) {
+                    val response = conn.inputStream.bufferedReader().readText()
+                    val json = JSONObject(response)
+                    val imageUrl = json.getJSONObject("data").getString("url")
+
+                    runOnUiThread { updateBillWithSlipUrl(imageUrl) }
+                } else {
+                    val errorResponse = conn.errorStream?.bufferedReader()?.readText() ?: "Unknown error"
+                    Log.e("PayBillConfirm", "ImgBB error: $errorResponse")
+                    runOnUiThread {
+                        Toast.makeText(this, "อัพโหลดรูปไม่สำเร็จ กรุณาลองใหม่", Toast.LENGTH_LONG).show()
+                        resetButton()
+                    }
+                }
+
+                conn.disconnect()
+            } catch (e: Exception) {
+                Log.e("PayBillConfirm", "ImgBB upload error", e)
+                runOnUiThread {
+                    Toast.makeText(this, "อัพโหลดรูปไม่สำเร็จ: ${e.message}", Toast.LENGTH_LONG).show()
+                    resetButton()
+                }
+            }
+        }.start()
+    }
+
+    /**
+     * ได้ URL รูปจาก ImgBB แล้ว → อัปเดต bill ใน Firestore
+     */
+    private fun updateBillWithSlipUrl(imageUrl: String) {
+        db.collection("bills").document(billId)
+            .update(
+                mapOf(
+                    "slipUrl" to imageUrl,
+                    "paymentDate" to Timestamp.now(),
+                    "status" to "pending"
+                )
+            )
+            .addOnSuccessListener {
+                Toast.makeText(
+                    this,
+                    "แจ้งชำระเงินเรียบร้อยแล้ว!",
+                    Toast.LENGTH_LONG
+                ).show()
+
+                val intent = Intent(this, HomeUserActivity::class.java)
+                intent.flags =
+                    Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                startActivity(intent)
             }
             .addOnFailureListener { e ->
                 Toast.makeText(
                     this,
-                    "อัพโหลดสลิปไม่สำเร็จ: ${e.message}",
+                    "อัปเดตบิลไม่สำเร็จ: ${e.message}",
                     Toast.LENGTH_LONG
                 ).show()
                 resetButton()

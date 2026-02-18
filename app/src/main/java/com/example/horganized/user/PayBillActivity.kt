@@ -38,10 +38,10 @@ class PayBillActivity : AppCompatActivity() {
         val btnSelectImage = findViewById<androidx.cardview.widget.CardView>(R.id.btn_select_image)
         val btnNext = findViewById<Button>(R.id.btn_next)
         val tvAccNumber = findViewById<TextView>(R.id.tv_acc_number)
-        val etAmount = findViewById<android.widget.EditText>(R.id.et_amount)
+        val tvAmount = findViewById<TextView>(R.id.tv_amount)
 
-        // แสดงยอดเงินจริง
-        etAmount.setText("${billAmount.toInt()} บาท")
+        // แสดงยอดเงินจริงจากบิล (user แก้ไขไม่ได้)
+        tvAmount.text = "${String.format("%,.0f", billAmount)} บาท"
 
         btnBack.setOnClickListener { finish() }
 
