@@ -1,6 +1,7 @@
 package com.example.horganized.user
 
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.ImageView
 import android.widget.LinearLayout
@@ -43,7 +44,20 @@ class NotificationActivity : AppCompatActivity() {
     }
 
     private fun setupRecyclerView() {
-        adapter = NotificationAdapter(notificationList)
+        adapter = NotificationAdapter(notificationList) { position ->
+            val item = notificationList[position]
+            if (!item.isRead) {
+                // อัปเดตสถานะเป็นอ่านแล้วใน Firestore (ถ้ามี ID)
+                if (item.notificationId.isNotEmpty()) {
+                    db.collection("notifications").document(item.notificationId)
+                        .update("isRead", true)
+                }
+                
+                notificationList[position] = item.copy(isRead = true)
+                adapter.notifyItemChanged(position)
+                updateNotifCount()
+            }
+        }
         rvNotifications.layoutManager = LinearLayoutManager(this)
         rvNotifications.adapter = adapter
     }
@@ -51,66 +65,29 @@ class NotificationActivity : AppCompatActivity() {
     private fun fetchNotifications() {
         val userId = auth.currentUser?.uid ?: return
 
+        // ดึงแจ้งเตือนที่เจาะจงถึงเรา (userId) และ ประกาศทั่วไป (userId == "all")
         db.collection("notifications")
-            .whereEqualTo("userId", userId)
+            .whereIn("userId", listOf(userId, "all"))
             .orderBy("timestamp", Query.Direction.DESCENDING)
-            .get()
-            .addOnSuccessListener { documents ->
-                notificationList.clear()
-                for (document in documents) {
-                    val notification = document.toObject(Notification::class.java)
-                    notificationList.add(notification)
+            .addSnapshotListener { snapshots, e ->
+                if (e != null) {
+                    Log.e("NotificationActivity", "Listen failed.", e)
+                    updateEmptyState()
+                    return@addSnapshotListener
                 }
 
-                if (notificationList.isEmpty()) {
-                    addSampleNotifications()
+                if (snapshots != null) {
+                    notificationList.clear()
+                    for (doc in snapshots) {
+                        val item = doc.toObject(Notification::class.java)
+                        notificationList.add(item)
+                    }
+
+                    adapter.notifyDataSetChanged()
+                    updateEmptyState()
+                    updateNotifCount()
                 }
-
-                adapter.notifyDataSetChanged()
-                updateEmptyState()
-                updateNotifCount()
             }
-            .addOnFailureListener {
-                addSampleNotifications()
-                adapter.notifyDataSetChanged()
-                updateEmptyState()
-                updateNotifCount()
-            }
-    }
-
-    private fun addSampleNotifications() {
-        notificationList.add(
-            Notification(
-                senderName = "ADMIN1",
-                message = "แอดมินได้ส่งร่างสัญญาฉบับที่ 2 ให้คุณแล้ว กรุณาตรวจสอบรายละเอียดและเซ็นสัญญาภายในวันที่ 01/06/2025",
-                timestamp = System.currentTimeMillis() - 60000,
-                isRead = false
-            )
-        )
-        notificationList.add(
-            Notification(
-                senderName = "ADMIN1",
-                message = "ใบแจ้งหนี้ใหม่ค่ะ ตรวจสอบยอดและชำระเงินได้ภายในวันที่ 05/05/2026",
-                timestamp = System.currentTimeMillis() - 259200000,
-                isRead = false
-            )
-        )
-        notificationList.add(
-            Notification(
-                senderName = "ADMIN1",
-                message = "ชำระเงินสำเร็จ แอดมินตรวจสอบยอดเงินเรียบร้อยแล้ว ขอบคุณค่ะ",
-                timestamp = System.currentTimeMillis() - 604800000,
-                isRead = true
-            )
-        )
-        notificationList.add(
-            Notification(
-                senderName = "ADMIN1",
-                message = "รับเรื่องแจ้งซ่อมเรียบร้อย คำขอซ่อมหลอดไฟ ของคุณอยู่ระหว่างดำเนินการ",
-                timestamp = System.currentTimeMillis() - 604800000,
-                isRead = true
-            )
-        )
     }
 
     private fun updateEmptyState() {

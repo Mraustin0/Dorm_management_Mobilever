@@ -12,7 +12,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Horganized">
         
-        <!-- แก้ไข LoginActivity ให้ชี้ไปยังตำแหน่งที่ถูกต้อง -->
+        <!-- Login (หน้าเปิดแอป) -->
         <activity 
             android:name="com.example.horganized.LoginActivity" 
             android:exported="true">
@@ -45,6 +45,7 @@
         <activity android:name=".admin.AdminLoginActivity" android:exported="false" />
         <activity android:name=".admin.AdminHomeActivity" android:exported="false" />
         <activity android:name=".admin.AdminAnnounceActivity" android:exported="false" />
+        <activity android:name=".admin.AdminAddAnnouncementActivity" android:exported="false" />
         <activity android:name=".admin.AdminCheckSlipActivity" android:exported="false" />
         <activity android:name=".admin.AdminCreateBillActivity" android:exported="false" />
         <activity android:name=".admin.AdminEditProfileActivity" android:exported="false" />
@@ -55,6 +56,7 @@
         <activity android:name=".admin.AdminOtpVerificationActivity" android:exported="false" />
         <activity android:name=".admin.AdminResetPasswordActivity" android:exported="false" />
         <activity android:name=".admin.AdminSelectRoomActivity" android:exported="false" />
+        <activity android:name=".admin.AdminSelectRoomBillActivity" android:exported="false" />
         <activity android:name=".admin.AdminSettingActivity" android:exported="false" />
         <activity android:name=".admin.AdminTechnicianActivity" android:exported="false" />
         <activity android:name=".admin.ChangePasswordActivity" android:exported="false" />

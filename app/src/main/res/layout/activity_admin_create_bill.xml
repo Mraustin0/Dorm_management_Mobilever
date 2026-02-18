@@ -19,22 +19,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <TextView
-        android:id="@+id/tv_send_all"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="24dp"
-        android:background="@drawable/edittext_background"
-        android:paddingStart="12dp"
-        android:paddingTop="4dp"
-        android:paddingEnd="12dp"
-        android:paddingBottom="4dp"
-        android:text="ส่งทั้งหมด ∨"
-        android:textSize="14sp"
-        app:layout_constraintBottom_toBottomOf="@id/btn_back"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@id/btn_back" />
-
     <LinearLayout
         android:id="@+id/ll_bill_title"
         android:layout_width="wrap_content"
@@ -223,7 +207,7 @@
                             android:background="@drawable/edittext_background"
                             android:gravity="center"
                             android:inputType="number"
-                            android:text="2639"
+                            android:text="0"
                             android:textSize="12sp" />
 
                         <TextView
@@ -240,7 +224,7 @@
                             android:background="@drawable/edittext_background"
                             android:gravity="center"
                             android:inputType="number"
-                            android:text="2639"
+                            android:text="0"
                             android:textSize="12sp" />
 
                         <TextView
@@ -298,7 +282,7 @@
                             android:background="@drawable/edittext_background"
                             android:gravity="center"
                             android:inputType="number"
-                            android:text="542"
+                            android:text="0"
                             android:textSize="12sp" />
 
                         <TextView
@@ -315,7 +299,7 @@
                             android:background="@drawable/edittext_background"
                             android:gravity="center"
                             android:inputType="number"
-                            android:text="537"
+                            android:text="0"
                             android:textSize="12sp" />
 
                         <TextView

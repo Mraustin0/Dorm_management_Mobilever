@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.example.horganized.LoginActivity
 import com.example.horganized.R
 
 class AdminSettingActivity : AppCompatActivity() {
@@ -49,7 +50,7 @@ class AdminSettingActivity : AppCompatActivity() {
             .setTitle("ออกจากระบบ")
             .setMessage("คุณต้องการออกจากระบบใช่หรือไม่?")
             .setPositiveButton("ตกลง") { _, _ ->
-                val intent = Intent(this, AdminLoginActivity::class.java)
+                val intent = Intent(this, LoginActivity::class.java)
                 intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                 startActivity(intent)
                 finish()
