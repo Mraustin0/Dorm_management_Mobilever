@@ -2,8 +2,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <uses-permission android:name="android.permission.INTERNET" />
-
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -42,6 +40,8 @@
         <activity android:name=".user.UserProfileEditActivity" android:exported="false" />
         <activity android:name=".user.ReportRepairActivity" android:exported="false" />
         <activity android:name=".user.RepairActivity" android:exported="false" />
+        <activity android:name=".user.RepairHistoryActivity" android:exported="false" />
+        <activity android:name=".user.RepairDetailActivity" android:exported="false" />
 
         <!-- Admin Activities -->
         <activity android:name=".admin.AdminLoginActivity" android:exported="false" />
@@ -60,7 +60,6 @@
         <activity android:name=".admin.AdminSelectRoomActivity" android:exported="false" />
         <activity android:name=".admin.AdminSelectRoomBillActivity" android:exported="false" />
         <activity android:name=".admin.AdminSettingActivity" android:exported="false" />
-        <activity android:name=".admin.AdminVacantRoomActivity" android:exported="false" />
         <activity android:name=".admin.AdminTechnicianActivity" android:exported="false" />
         <activity android:name=".admin.ChangePasswordActivity" android:exported="false" />
         <activity android:name=".admin.ChatDetailActivity" android:exported="false" />

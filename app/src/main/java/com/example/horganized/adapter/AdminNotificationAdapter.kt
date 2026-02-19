@@ -9,13 +9,13 @@ import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.example.horganized.R
-import com.example.horganized.model.AdminNotificationModel
+import com.example.horganized.model.AdminNotification
 import java.text.SimpleDateFormat
 import java.util.*
 
 class AdminNotificationAdapter(
-    private val list: List<AdminNotificationModel>,
-    private val onItemClick: (AdminNotificationModel) -> Unit
+    private val list: List<AdminNotification>,
+    private val onItemClick: (AdminNotification) -> Unit
 ) : RecyclerView.Adapter<AdminNotificationAdapter.ViewHolder>() {
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -35,11 +35,13 @@ class AdminNotificationAdapter(
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = list[position]
         
-        holder.title.text = item.title
+        holder.title.text = if (item.roomNumber.isNotEmpty()) "ห้อง ${item.roomNumber} ส่งข้อความ" else item.title
         holder.message.text = item.message
         
-        val sdf = SimpleDateFormat("dd MMM yyyy, HH:mm", Locale("th", "TH"))
-        holder.time.text = sdf.format(Date(item.timestamp))
+        item.timestamp?.let {
+            val sdf = SimpleDateFormat("dd MMM yyyy, HH:mm", Locale("th", "TH"))
+            holder.time.text = sdf.format(it.toDate())
+        }
 
         holder.unreadDot.visibility = if (item.isRead) View.GONE else View.VISIBLE
         
