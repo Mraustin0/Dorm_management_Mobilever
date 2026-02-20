@@ -143,6 +143,8 @@ class AdminCheckSlipActivity : AppCompatActivity() {
                     val slipUrl = doc.getString("slipUrl") ?: ""
                     val paymentDate = doc.getTimestamp("paymentDate")
 
+                    Log.d("CheckSlip", "Bill ${doc.id} → slipUrl = '$slipUrl'")
+
                     PendingSlip(
                         billId = doc.id,
                         roomNumber = roomNumber,
@@ -212,7 +214,20 @@ class AdminCheckSlipActivity : AppCompatActivity() {
     }
 
     private fun showSlipDialog(slip: PendingSlip) {
+        if (slip.slipUrl.isEmpty()) {
+            Toast.makeText(this, "ไม่พบรูปสลิป", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        Log.d("CheckSlip", "Loading slip image: ${slip.slipUrl}")
+
         val dialog = Dialog(this)
+        val scrollView = android.widget.ScrollView(this).apply {
+            layoutParams = ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+            )
+        }
         val imageView = ImageView(this).apply {
             layoutParams = ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
@@ -221,12 +236,15 @@ class AdminCheckSlipActivity : AppCompatActivity() {
             adjustViewBounds = true
             scaleType = ImageView.ScaleType.FIT_CENTER
         }
+        scrollView.addView(imageView)
 
         Glide.with(this)
             .load(slip.slipUrl)
+            .override(1024)  // จำกัดขนาดรูปไม่ให้ใหญ่เกิน ป้องกัน OOM crash
+            .error(android.R.drawable.ic_menu_report_image)
             .into(imageView)
 
-        dialog.setContentView(imageView)
+        dialog.setContentView(scrollView)
         dialog.window?.setLayout(
             ViewGroup.LayoutParams.MATCH_PARENT,
             ViewGroup.LayoutParams.WRAP_CONTENT

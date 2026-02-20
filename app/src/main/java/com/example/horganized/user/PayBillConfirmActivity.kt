@@ -1,6 +1,8 @@
 package com.example.horganized.user
 
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
 import android.util.Base64
@@ -79,19 +81,35 @@ class PayBillConfirmActivity : AppCompatActivity() {
             return
         }
 
-        // แปลงรูปเป็น Base64 แล้วอัพไป ImgBB
+        // แปลงรูปเป็น Base64 + compress ก่อนอัพไป ImgBB
         try {
             val inputStream = contentResolver.openInputStream(uri)
-            val bytes = inputStream?.readBytes()
+            val originalBitmap = BitmapFactory.decodeStream(inputStream)
             inputStream?.close()
 
-            if (bytes == null) {
+            if (originalBitmap == null) {
                 Toast.makeText(this, "อ่านไฟล์รูปไม่สำเร็จ", Toast.LENGTH_SHORT).show()
                 resetButton()
                 return
             }
 
-            val base64Image = Base64.encodeToString(bytes, Base64.NO_WRAP)
+            // ย่อขนาดรูปถ้าใหญ่เกิน 1280px
+            val maxSize = 1280
+            val ratio = minOf(maxSize.toFloat() / originalBitmap.width, maxSize.toFloat() / originalBitmap.height, 1f)
+            val scaledBitmap = if (ratio < 1f) {
+                Bitmap.createScaledBitmap(originalBitmap, (originalBitmap.width * ratio).toInt(), (originalBitmap.height * ratio).toInt(), true)
+            } else {
+                originalBitmap
+            }
+
+            // compress เป็น JPEG 80%
+            val outputStream = java.io.ByteArrayOutputStream()
+            scaledBitmap.compress(Bitmap.CompressFormat.JPEG, 80, outputStream)
+            val compressedBytes = outputStream.toByteArray()
+
+            Log.d("PayBillConfirm", "Original: ${originalBitmap.width}x${originalBitmap.height}, Compressed: ${compressedBytes.size / 1024}KB")
+
+            val base64Image = Base64.encodeToString(compressedBytes, Base64.NO_WRAP)
             uploadToImgBB(base64Image)
         } catch (e: Exception) {
             Log.e("PayBillConfirm", "Error reading image", e)

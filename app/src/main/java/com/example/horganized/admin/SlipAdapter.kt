@@ -59,6 +59,15 @@ class SlipAdapter(
             holder.tvDate.text = "-"
         }
 
+        // โหลดรูปสลิปเข้า thumbnail ด้วย Glide (จำกัดขนาดป้องกัน crash)
+        if (slip.slipUrl.isNotEmpty()) {
+            Glide.with(holder.itemView.context)
+                .load(slip.slipUrl)
+                .override(256)
+                .centerCrop()
+                .into(holder.ivThumbnail)
+        }
+
         holder.btnViewSlip.setOnClickListener { onViewSlip(slip) }
         holder.btnApprove.setOnClickListener { onApprove(slip) }
         holder.btnReject.setOnClickListener { onReject(slip) }

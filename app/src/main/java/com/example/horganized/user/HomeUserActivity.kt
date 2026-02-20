@@ -64,9 +64,9 @@ class HomeUserActivity : AppCompatActivity() {
         }
         notificationIcon?.applyHoverAnimation()
 
-        // ปุ่ม "ดูและจ่ายบิล"
+        // ปุ่ม "ดูและจ่ายบิล" → ไปหน้ารายละเอียดบิลก่อน เพื่อเลือกบิลที่จะจ่าย
         findViewById<Button>(R.id.btn_view_pay_bill)?.setOnClickListener {
-            val intent = Intent(this, PayBillActivity::class.java)
+            val intent = Intent(this, DetailBillActivity::class.java)
             startActivity(intent)
             overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
         }
