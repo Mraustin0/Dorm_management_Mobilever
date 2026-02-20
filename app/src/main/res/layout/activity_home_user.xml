@@ -378,26 +378,41 @@
                     app:cardCornerRadius="16dp"
                     app:cardElevation="2dp">
 
-                    <LinearLayout
+                    <FrameLayout
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:gravity="center"
-                        android:orientation="vertical">
+                        android:layout_height="match_parent">
 
-                        <ImageView
-                            android:layout_width="32dp"
-                            android:layout_height="32dp"
-                            android:src="@drawable/ic_repair_gg"
-                            app:tint="#333333" />
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:gravity="center"
+                            android:orientation="vertical">
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="8dp"
-                            android:text="แจ้งซ่อม"
-                            android:textColor="#333333"
-                            android:textStyle="bold" />
-                    </LinearLayout>
+                            <ImageView
+                                android:layout_width="32dp"
+                                android:layout_height="32dp"
+                                android:src="@drawable/ic_repair_gg"
+                                app:tint="#333333" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="8dp"
+                                android:text="แจ้งซ่อม"
+                                android:textColor="#333333"
+                                android:textStyle="bold" />
+                        </LinearLayout>
+
+                        <!-- Red dot for repair card -->
+                        <View
+                            android:id="@+id/view_repair_dot"
+                            android:layout_width="10dp"
+                            android:layout_height="10dp"
+                            android:layout_gravity="top|end"
+                            android:layout_margin="12dp"
+                            android:background="@drawable/bg_unread_dot"
+                            android:visibility="gone" />
+                    </FrameLayout>
                 </androidx.cardview.widget.CardView>
 
                 <androidx.cardview.widget.CardView
