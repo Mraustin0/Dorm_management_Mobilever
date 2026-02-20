@@ -79,11 +79,15 @@ class RepairDetailActivity : AppCompatActivity() {
             }
         }
 
-        // จัดการรูปภาพ
+        // จัดการรูปภาพ (จำกัดขนาดป้องกัน OOM crash)
         if (repair.imageUrl.isNotEmpty()) {
             cvImage.visibility = View.VISIBLE
             tvImageLabel.visibility = View.VISIBLE
-            Glide.with(this).load(repair.imageUrl).into(ivImage)
+            Glide.with(this)
+                .load(repair.imageUrl)
+                .override(1024)
+                .error(android.R.drawable.ic_menu_report_image)
+                .into(ivImage)
         } else {
             cvImage.visibility = View.GONE
             tvImageLabel.visibility = View.GONE

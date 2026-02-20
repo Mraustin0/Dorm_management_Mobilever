@@ -2,8 +2,12 @@ package com.example.horganized.user
 
 import android.app.Activity
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
+import android.util.Base64
+import android.util.Log
 import android.view.View
 import android.widget.EditText
 import android.widget.ImageView
@@ -18,6 +22,9 @@ import com.example.horganized.R
 import com.example.horganized.model.RepairRequest
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import org.json.JSONObject
+import java.net.HttpURLConnection
+import java.net.URL
 import java.util.UUID
 
 class RepairActivity : AppCompatActivity() {
@@ -28,6 +35,10 @@ class RepairActivity : AppCompatActivity() {
     private var selectedImageUri: Uri? = null
     private var selectedRepairType: String = ""
     private var isDropdownOpen = false
+
+    companion object {
+        private const val IMGBB_API_KEY = "03c7b6aeebf7b62f78427d1d28a7a7b4"
+    }
 
     private lateinit var ivPreview: ImageView
     private lateinit var tvUploadLabel: TextView
@@ -141,6 +152,18 @@ class RepairActivity : AppCompatActivity() {
     private fun submitRepairRequest(repairType: String, description: String) {
         val userId = auth.currentUser?.uid ?: return
 
+        // ถ้ามีรูป → อัพขึ้น ImgBB ก่อน ถ้าไม่มี → ส่งเลย
+        if (selectedImageUri != null) {
+            Toast.makeText(this, "กำลังอัพโหลดรูป...", Toast.LENGTH_SHORT).show()
+            uploadToImgBB(selectedImageUri!!) { imageUrl ->
+                saveRepairToFirestore(userId, repairType, description, imageUrl)
+            }
+        } else {
+            saveRepairToFirestore(userId, repairType, description, "")
+        }
+    }
+
+    private fun saveRepairToFirestore(userId: String, repairType: String, description: String, imageUrl: String) {
         db.collection("users").document(userId).get()
             .addOnSuccessListener { userDoc ->
                 val userName = userDoc.getString("name") ?: "ไม่ระบุชื่อ"
@@ -158,7 +181,7 @@ class RepairActivity : AppCompatActivity() {
                     userPhone = userPhone,
                     repairType = repairType,
                     description = description,
-                    imageUrl = selectedImageUri?.toString() ?: "",
+                    imageUrl = imageUrl,
                     status = "pending",
                     timestamp = timestamp
                 )
@@ -175,6 +198,58 @@ class RepairActivity : AppCompatActivity() {
                         Toast.makeText(this, "เกิดข้อผิดพลาด: ${e.message}", Toast.LENGTH_SHORT).show()
                     }
             }
+    }
+
+    private fun uploadToImgBB(uri: Uri, onSuccess: (String) -> Unit) {
+        Thread {
+            try {
+                val inputStream = contentResolver.openInputStream(uri)
+                val originalBitmap = BitmapFactory.decodeStream(inputStream)
+                inputStream?.close()
+
+                if (originalBitmap == null) {
+                    runOnUiThread { Toast.makeText(this, "อ่านไฟล์รูปไม่สำเร็จ", Toast.LENGTH_SHORT).show() }
+                    return@Thread
+                }
+
+                val maxSize = 1280
+                val ratio = minOf(maxSize.toFloat() / originalBitmap.width, maxSize.toFloat() / originalBitmap.height, 1f)
+                val scaledBitmap = if (ratio < 1f) {
+                    Bitmap.createScaledBitmap(originalBitmap, (originalBitmap.width * ratio).toInt(), (originalBitmap.height * ratio).toInt(), true)
+                } else originalBitmap
+
+                val outputStream = java.io.ByteArrayOutputStream()
+                scaledBitmap.compress(Bitmap.CompressFormat.JPEG, 80, outputStream)
+                val base64Image = Base64.encodeToString(outputStream.toByteArray(), Base64.NO_WRAP)
+
+                val url = URL("https://api.imgbb.com/1/upload?key=$IMGBB_API_KEY")
+                val conn = url.openConnection() as HttpURLConnection
+                conn.requestMethod = "POST"
+                conn.doOutput = true
+
+                val postData = "image=${java.net.URLEncoder.encode(base64Image, "UTF-8")}"
+                conn.outputStream.use { it.write(postData.toByteArray()); it.flush() }
+
+                if (conn.responseCode == HttpURLConnection.HTTP_OK) {
+                    val response = conn.inputStream.bufferedReader().readText()
+                    val imageUrl = JSONObject(response).getJSONObject("data").getString("url")
+                    runOnUiThread { onSuccess(imageUrl) }
+                } else {
+                    Log.e("Repair", "ImgBB error: ${conn.errorStream?.bufferedReader()?.readText()}")
+                    runOnUiThread {
+                        Toast.makeText(this, "อัพโหลดรูปไม่สำเร็จ", Toast.LENGTH_SHORT).show()
+                        onSuccess("") // ส่งแจ้งซ่อมได้แม้ไม่มีรูป
+                    }
+                }
+                conn.disconnect()
+            } catch (e: Exception) {
+                Log.e("Repair", "Upload error", e)
+                runOnUiThread {
+                    Toast.makeText(this, "อัพโหลดรูปไม่สำเร็จ", Toast.LENGTH_SHORT).show()
+                    onSuccess("")
+                }
+            }
+        }.start()
     }
 
     private fun sendNotificationToAdmin(userName: String, roomNumber: String, repairType: String, timestamp: Long) {
