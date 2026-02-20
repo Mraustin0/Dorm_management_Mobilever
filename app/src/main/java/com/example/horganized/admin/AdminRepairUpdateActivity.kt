@@ -1,0 +1,101 @@
+package com.example.horganized.admin
+
+import android.os.Bundle
+import android.view.View
+import android.widget.ImageView
+import android.widget.TextView
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import androidx.cardview.widget.CardView
+import com.bumptech.glide.Glide
+import com.example.horganized.R
+import com.example.horganized.model.RepairRequest
+import com.google.firebase.firestore.FirebaseFirestore
+
+class AdminRepairUpdateActivity : AppCompatActivity() {
+
+    private val db = FirebaseFirestore.getInstance()
+    private var requestId: String = ""
+    private var userId: String = ""
+    private var roomNumber: String = ""
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_admin_repair_update)
+
+        requestId = intent.getStringExtra("repair_id") ?: ""
+
+        findViewById<ImageView>(R.id.btn_back).setOnClickListener { finish() }
+
+        if (requestId.isNotEmpty()) {
+            fetchRepairDetail()
+        }
+
+        findViewById<View>(R.id.btn_status_in_progress).setOnClickListener {
+            updateStatus("in_progress", "รับเรื่องแล้ว กำลังดำเนินการ")
+        }
+
+        findViewById<View>(R.id.btn_status_completed).setOnClickListener {
+            updateStatus("completed", "ซ่อมเสร็จสิ้นเรียบร้อยแล้ว")
+        }
+    }
+
+    private fun fetchRepairDetail() {
+        db.collection("repair_requests").document(requestId).get()
+            .addOnSuccessListener { document ->
+                val repair = document.toObject(RepairRequest::class.java)
+                if (repair != null) {
+                    userId = repair.userId
+                    roomNumber = repair.roomNumber
+                    
+                    findViewById<TextView>(R.id.tv_update_room).text = "ห้อง ${repair.roomNumber}"
+                    findViewById<TextView>(R.id.tv_update_user).text = "ผู้แจ้ง: ${repair.userName}"
+                    findViewById<TextView>(R.id.tv_update_type).text = repair.repairType
+                    findViewById<TextView>(R.id.tv_update_description).text = repair.description
+
+                    val ivImage = findViewById<ImageView>(R.id.iv_update_image)
+                    val cvImage = findViewById<CardView>(R.id.cv_update_image)
+                    val tvLabel = findViewById<TextView>(R.id.tv_image_label)
+
+                    if (repair.imageUrl.isNotEmpty()) {
+                        cvImage.visibility = View.VISIBLE
+                        tvLabel.visibility = View.VISIBLE
+                        Glide.with(this).load(repair.imageUrl).into(ivImage)
+                    } else {
+                        cvImage.visibility = View.GONE
+                        tvLabel.visibility = View.GONE
+                    }
+                }
+            }
+    }
+
+    private fun updateStatus(newStatus: String, message: String) {
+        db.collection("repair_requests").document(requestId)
+            .update("status", newStatus)
+            .addOnSuccessListener {
+                // ส่งแจ้งเตือนกลับหา User
+                sendNotificationToUser(message)
+                Toast.makeText(this, "อัปเดตสถานะเรียบร้อย", Toast.LENGTH_SHORT).show()
+                finish()
+            }
+            .addOnFailureListener { e ->
+                Toast.makeText(this, "ผิดพลาด: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
+    }
+
+    private fun sendNotificationToUser(message: String) {
+        if (userId.isEmpty()) return
+
+        val notifId = db.collection("notifications").document().id
+        val notification = hashMapOf(
+            "notificationId" to notifId,
+            "userId" to userId,
+            "title" to "อัปเดตการแจ้งซ่อม: ห้อง $roomNumber",
+            "message" to message,
+            "senderName" to "ADMIN1",
+            "timestamp" to System.currentTimeMillis(),
+            "isRead" to false
+        )
+        db.collection("notifications").document(notifId).set(notification)
+    }
+}

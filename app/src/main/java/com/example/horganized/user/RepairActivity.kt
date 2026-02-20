@@ -18,6 +18,7 @@ import com.example.horganized.R
 import com.example.horganized.model.RepairRequest
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
 import java.util.UUID
 
 class RepairActivity : AppCompatActivity() {
@@ -37,6 +38,7 @@ class RepairActivity : AppCompatActivity() {
     private lateinit var cvCustomType: CardView
     private lateinit var etCustomType: EditText
     private lateinit var etDescription: EditText
+    private lateinit var viewHistoryDot: View
 
     private val pickImage = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
@@ -63,6 +65,7 @@ class RepairActivity : AppCompatActivity() {
         cvCustomType = findViewById(R.id.cv_custom_type)
         etCustomType = findViewById(R.id.et_custom_type)
         etDescription = findViewById(R.id.et_description)
+        viewHistoryDot = findViewById(R.id.view_history_dot)
 
         val btnBack = findViewById<ImageView>(R.id.btn_back)
         val btnSend = findViewById<TextView>(R.id.btn_send_repair)
@@ -72,15 +75,14 @@ class RepairActivity : AppCompatActivity() {
 
         btnBack.setOnClickListener { finish() }
 
-        // เชื่อมปุ่มประวัติไปยังหน้า RepairHistoryActivity
         btnHistory.setOnClickListener {
+            // เมื่อกดเข้าดูประวัติ ให้จุดสีแดงหายไป (ถ้าต้องการ)
+            viewHistoryDot.visibility = View.GONE
             val intent = Intent(this, RepairHistoryActivity::class.java)
             startActivity(intent)
         }
 
-        rlRepairType.setOnClickListener {
-            toggleDropdown()
-        }
+        rlRepairType.setOnClickListener { toggleDropdown() }
 
         findViewById<TextView>(R.id.option_electric).setOnClickListener { selectType("ไฟฟ้า") }
         findViewById<TextView>(R.id.option_water).setOnClickListener { selectType("ประปา") }
@@ -109,6 +111,25 @@ class RepairActivity : AppCompatActivity() {
 
             submitRepairRequest(finalType, description)
         }
+
+        checkRepairStatusUpdates()
+    }
+
+    private fun checkRepairStatusUpdates() {
+        val userId = auth.currentUser?.uid ?: return
+        // ฟังการเปลี่ยนแปลงใน repair_requests ที่มี status เปลี่ยนไปจาก pending 
+        // หรือดึงแจ้งเตือนล่าสุดที่ยังไม่ได้อ่าน
+        db.collection("notifications")
+            .whereEqualTo("userId", userId)
+            .whereEqualTo("isRead", false)
+            .addSnapshotListener { snapshots, _ ->
+                if (snapshots != null) {
+                    val hasRepairUpdate = snapshots.documents.any { 
+                        it.getString("title")?.contains("แจ้งซ่อม") == true 
+                    }
+                    viewHistoryDot.visibility = if (hasRepairUpdate) View.VISIBLE else View.GONE
+                }
+            }
     }
 
     private fun toggleDropdown() {
@@ -126,13 +147,7 @@ class RepairActivity : AppCompatActivity() {
         selectedRepairType = type
         tvRepairType.text = type
         tvRepairType.setTextColor(resources.getColor(android.R.color.black, null))
-        
-        if (type == "อื่น ๆ") {
-            cvCustomType.visibility = View.VISIBLE
-        } else {
-            cvCustomType.visibility = View.GONE
-        }
-
+        if (type == "อื่น ๆ") cvCustomType.visibility = View.VISIBLE else cvCustomType.visibility = View.GONE
         isDropdownOpen = false
         layoutDropdown.visibility = View.GONE
         ivDropdownArrow.setImageResource(R.drawable.ic_chevron_down_gg)
@@ -140,54 +155,27 @@ class RepairActivity : AppCompatActivity() {
 
     private fun submitRepairRequest(repairType: String, description: String) {
         val userId = auth.currentUser?.uid ?: return
+        db.collection("users").document(userId).get().addOnSuccessListener { userDoc ->
+            val userName = userDoc.getString("name") ?: "ไม่ระบุชื่อ"
+            val roomNumber = userDoc.getString("roomNumber") ?: "ไม่ระบุห้อง"
+            val userPhone = userDoc.getString("phone") ?: ""
+            val requestId = UUID.randomUUID().toString()
+            val timestamp = System.currentTimeMillis()
 
-        db.collection("users").document(userId).get()
-            .addOnSuccessListener { userDoc ->
-                val userName = userDoc.getString("name") ?: "ไม่ระบุชื่อ"
-                val roomNumber = userDoc.getString("roomNumber") ?: "ไม่ระบุห้อง"
-                val userPhone = userDoc.getString("phone") ?: ""
+            val repairRequest = RepairRequest(requestId, userId, userName, roomNumber, userPhone, repairType, description, selectedImageUri?.toString() ?: "", "pending", timestamp)
 
-                val requestId = UUID.randomUUID().toString()
-                val timestamp = System.currentTimeMillis()
-
-                val repairRequest = RepairRequest(
-                    requestId = requestId,
-                    userId = userId,
-                    userName = userName,
-                    roomNumber = roomNumber,
-                    userPhone = userPhone,
-                    repairType = repairType,
-                    description = description,
-                    imageUrl = selectedImageUri?.toString() ?: "",
-                    status = "pending",
-                    timestamp = timestamp
-                )
-
-                db.collection("repair_requests")
-                    .document(requestId)
-                    .set(repairRequest)
-                    .addOnSuccessListener {
-                        sendNotificationToAdmin(userName, roomNumber, repairType, timestamp)
-                        Toast.makeText(this, "แจ้งซ่อมเรียบร้อยแล้ว!", Toast.LENGTH_LONG).show()
-                        finish()
-                    }
-                    .addOnFailureListener { e ->
-                        Toast.makeText(this, "เกิดข้อผิดพลาด: ${e.message}", Toast.LENGTH_SHORT).show()
-                    }
-            }
+            db.collection("repair_requests").document(requestId).set(repairRequest)
+                .addOnSuccessListener {
+                    sendNotificationToAdmin(userName, roomNumber, repairType, timestamp)
+                    Toast.makeText(this, "แจ้งซ่อมเรียบร้อยแล้ว!", Toast.LENGTH_LONG).show()
+                    finish()
+                }
+        }
     }
 
     private fun sendNotificationToAdmin(userName: String, roomNumber: String, repairType: String, timestamp: Long) {
         val notifId = db.collection("notifications").document().id
-        val notificationData = hashMapOf(
-            "notificationId" to notifId,
-            "userId" to "admin",
-            "title" to "แจ้งซ่อมใหม่: ห้อง $roomNumber",
-            "message" to "คุณ $userName แจ้งซ่อมเรื่อง $repairType",
-            "senderName" to userName,
-            "timestamp" to timestamp,
-            "isRead" to false
-        )
+        val notificationData = hashMapOf("notificationId" to notifId, "userId" to "admin", "title" to "แจ้งซ่อมใหม่: ห้อง $roomNumber", "message" to "คุณ $userName แจ้งซ่อมเรื่อง $repairType", "senderName" to userName, "timestamp" to timestamp, "isRead" to false)
         db.collection("notifications").document(notifId).set(notificationData)
     }
 }

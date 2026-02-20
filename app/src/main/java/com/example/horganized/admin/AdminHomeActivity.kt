@@ -2,6 +2,7 @@ package com.example.horganized.admin
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
@@ -10,7 +11,6 @@ import androidx.cardview.widget.CardView
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.example.horganized.R
-import com.example.horganized.user.NotificationActivity
 import com.google.firebase.firestore.FirebaseFirestore
 
 class AdminHomeActivity : AppCompatActivity() {
@@ -29,87 +29,82 @@ class AdminHomeActivity : AppCompatActivity() {
         }
 
         loadVacantRoomCount()
+        checkUnreadAdminNotifications()
 
-        // ไอคอนการแจ้งเตือน (Notifications) ดึงข้อมูลจาก Firebase
+        // ไอคอนการแจ้งเตือน (Notifications) เปิดหน้า AdminNotificationActivity
         val ivNotification = findViewById<ImageView>(R.id.iv_notification)
         ivNotification.setOnClickListener {
-            // เปิดหน้าแจ้งเตือน (ใช้ NotificationActivity ร่วมกัน หรือสร้าง AdminNotificationActivity แยกได้)
-            val intent = Intent(this, NotificationActivity::class.java)
-            intent.putExtra("IS_ADMIN", true)
+            val intent = Intent(this, AdminNotificationActivity::class.java)
             startActivity(intent)
         }
 
         // เชื่อมการ์ดห้องว่าง
-        val cvVacant = findViewById<CardView>(R.id.cv_room_vacant)
-        cvVacant.setOnClickListener {
-            val intent = Intent(this, AdminVacantRoomActivity::class.java)
-            startActivity(intent)
+        findViewById<CardView>(R.id.cv_room_vacant).setOnClickListener {
+            startActivity(Intent(this, AdminVacantRoomActivity::class.java))
         }
 
-        // เชื่อมไอคอนกลางล่าง (nav_list) ไปยังหน้าเลือกห้องพัก
-        val navSelectRoom = findViewById<ImageView>(R.id.iv_nav_apartment)
-        navSelectRoom.setOnClickListener {
-            val intent = Intent(this, AdminSelectRoomActivity::class.java)
-            startActivity(intent)
+        // เชื่อมไอคอนกลางล่างไปยังหน้าเลือกห้องพัก
+        findViewById<ImageView>(R.id.iv_nav_apartment).setOnClickListener {
+            startActivity(Intent(this, AdminSelectRoomActivity::class.java))
         }
 
-        // เชื่อมไอคอนแชท (ขวาล่าง) ไปยังหน้า Chat List
-        val navChat = findViewById<ImageView>(R.id.iv_nav_chat)
-        navChat.setOnClickListener {
-            val intent = Intent(this, ChatListActivity::class.java)
-            startActivity(intent)
+        // เชื่อมไอคอนแชท
+        findViewById<ImageView>(R.id.iv_nav_chat).setOnClickListener {
+            startActivity(Intent(this, ChatListActivity::class.java))
         }
 
         // เชื่อมปุ่มประกาศ
-        val cvAnnounce = findViewById<CardView>(R.id.cv_announce)
-        cvAnnounce.setOnClickListener {
-            val intent = Intent(this, AdminAddAnnouncementActivity::class.java)
-            startActivity(intent)
+        findViewById<CardView>(R.id.cv_announce).setOnClickListener {
+            startActivity(Intent(this, AdminAddAnnouncementActivity::class.java))
         }
 
         // เชื่อมปุ่มจดมิเตอร์
-        val cvMeter = findViewById<CardView>(R.id.cv_meter)
-        cvMeter.setOnClickListener {
-            val intent = Intent(this, AdminMeterActivity::class.java)
-            startActivity(intent)
+        findViewById<CardView>(R.id.cv_meter).setOnClickListener {
+            startActivity(Intent(this, AdminMeterActivity::class.java))
         }
 
         // เชื่อมปุ่มตรวจสอบสลิป
-        val cvCheckSlip = findViewById<CardView>(R.id.cv_check_slip)
-        cvCheckSlip.setOnClickListener {
+        findViewById<CardView>(R.id.cv_check_slip).setOnClickListener {
             val intent = Intent(this, AdminSelectRoomActivity::class.java)
             intent.putExtra("MODE", "CHECK_SLIP")
             startActivity(intent)
         }
 
-        // เชื่อมปุ่มสร้างบิล (Card 3) ไปยังหน้า AdminSelectRoomActivity
-        val cvCreateBill = findViewById<CardView>(R.id.cv_create_bill)
-        cvCreateBill.setOnClickListener {
+        // เชื่อมปุ่มสร้างบิล
+        findViewById<CardView>(R.id.cv_create_bill).setOnClickListener {
             val intent = Intent(this, AdminSelectRoomActivity::class.java)
             intent.putExtra("MODE", "CREATE_BILL")
             startActivity(intent)
         }
 
-        // เชื่อมปุ่มติดต่อช่าง
-        val cvTechnician = findViewById<CardView>(R.id.cv_technician)
-        cvTechnician.setOnClickListener {
-            val intent = Intent(this, AdminTechnicianActivity::class.java)
-            startActivity(intent)
+        // เชื่อมปุ่มแจ้งซ่อม
+        findViewById<CardView>(R.id.cv_technician).setOnClickListener {
+            startActivity(Intent(this, AdminRepairListActivity::class.java))
         }
 
-        // เชื่อมปุ่มย้ายเข้า/ออก (cv_move)
-        val cvMove = findViewById<CardView>(R.id.cv_move)
-        cvMove.setOnClickListener {
-            val intent = Intent(this, AdminMoveSelectionActivity::class.java)
-            startActivity(intent)
+        // เชื่อมปุ่มย้ายเข้า/ออก
+        findViewById<CardView>(R.id.cv_move).setOnClickListener {
+            startActivity(Intent(this, AdminMoveSelectionActivity::class.java))
         }
 
-        // เชื่อมไอคอนตั้งค่า (ขวาบน)
-        val ivSetting = findViewById<ImageView>(R.id.iv_menu)
-        ivSetting.setOnClickListener {
-            val intent = Intent(this, AdminSettingActivity::class.java)
-            startActivity(intent)
+        // เชื่อมไอคอนตั้งค่า
+        findViewById<ImageView>(R.id.iv_menu).setOnClickListener {
+            startActivity(Intent(this, AdminSettingActivity::class.java))
         }
+    }
+
+    private fun checkUnreadAdminNotifications() {
+        val viewNotifDot = findViewById<View>(R.id.view_notif_dot)
+        // ฟังรายการแจ้งเตือนจากลูกหอที่ส่งมาหาแอดมิน (คอลเลกชัน Admin_Notifications)
+        db.collection("Admin_Notifications")
+            .whereEqualTo("isRead", false)
+            .addSnapshotListener { snapshots, e ->
+                if (snapshots != null && !snapshots.isEmpty) {
+                    viewNotifDot?.visibility = View.VISIBLE
+                } else {
+                    viewNotifDot?.visibility = View.GONE
+                }
+            }
     }
 
     override fun onResume() {
@@ -119,7 +114,6 @@ class AdminHomeActivity : AppCompatActivity() {
 
     private fun loadVacantRoomCount() {
         val tvVacantCount = findViewById<TextView>(R.id.tv_vacant_count)
-
         db.collection("rooms")
             .get()
             .addOnSuccessListener { documents ->
