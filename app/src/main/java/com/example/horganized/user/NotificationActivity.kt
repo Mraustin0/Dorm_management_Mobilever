@@ -24,6 +24,7 @@ class NotificationActivity : AppCompatActivity() {
     private lateinit var tvNotifCount: TextView
     private val notificationList = mutableListOf<Notification>()
     private lateinit var adapter: NotificationAdapter
+    private var isAdmin = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,6 +32,8 @@ class NotificationActivity : AppCompatActivity() {
 
         db = FirebaseFirestore.getInstance()
         auth = FirebaseAuth.getInstance()
+
+        isAdmin = intent.getBooleanExtra("IS_ADMIN", false)
 
         val btnBack = findViewById<ImageView>(R.id.btn_back)
         rvNotifications = findViewById(R.id.rv_notifications)
@@ -47,12 +50,10 @@ class NotificationActivity : AppCompatActivity() {
         adapter = NotificationAdapter(notificationList) { position ->
             val item = notificationList[position]
             if (!item.isRead) {
-                // อัปเดตสถานะเป็นอ่านแล้วใน Firestore (ถ้ามี ID)
                 if (item.notificationId.isNotEmpty()) {
                     db.collection("notifications").document(item.notificationId)
                         .update("isRead", true)
                 }
-                
                 notificationList[position] = item.copy(isRead = true)
                 adapter.notifyItemChanged(position)
                 updateNotifCount()
@@ -63,31 +64,40 @@ class NotificationActivity : AppCompatActivity() {
     }
 
     private fun fetchNotifications() {
-        val userId = auth.currentUser?.uid ?: return
-
-        // ดึงแจ้งเตือนที่เจาะจงถึงเรา (userId) และ ประกาศทั่วไป (userId == "all")
-        db.collection("notifications")
-            .whereIn("userId", listOf(userId, "all"))
-            .orderBy("timestamp", Query.Direction.DESCENDING)
-            .addSnapshotListener { snapshots, e ->
-                if (e != null) {
-                    Log.e("NotificationActivity", "Listen failed.", e)
-                    updateEmptyState()
-                    return@addSnapshotListener
-                }
-
-                if (snapshots != null) {
-                    notificationList.clear()
-                    for (doc in snapshots) {
-                        val item = doc.toObject(Notification::class.java)
-                        notificationList.add(item)
-                    }
-
-                    adapter.notifyDataSetChanged()
-                    updateEmptyState()
-                    updateNotifCount()
-                }
+        // สร้าง Query พื้นฐานโดยไม่ใส่ OrderBy เพื่อเลี่ยงปัญหาเรื่อง Index ในช่วงแรก
+        val baseQuery = if (isAdmin) {
+            db.collection("notifications").whereEqualTo("userId", "admin")
+        } else {
+            val currentUserId = auth.currentUser?.uid ?: ""
+            if (currentUserId.isEmpty()) {
+                updateEmptyState()
+                return
             }
+            db.collection("notifications").whereIn("userId", listOf(currentUserId, "all"))
+        }
+
+        baseQuery.addSnapshotListener { snapshots, e ->
+            if (e != null) {
+                Log.e("NotificationActivity", "Error: ${e.message}")
+                updateEmptyState()
+                return@addSnapshotListener
+            }
+
+            if (snapshots != null) {
+                val items = snapshots.documents.mapNotNull { it.toObject(Notification::class.java) }
+                
+                // เรียงลำดับตาม Timestamp ในโค้ด (จากใหม่ไปเก่า)
+                val sortedItems = items.sortedByDescending { it.timestamp }
+                
+                notificationList.clear()
+                notificationList.addAll(sortedItems)
+
+                adapter.notifyDataSetChanged()
+                updateEmptyState()
+                updateNotifCount()
+                Log.d("NotificationActivity", "Data loaded: ${notificationList.size} items")
+            }
+        }
     }
 
     private fun updateEmptyState() {

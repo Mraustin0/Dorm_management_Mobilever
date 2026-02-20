@@ -34,6 +34,9 @@ class ReportRepairActivity : AppCompatActivity() {
     private lateinit var tvRepairType: TextView
     private lateinit var layoutDropdown: LinearLayout
     private lateinit var ivDropdownArrow: ImageView
+    private lateinit var cvOtherType: CardView
+    private lateinit var etOtherType: EditText
+    private lateinit var etDescription: EditText
 
     private val pickImage = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
@@ -57,39 +60,43 @@ class ReportRepairActivity : AppCompatActivity() {
         tvUploadLabel = findViewById(R.id.tv_upload_label)
         layoutDropdown = findViewById(R.id.layout_dropdown_list)
         ivDropdownArrow = findViewById(R.id.iv_dropdown_arrow)
+        cvOtherType = findViewById(R.id.cv_other_type)
+        etOtherType = findViewById(R.id.et_other_type)
+        etDescription = findViewById(R.id.et_description)
 
         val btnBack = findViewById<ImageView>(R.id.btn_back)
         val btnSubmit = findViewById<TextView>(R.id.btn_submit)
+        val btnHistory = findViewById<ImageView>(R.id.btn_history)
         val rlRepairType = findViewById<RelativeLayout>(R.id.rl_repair_type)
         val btnSelectImage = findViewById<CardView>(R.id.btn_select_image)
-        val etDescription = findViewById<EditText>(R.id.et_description)
 
         btnBack.setOnClickListener { finish() }
 
-        // Toggle dropdown
-        rlRepairType.setOnClickListener {
-            toggleDropdown()
+        // เชื่อมปุ่มประวัติไปยังหน้า RepairHistoryActivity
+        btnHistory.setOnClickListener {
+            val intent = Intent(this, RepairHistoryActivity::class.java)
+            startActivity(intent)
         }
 
-        // ตัวเลือก dropdown
+        rlRepairType.setOnClickListener { toggleDropdown() }
+
         findViewById<TextView>(R.id.option_electric).setOnClickListener { selectType("ไฟฟ้า") }
         findViewById<TextView>(R.id.option_water).setOnClickListener { selectType("ประปา") }
         findViewById<TextView>(R.id.option_internet).setOnClickListener { selectType("อินเทอร์เน็ต") }
         findViewById<TextView>(R.id.option_other).setOnClickListener { selectType("อื่น ๆ") }
 
-        // Image Picker
         btnSelectImage.setOnClickListener {
             val intent = Intent(Intent.ACTION_PICK)
             intent.type = "image/*"
             pickImage.launch(intent)
         }
 
-        // Submit
         btnSubmit.setOnClickListener {
+            val finalType = if (selectedRepairType == "อื่น ๆ") etOtherType.text.toString().trim() else selectedRepairType
             val description = etDescription.text.toString().trim()
 
-            if (selectedRepairType.isEmpty()) {
-                Toast.makeText(this, "กรุณาเลือกประเภทการแจ้งซ่อม", Toast.LENGTH_SHORT).show()
+            if (finalType.isEmpty()) {
+                Toast.makeText(this, "กรุณาระบุเรื่องที่ต้องการแจ้งซ่อม", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
@@ -98,54 +105,73 @@ class ReportRepairActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            submitRepairRequest(description)
+            submitRepairRequest(finalType, description)
         }
     }
 
     private fun toggleDropdown() {
         isDropdownOpen = !isDropdownOpen
-        if (isDropdownOpen) {
-            layoutDropdown.visibility = View.VISIBLE
-            ivDropdownArrow.setImageResource(R.drawable.ic_chevron_up_gg)
-        } else {
-            layoutDropdown.visibility = View.GONE
-            ivDropdownArrow.setImageResource(R.drawable.ic_chevron_down_gg)
-        }
+        layoutDropdown.visibility = if (isDropdownOpen) View.VISIBLE else View.GONE
+        ivDropdownArrow.setImageResource(if (isDropdownOpen) R.drawable.ic_chevron_up_gg else R.drawable.ic_chevron_down_gg)
     }
 
     private fun selectType(type: String) {
         selectedRepairType = type
         tvRepairType.text = type
         tvRepairType.setTextColor(resources.getColor(android.R.color.black, null))
-        // ปิด dropdown
+        
+        // ถ้าเลือก "อื่น ๆ" ให้แสดงช่องกรอกข้อมูล
+        cvOtherType.visibility = if (type == "อื่น ๆ") View.VISIBLE else View.GONE
+        
         isDropdownOpen = false
         layoutDropdown.visibility = View.GONE
         ivDropdownArrow.setImageResource(R.drawable.ic_chevron_down_gg)
     }
 
-    private fun submitRepairRequest(description: String) {
+    private fun submitRepairRequest(repairType: String, description: String) {
         val userId = auth.currentUser?.uid ?: return
 
-        val requestId = UUID.randomUUID().toString()
-        val repairRequest = RepairRequest(
-            requestId = requestId,
-            userId = userId,
-            repairType = selectedRepairType,
-            description = description,
-            imageUrl = selectedImageUri?.toString() ?: "",
-            status = "pending",
-            timestamp = System.currentTimeMillis()
-        )
+        // ดึงข้อมูลผู้ใช้เพื่อส่งแจ้งเตือนให้แอดมิน
+        db.collection("users").document(userId).get().addOnSuccessListener { userDoc ->
+            val userName = userDoc.getString("name") ?: "ไม่ระบุชื่อ"
+            val roomNumber = userDoc.getString("roomNumber") ?: "ไม่ระบุห้อง"
 
-        db.collection("repair_requests")
-            .document(requestId)
-            .set(repairRequest)
-            .addOnSuccessListener {
-                Toast.makeText(this, "แจ้งซ่อมเรียบร้อยแล้ว!", Toast.LENGTH_LONG).show()
-                finish()
-            }
-            .addOnFailureListener { e ->
-                Toast.makeText(this, "เกิดข้อผิดพลาด: ${e.message}", Toast.LENGTH_SHORT).show()
-            }
+            val requestId = UUID.randomUUID().toString()
+            val repairRequest = RepairRequest(
+                requestId = requestId,
+                userId = userId,
+                repairType = repairType,
+                description = description,
+                imageUrl = selectedImageUri?.toString() ?: "",
+                status = "pending",
+                timestamp = System.currentTimeMillis()
+            )
+
+            db.collection("repair_requests").document(requestId).set(repairRequest)
+                .addOnSuccessListener {
+                    // ส่ง Notification ไปหา Admin
+                    sendNotificationToAdmin(userName, roomNumber, repairType)
+                    
+                    Toast.makeText(this, "แจ้งซ่อมเรียบร้อยแล้ว!", Toast.LENGTH_LONG).show()
+                    finish()
+                }
+                .addOnFailureListener { e ->
+                    Toast.makeText(this, "เกิดข้อผิดพลาด: ${e.message}", Toast.LENGTH_SHORT).show()
+                }
+        }
+    }
+
+    private fun sendNotificationToAdmin(userName: String, roomNumber: String, type: String) {
+        val notifId = db.collection("notifications").document().id
+        val notification = hashMapOf(
+            "notificationId" to notifId,
+            "userId" to "admin", // ส่งให้กลุ่ม admin
+            "title" to "แจ้งซ่อมใหม่: ห้อง $roomNumber",
+            "message" to "คุณ $userName ได้แจ้งซ่อมเรื่อง $type",
+            "senderName" to userName,
+            "timestamp" to System.currentTimeMillis(),
+            "isRead" to false
+        )
+        db.collection("notifications").document(notifId).set(notification)
     }
 }

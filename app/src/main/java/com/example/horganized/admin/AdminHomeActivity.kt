@@ -10,6 +10,7 @@ import androidx.cardview.widget.CardView
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.example.horganized.R
+import com.example.horganized.user.NotificationActivity
 import com.google.firebase.firestore.FirebaseFirestore
 
 class AdminHomeActivity : AppCompatActivity() {
@@ -28,6 +29,15 @@ class AdminHomeActivity : AppCompatActivity() {
         }
 
         loadVacantRoomCount()
+
+        // ไอคอนการแจ้งเตือน (Notifications) ดึงข้อมูลจาก Firebase
+        val ivNotification = findViewById<ImageView>(R.id.iv_notification)
+        ivNotification.setOnClickListener {
+            // เปิดหน้าแจ้งเตือน (ใช้ NotificationActivity ร่วมกัน หรือสร้าง AdminNotificationActivity แยกได้)
+            val intent = Intent(this, NotificationActivity::class.java)
+            intent.putExtra("IS_ADMIN", true)
+            startActivity(intent)
+        }
 
         // เชื่อมการ์ดห้องว่าง
         val cvVacant = findViewById<CardView>(R.id.cv_room_vacant)
@@ -67,11 +77,12 @@ class AdminHomeActivity : AppCompatActivity() {
         // เชื่อมปุ่มตรวจสอบสลิป
         val cvCheckSlip = findViewById<CardView>(R.id.cv_check_slip)
         cvCheckSlip.setOnClickListener {
-            val intent = Intent(this, AdminCheckSlipActivity::class.java)
+            val intent = Intent(this, AdminSelectRoomActivity::class.java)
+            intent.putExtra("MODE", "CHECK_SLIP")
             startActivity(intent)
         }
 
-        // เชื่อมปุ่มสร้างบิล (Card 3) ไปยังหน้า AdminSelectRoomActivity พร้อมบอกโหมด
+        // เชื่อมปุ่มสร้างบิล (Card 3) ไปยังหน้า AdminSelectRoomActivity
         val cvCreateBill = findViewById<CardView>(R.id.cv_create_bill)
         cvCreateBill.setOnClickListener {
             val intent = Intent(this, AdminSelectRoomActivity::class.java)
@@ -86,14 +97,14 @@ class AdminHomeActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
-        // เชื่อมปุ่มย้ายเข้า/ออก (cv_move) ไปหน้า AdminMoveSelectionActivity
+        // เชื่อมปุ่มย้ายเข้า/ออก (cv_move)
         val cvMove = findViewById<CardView>(R.id.cv_move)
         cvMove.setOnClickListener {
             val intent = Intent(this, AdminMoveSelectionActivity::class.java)
             startActivity(intent)
         }
 
-        // เชื่อมไอคอนตั้งค่า (ขวาบน) ไปยังหน้า AdminSettingActivity
+        // เชื่อมไอคอนตั้งค่า (ขวาบน)
         val ivSetting = findViewById<ImageView>(R.id.iv_menu)
         ivSetting.setOnClickListener {
             val intent = Intent(this, AdminSettingActivity::class.java)

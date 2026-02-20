@@ -21,8 +21,10 @@ class UserProfileEditActivity : AppCompatActivity() {
     private lateinit var db: FirebaseFirestore
 
     private lateinit var ivProfile: ImageView
-    private lateinit var etName: EditText
+    private lateinit var etFirstName: EditText
+    private lateinit var etLastName: EditText
     private lateinit var etPhone: EditText
+    private lateinit var etEmail: EditText
     private lateinit var etRoomNumber: EditText
 
     private val pickImage = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -43,8 +45,10 @@ class UserProfileEditActivity : AppCompatActivity() {
         db = FirebaseFirestore.getInstance()
 
         ivProfile = findViewById(R.id.profile_image_edit)
-        etName = findViewById(R.id.et_name)
+        etFirstName = findViewById(R.id.et_first_name)
+        etLastName = findViewById(R.id.et_last_name)
         etPhone = findViewById(R.id.et_phone)
+        etEmail = findViewById(R.id.et_email)
         etRoomNumber = findViewById(R.id.et_room_number)
 
         // ปุ่มย้อนกลับ
@@ -81,8 +85,10 @@ class UserProfileEditActivity : AppCompatActivity() {
         db.collection("users").document(uid).get()
             .addOnSuccessListener { document ->
                 if (document != null && document.exists()) {
-                    etName.setText(document.getString("name") ?: "")
+                    etFirstName.setText(document.getString("name") ?: "")
+                    etLastName.setText(document.getString("surname") ?: "")
                     etPhone.setText(document.getString("phone") ?: "")
+                    etEmail.setText(document.getString("email") ?: "")
                     etRoomNumber.setText(document.getString("roomNumber") ?: "")
 
                     val imageUri = document.getString("profileImage")
@@ -97,17 +103,21 @@ class UserProfileEditActivity : AppCompatActivity() {
 
     private fun saveUserData() {
         val uid = auth.currentUser?.uid ?: return
-        val name = etName.text.toString().trim()
+        val firstName = etFirstName.text.toString().trim()
+        val lastName = etLastName.text.toString().trim()
         val phone = etPhone.text.toString().trim()
+        val email = etEmail.text.toString().trim()
 
-        if (name.isEmpty()) {
+        if (firstName.isEmpty()) {
             Toast.makeText(this, "กรุณากรอกชื่อ", Toast.LENGTH_SHORT).show()
             return
         }
 
         val updates = mapOf<String, Any>(
-            "name" to name,
-            "phone" to phone
+            "name" to firstName,
+            "surname" to lastName,
+            "phone" to phone,
+            "email" to email
         )
 
         db.collection("users").document(uid).update(updates)
