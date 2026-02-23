@@ -190,18 +190,39 @@ class HomeUserActivity : AppCompatActivity() {
         findViewById<TextView>(R.id.tv_other_price)?.text = String.format("%,.0f บาท", bill.details.otherPrice)
         findViewById<TextView>(R.id.tv_total_price)?.text = String.format("%,.2f บาท", bill.amount)
 
-        if (bill.isPaid) {
-            btnPay?.text = "จ่ายแล้ว"
-            btnPay?.backgroundTintList = android.content.res.ColorStateList.valueOf(
-                android.graphics.Color.parseColor("#1B9E44")
-            )
-            btnPay?.isEnabled = false
-        } else {
-            btnPay?.text = "ดูและจ่ายบิล"
-            btnPay?.backgroundTintList = android.content.res.ColorStateList.valueOf(
-                android.graphics.Color.parseColor("#E53935")
-            )
-            btnPay?.isEnabled = true
+        when {
+            bill.isPaid -> {
+                // จ่ายแล้ว (admin ยืนยัน) → สีเขียว
+                btnPay?.text = "จ่ายแล้ว"
+                btnPay?.backgroundTintList = android.content.res.ColorStateList.valueOf(
+                    android.graphics.Color.parseColor("#1B9E44")
+                )
+                btnPay?.isEnabled = false
+            }
+            bill.isPending -> {
+                // ส่งสลิปแล้ว รอ admin ยืนยัน → สีเหลืองเข้ม
+                btnPay?.text = "รอการยืนยัน"
+                btnPay?.backgroundTintList = android.content.res.ColorStateList.valueOf(
+                    android.graphics.Color.parseColor("#F9A825")
+                )
+                btnPay?.isEnabled = false
+            }
+            bill.status == "rejected" -> {
+                // admin ปฏิเสธสลิป → สีแดง ให้จ่ายใหม่
+                btnPay?.text = "สลิปถูกปฏิเสธ จ่ายใหม่"
+                btnPay?.backgroundTintList = android.content.res.ColorStateList.valueOf(
+                    android.graphics.Color.parseColor("#E53935")
+                )
+                btnPay?.isEnabled = true
+            }
+            else -> {
+                // ยังไม่จ่าย → สีแดง
+                btnPay?.text = "ดูและจ่ายบิล"
+                btnPay?.backgroundTintList = android.content.res.ColorStateList.valueOf(
+                    android.graphics.Color.parseColor("#E53935")
+                )
+                btnPay?.isEnabled = true
+            }
         }
     }
 

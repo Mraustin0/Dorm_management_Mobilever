@@ -224,40 +224,63 @@ class AdminCreateBillActivity : AppCompatActivity() {
         calendar.add(Calendar.DAY_OF_YEAR, 7)
         val dueDate = Timestamp(calendar.time)
 
-        val billData = hashMapOf(
-            "userId" to tenantId,
-            "roomNumber" to roomNumber,
-            "amount" to totalAmount,
-            "month" to currentMonth,
-            "year" to currentYear,
-            "status" to "pending",
-            "dueDate" to dueDate,
-            "createdAt" to FieldValue.serverTimestamp(),
-            "details" to hashMapOf(
-                "roomPrice" to tvRoomPrice.text.toString().replace(Regex("[^0-9]"), "").toDoubleOrNull(),
-                "electricPrice" to tvElecTotal.text.toString().replace(Regex("[^0-9]"), "").toDoubleOrNull(),
-                "electricUnit" to tvElecUnits.text.toString().replace("= ", "").replace(" * ", ""),
-                "waterPrice" to tvWaterTotal.text.toString().replace(Regex("[^0-9]"), "").toDoubleOrNull(),
-                "otherPrice" to (etAdditional.text.toString().toDoubleOrNull() ?: 0.0) + dynamicItemPrices.values.sum().toDouble()
-            )
-        )
+        // ตรวจสอบว่ามีบิลเดือน/ปีเดียวกันอยู่แล้วหรือไม่
+        db.collection("bills")
+            .whereEqualTo("userId", tenantId)
+            .whereEqualTo("month", currentMonth)
+            .whereEqualTo("year", currentYear)
+            .get()
+            .addOnSuccessListener { existingBills ->
+                if (!existingBills.isEmpty) {
+                    // มีบิลซ้ำ → แจ้งเตือน ไม่ให้สร้าง
+                    AlertDialog.Builder(this)
+                        .setTitle("ไม่สามารถสร้างบิลได้")
+                        .setMessage("ห้อง $roomNumber มีบิลประจำเดือน $currentMonth $currentYear อยู่แล้ว\nไม่สามารถสร้างบิลซ้ำได้")
+                        .setPositiveButton("ตกลง", null)
+                        .show()
+                    return@addOnSuccessListener
+                }
 
-        db.collection("bills").add(billData).addOnSuccessListener {
-            // สร้างการแจ้งเตือนส่งให้ User
-            val notifId = db.collection("notifications").document().id
-            val notification = hashMapOf(
-                "notificationId" to notifId,
-                "userId" to tenantId,
-                "title" to "บิลค่าเช่าใหม่",
-                "message" to "แอดมินได้ส่งบิลประจำเดือน $currentMonth $currentYear ให้คุณแล้ว กรุณาชำระเงินภายในวันที่ ${SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(dueDate.toDate())}",
-                "senderName" to "ADMIN1",
-                "timestamp" to System.currentTimeMillis(),
-                "isRead" to false
-            )
-            db.collection("notifications").document(notifId).set(notification)
-            
-            Toast.makeText(this, "ส่งบิลเรียบร้อยแล้ว", Toast.LENGTH_SHORT).show()
-            finish()
-        }
+                // ไม่ซ้ำ → สร้างบิลได้
+                val billData = hashMapOf(
+                    "userId" to tenantId,
+                    "roomNumber" to roomNumber,
+                    "amount" to totalAmount,
+                    "month" to currentMonth,
+                    "year" to currentYear,
+                    "status" to "unpaid",
+                    "dueDate" to dueDate,
+                    "createdAt" to FieldValue.serverTimestamp(),
+                    "details" to hashMapOf(
+                        "roomPrice" to tvRoomPrice.text.toString().replace(Regex("[^0-9]"), "").toDoubleOrNull(),
+                        "electricPrice" to tvElecTotal.text.toString().replace(Regex("[^0-9]"), "").toDoubleOrNull(),
+                        "electricUnit" to tvElecUnits.text.toString().replace("= ", "").replace(" * ", ""),
+                        "waterPrice" to tvWaterTotal.text.toString().replace(Regex("[^0-9]"), "").toDoubleOrNull(),
+                        "otherPrice" to (etAdditional.text.toString().toDoubleOrNull() ?: 0.0) + dynamicItemPrices.values.sum().toDouble()
+                    )
+                )
+
+                db.collection("bills").add(billData).addOnSuccessListener {
+                    // สร้างการแจ้งเตือนส่งให้ User
+                    val notifId = db.collection("notifications").document().id
+                    val notification = hashMapOf(
+                        "notificationId" to notifId,
+                        "userId" to tenantId,
+                        "title" to "บิลค่าเช่าใหม่",
+                        "message" to "แอดมินได้ส่งบิลประจำเดือน $currentMonth $currentYear ให้คุณแล้ว กรุณาชำระเงินภายในวันที่ ${SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(dueDate.toDate())}",
+                        "senderName" to "ADMIN1",
+                        "timestamp" to System.currentTimeMillis(),
+                        "isRead" to false
+                    )
+                    db.collection("notifications").document(notifId).set(notification)
+
+                    Toast.makeText(this, "ส่งบิลเรียบร้อยแล้ว", Toast.LENGTH_SHORT).show()
+                    finish()
+                }
+            }
+            .addOnFailureListener { e ->
+                Log.e("AdminCreateBill", "Error checking duplicate bill", e)
+                Toast.makeText(this, "เกิดข้อผิดพลาด: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
     }
 }

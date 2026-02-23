@@ -63,11 +63,9 @@ class AdminHomeActivity : AppCompatActivity() {
             startActivity(Intent(this, AdminMeterActivity::class.java))
         }
 
-        // เชื่อมปุ่มตรวจสอบสลิป
+        // เชื่อมปุ่มตรวจสอบสลิป → ไปหน้าตรวจสลิปโดยตรง (ไม่ต้องเลือกห้อง)
         findViewById<CardView>(R.id.cv_check_slip).setOnClickListener {
-            val intent = Intent(this, AdminSelectRoomActivity::class.java)
-            intent.putExtra("MODE", "CHECK_SLIP")
-            startActivity(intent)
+            startActivity(Intent(this, AdminCheckSlipActivity::class.java))
         }
 
         // เชื่อมปุ่มสร้างบิล

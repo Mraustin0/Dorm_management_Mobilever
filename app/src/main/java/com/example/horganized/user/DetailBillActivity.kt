@@ -126,30 +126,68 @@ class DetailBillActivity : AppCompatActivity() {
         if (bill.dueDate != null) {
             val sdf = SimpleDateFormat("d MMM yyyy", Locale("th", "TH"))
             val dueDateStr = sdf.format(bill.dueDate.toDate())
-            if (bill.isPaid) {
-                tvDue.text = "ชำระแล้ว"
-                tvDue.setTextColor(resources.getColor(android.R.color.holo_green_dark, null))
-            } else {
-                tvDue.text = "เกินกำหนดชำระ $dueDateStr"
+            when {
+                bill.isPaid -> {
+                    tvDue.text = "ชำระแล้ว"
+                    tvDue.setTextColor(resources.getColor(android.R.color.holo_green_dark, null))
+                }
+                bill.isPending -> {
+                    tvDue.text = "รอ admin ยืนยัน"
+                    tvDue.setTextColor(resources.getColor(android.R.color.holo_orange_dark, null))
+                }
+                bill.status == "rejected" -> {
+                    tvDue.text = "สลิปถูกปฏิเสธ กรุณาจ่ายใหม่"
+                    tvDue.setTextColor(resources.getColor(android.R.color.holo_red_dark, null))
+                }
+                else -> {
+                    tvDue.text = "กำหนดชำระ $dueDateStr"
+                }
             }
         }
 
         // Pay button
-        if (bill.isPaid) {
-            btnPay.text = "จ่ายแล้ว"
-            btnPay.backgroundTintList = android.content.res.ColorStateList.valueOf(
-                android.graphics.Color.parseColor("#1B9E44")
-            )
-            btnPay.isEnabled = false
-        } else {
-            btnPay.text = "จ่ายเลย"
-            btnPay.setOnClickListener {
-                val payIntent = Intent(this, PayBillActivity::class.java)
-                payIntent.putExtra("BILL_ID", billId)
-                payIntent.putExtra("BILL_AMOUNT", bill.amount)
-                payIntent.putExtra("BILL_MONTH", bill.month)
-                startActivity(payIntent)
-                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
+        when {
+            bill.isPaid -> {
+                btnPay.text = "จ่ายแล้ว"
+                btnPay.backgroundTintList = android.content.res.ColorStateList.valueOf(
+                    android.graphics.Color.parseColor("#1B9E44")
+                )
+                btnPay.isEnabled = false
+            }
+            bill.isPending -> {
+                // ส่งสลิปแล้ว รอ admin ยืนยัน → สีเหลืองเข้ม
+                btnPay.text = "รอการยืนยัน"
+                btnPay.backgroundTintList = android.content.res.ColorStateList.valueOf(
+                    android.graphics.Color.parseColor("#F9A825")
+                )
+                btnPay.isEnabled = false
+            }
+            bill.status == "rejected" -> {
+                // admin ปฏิเสธสลิป → สีแดง ให้จ่ายใหม่
+                btnPay.text = "สลิปถูกปฏิเสธ จ่ายใหม่"
+                btnPay.backgroundTintList = android.content.res.ColorStateList.valueOf(
+                    android.graphics.Color.parseColor("#E53935")
+                )
+                btnPay.setOnClickListener {
+                    val payIntent = Intent(this, PayBillActivity::class.java)
+                    payIntent.putExtra("BILL_ID", billId)
+                    payIntent.putExtra("BILL_AMOUNT", bill.amount)
+                    payIntent.putExtra("BILL_MONTH", bill.month)
+                    startActivity(payIntent)
+                    overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
+                }
+            }
+            else -> {
+                // ยังไม่จ่าย → สีแดง
+                btnPay.text = "จ่ายเลย"
+                btnPay.setOnClickListener {
+                    val payIntent = Intent(this, PayBillActivity::class.java)
+                    payIntent.putExtra("BILL_ID", billId)
+                    payIntent.putExtra("BILL_AMOUNT", bill.amount)
+                    payIntent.putExtra("BILL_MONTH", bill.month)
+                    startActivity(payIntent)
+                    overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
+                }
             }
         }
 

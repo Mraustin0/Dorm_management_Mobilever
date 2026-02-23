@@ -257,10 +257,37 @@ class AdminCheckSlipActivity : AppCompatActivity() {
             .setTitle("ยืนยันการชำระเงิน")
             .setMessage("ยืนยันว่าห้อง ${slip.roomNumber} ชำระ ${String.format("%,.0f", slip.amount)} บาท เรียบร้อยแล้ว?")
             .setPositiveButton("ยืนยัน") { _, _ ->
-                db.collection("bills").document(slip.billId)
-                    .update("status", "paid")
-                    .addOnSuccessListener {
-                        Toast.makeText(this, "ยืนยันการชำระเงินเรียบร้อย", Toast.LENGTH_SHORT).show()
+                // ดึง userId จาก bill ก่อน แล้วค่อย update
+                db.collection("bills").document(slip.billId).get()
+                    .addOnSuccessListener { doc ->
+                        val userId = doc.getString("userId") ?: ""
+
+                        // 1. อัปเดต status ใน bill → paid
+                        db.collection("bills").document(slip.billId)
+                            .update("status", "paid")
+                            .addOnSuccessListener {
+                                Toast.makeText(this, "ยืนยันการชำระเงินเรียบร้อย", Toast.LENGTH_SHORT).show()
+
+                                // 2. เพิ่ม notification แจ้ง user (ถ้ามี userId จริง)
+                                if (userId.isNotEmpty()) {
+                                    val notification = hashMapOf(
+                                        "userId"     to userId,
+                                        "title"      to "ยืนยันการชำระเงินแล้ว",
+                                        "message"    to "ห้อง ${slip.roomNumber} ยอด ${String.format("%,.0f", slip.amount)} บาท ได้รับการยืนยันจาก admin เรียบร้อยแล้ว",
+                                        "type"       to "payment_approved",
+                                        "roomNumber" to slip.roomNumber,
+                                        "isRead"     to false,
+                                        "timestamp"  to Timestamp.now()
+                                    )
+                                    db.collection("notifications").add(notification)
+                                        .addOnFailureListener { e ->
+                                            Log.e("CheckSlip", "Failed to send notification: ${e.message}")
+                                        }
+                                }
+                            }
+                            .addOnFailureListener { e ->
+                                Toast.makeText(this, "เกิดข้อผิดพลาด: ${e.message}", Toast.LENGTH_SHORT).show()
+                            }
                     }
                     .addOnFailureListener { e ->
                         Toast.makeText(this, "เกิดข้อผิดพลาด: ${e.message}", Toast.LENGTH_SHORT).show()
@@ -275,10 +302,37 @@ class AdminCheckSlipActivity : AppCompatActivity() {
             .setTitle("ปฏิเสธสลิป")
             .setMessage("ปฏิเสธสลิปของห้อง ${slip.roomNumber}?")
             .setPositiveButton("ปฏิเสธ") { _, _ ->
-                db.collection("bills").document(slip.billId)
-                    .update("status", "rejected")
-                    .addOnSuccessListener {
-                        Toast.makeText(this, "ปฏิเสธสลิปเรียบร้อย", Toast.LENGTH_SHORT).show()
+                // ดึง userId จาก bill ก่อน แล้วค่อย update
+                db.collection("bills").document(slip.billId).get()
+                    .addOnSuccessListener { doc ->
+                        val userId = doc.getString("userId") ?: ""
+
+                        // 1. อัปเดต status ใน bill → rejected
+                        db.collection("bills").document(slip.billId)
+                            .update("status", "rejected")
+                            .addOnSuccessListener {
+                                Toast.makeText(this, "ปฏิเสธสลิปเรียบร้อย", Toast.LENGTH_SHORT).show()
+
+                                // 2. เพิ่ม notification แจ้ง user (ถ้ามี userId จริง)
+                                if (userId.isNotEmpty()) {
+                                    val notification = hashMapOf(
+                                        "userId"     to userId,
+                                        "title"      to "สลิปถูกปฏิเสธ",
+                                        "message"    to "ห้อง ${slip.roomNumber} สลิปการชำระเงิน ${String.format("%,.0f", slip.amount)} บาท ถูกปฏิเสธ กรุณาส่งสลิปใหม่อีกครั้ง",
+                                        "type"       to "payment_rejected",
+                                        "roomNumber" to slip.roomNumber,
+                                        "isRead"     to false,
+                                        "timestamp"  to Timestamp.now()
+                                    )
+                                    db.collection("notifications").add(notification)
+                                        .addOnFailureListener { e ->
+                                            Log.e("CheckSlip", "Failed to send notification: ${e.message}")
+                                        }
+                                }
+                            }
+                            .addOnFailureListener { e ->
+                                Toast.makeText(this, "เกิดข้อผิดพลาด: ${e.message}", Toast.LENGTH_SHORT).show()
+                            }
                     }
                     .addOnFailureListener { e ->
                         Toast.makeText(this, "เกิดข้อผิดพลาด: ${e.message}", Toast.LENGTH_SHORT).show()
