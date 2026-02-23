@@ -238,12 +238,12 @@ class AdminCreateBillActivity : AppCompatActivity() {
                 "electricPrice" to tvElecTotal.text.toString().replace(Regex("[^0-9]"), "").toDoubleOrNull(),
                 "electricUnit" to tvElecUnits.text.toString().replace("= ", "").replace(" * ", ""),
                 "waterPrice" to tvWaterTotal.text.toString().replace(Regex("[^0-9]"), "").toDoubleOrNull(),
-                "waterUnit" to tvWaterUnits.text.toString().replace("= ", "").replace(" * ", ""),
                 "otherPrice" to (etAdditional.text.toString().toDoubleOrNull() ?: 0.0) + dynamicItemPrices.values.sum().toDouble()
             )
         )
 
         db.collection("bills").add(billData).addOnSuccessListener {
+            // สร้างการแจ้งเตือนส่งให้ User
             val notifId = db.collection("notifications").document().id
             val notification = hashMapOf(
                 "notificationId" to notifId,

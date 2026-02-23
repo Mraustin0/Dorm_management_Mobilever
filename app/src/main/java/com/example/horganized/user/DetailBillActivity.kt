@@ -74,33 +74,19 @@ class DetailBillActivity : AppCompatActivity() {
                 billsContainer.removeAllViews()
 
                 val billDocs = snapshots.documents
-                val allBills = billDocs.mapNotNull { it.toObject(Bill::class.java) }
-                val allBillIds = billDocs.map { it.id }
+                val bills = billDocs.mapNotNull { it.toObject(Bill::class.java) }
+                val billIds = billDocs.map { it.id }
 
                 val layoutNoBill = findViewById<View>(R.id.layout_no_bill)
-                
-                if (allBills.isEmpty()) {
+                if (bills.isEmpty()) {
                     layoutNoBill?.visibility = View.VISIBLE
                     billsContainer.visibility = View.GONE
                 } else {
                     layoutNoBill?.visibility = View.GONE
                     billsContainer.visibility = View.VISIBLE
-
-                    val filteredBills = mutableListOf<Pair<Bill, String>>()
-                    val seenMonthYear = mutableSetOf<String>()
-
-                    for (i in allBills.indices) {
-                        val bill = allBills[i]
-                        val key = "${bill.month}_${bill.year}"
-                        if (!seenMonthYear.contains(key)) {
-                            filteredBills.add(Pair(bill, allBillIds[i]))
-                            seenMonthYear.add(key)
-                        }
-                    }
-
-                    filteredBills.forEachIndexed { index, pair ->
+                    bills.forEachIndexed { index, bill ->
                         val isLatest = index == 0
-                        addBillCard(pair.first, pair.second, isLatest)
+                        addBillCard(bill, billIds[index], isLatest)
                     }
                 }
             }
@@ -119,19 +105,24 @@ class DetailBillActivity : AppCompatActivity() {
         val tvDue = cardView.findViewById<TextView>(R.id.tv_bill_due)
         val btnPay = cardView.findViewById<Button>(R.id.btn_pay)
 
-        // Usage details views
+        // Usage details
         val tvRoomPrice = cardView.findViewById<TextView>(R.id.tv_room_price)
         val tvElectricPrice = cardView.findViewById<TextView>(R.id.tv_electric_price)
         val tvWaterPrice = cardView.findViewById<TextView>(R.id.tv_water_price)
         val tvOtherPrice = cardView.findViewById<TextView>(R.id.tv_other_price)
         val tvTotalPrice = cardView.findViewById<TextView>(R.id.tv_total_price)
 
+        // Month title
         val monthName = bill.month.ifEmpty { "ไม่ระบุ" }
-        val yearName = bill.year.ifEmpty { "" }
-        tvMonthTitle.text = "บิลประจำเดือน $monthName $yearName"
+        tvMonthTitle.text = "บิลประจำเดือน $monthName"
+
+        // Subtitle
         tvSubtitle.text = "ยอดค่าบริการ เดือน$monthName"
+
+        // Amount
         tvAmount.text = String.format("%,.2f บาท", bill.amount)
 
+        // Due date
         if (bill.dueDate != null) {
             val sdf = SimpleDateFormat("d MMM yyyy", Locale("th", "TH"))
             val dueDateStr = sdf.format(bill.dueDate.toDate())
@@ -143,9 +134,12 @@ class DetailBillActivity : AppCompatActivity() {
             }
         }
 
+        // Pay button
         if (bill.isPaid) {
             btnPay.text = "จ่ายแล้ว"
-            btnPay.backgroundTintList = android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#1B9E44"))
+            btnPay.backgroundTintList = android.content.res.ColorStateList.valueOf(
+                android.graphics.Color.parseColor("#1B9E44")
+            )
             btnPay.isEnabled = false
         } else {
             btnPay.text = "จ่ายเลย"
@@ -159,14 +153,14 @@ class DetailBillActivity : AppCompatActivity() {
             }
         }
 
-        // แสดงรายละเอียดการใช้งานพร้อมหน่วย
+        // Usage details
         tvRoomPrice.text = String.format("%,.0f บาท", bill.details.roomPrice)
-        tvElectricPrice.text = "${bill.details.electricUnit} หน่วย = ${String.format("%,.0f", bill.details.electricPrice)} บาท"
-        // เพิ่มการแสดงหน่วยค่าน้ำ
-        tvWaterPrice.text = "${bill.details.waterUnit} หน่วย = ${String.format("%,.0f", bill.details.waterPrice)} บาท"
+        tvElectricPrice.text = "${bill.details.electricUnit} = ${String.format("%,.0f", bill.details.electricPrice)} บาท"
+        tvWaterPrice.text = String.format("%,.0f บาท", bill.details.waterPrice)
         tvOtherPrice.text = String.format("%,.0f บาท", bill.details.otherPrice)
-        tvTotalPrice.text = String.format("%,.2f บาท", bill.amount)
+        tvTotalPrice.text = String.format("%,.0f บาท", bill.amount)
 
+        // Latest bill: expanded, others: collapsed
         if (isLatest) {
             layoutContent.visibility = View.VISIBLE
             ivChevron.setImageResource(R.drawable.ic_chevron_up_gg)
@@ -175,6 +169,7 @@ class DetailBillActivity : AppCompatActivity() {
             ivChevron.setImageResource(R.drawable.ic_chevron_down_gg)
         }
 
+        // Toggle
         btnToggle.setOnClickListener {
             if (layoutContent.visibility == View.VISIBLE) {
                 layoutContent.visibility = View.GONE
@@ -195,17 +190,20 @@ class DetailBillActivity : AppCompatActivity() {
             when (item.itemId) {
                 R.id.navigation_home -> {
                     startActivity(Intent(this, HomeUserActivity::class.java))
+                    overridePendingTransition(0, 0)
                     finish()
                     true
                 }
                 R.id.navigation_bill -> true
                 R.id.navigation_notifications -> {
                     startActivity(Intent(this, DormInfoActivity::class.java))
+                    overridePendingTransition(0, 0)
                     finish()
                     true
                 }
                 R.id.navigation_chat -> {
                     startActivity(Intent(this, ChatActivity::class.java))
+                    overridePendingTransition(0, 0)
                     finish()
                     true
                 }

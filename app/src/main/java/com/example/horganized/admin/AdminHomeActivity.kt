@@ -28,87 +28,81 @@ class AdminHomeActivity : AppCompatActivity() {
             insets
         }
 
-        setupClickListeners()
         loadVacantRoomCount()
-        
-        // 1. ดึงข้อมูลแบบ Real-time เพื่อแสดงจุดแจ้งเตือน
-        checkUnreadGeneralNotifications()
-        checkNewRepairRequests()
-    }
+        checkUnreadAdminNotifications()
 
-    private fun setupClickListeners() {
-        // ไอคอนการแจ้งเตือนรวม
-        findViewById<ImageView>(R.id.iv_notification).setOnClickListener {
-            startActivity(Intent(this, AdminNotificationActivity::class.java))
+        // ไอคอนการแจ้งเตือน (Notifications) เปิดหน้า AdminNotificationActivity
+        val ivNotification = findViewById<ImageView>(R.id.iv_notification)
+        ivNotification.setOnClickListener {
+            val intent = Intent(this, AdminNotificationActivity::class.java)
+            startActivity(intent)
         }
 
-        // 4. Logic การลบ Dot (เมื่อคลิกการ์ดแจ้งซ่อม)
-        findViewById<CardView>(R.id.cv_technician).setOnClickListener {
-            markRepairRequestsAsRead()
-            startActivity(Intent(this, AdminRepairListActivity::class.java))
-        }
-
-        // เมนูอื่นๆ
+        // เชื่อมการ์ดห้องว่าง
         findViewById<CardView>(R.id.cv_room_vacant).setOnClickListener {
             startActivity(Intent(this, AdminVacantRoomActivity::class.java))
         }
+
+        // เชื่อมไอคอนกลางล่างไปยังหน้าเลือกห้องพัก
         findViewById<ImageView>(R.id.iv_nav_apartment).setOnClickListener {
             startActivity(Intent(this, AdminSelectRoomActivity::class.java))
         }
+
+        // เชื่อมไอคอนแชท
         findViewById<ImageView>(R.id.iv_nav_chat).setOnClickListener {
             startActivity(Intent(this, ChatListActivity::class.java))
         }
+
+        // เชื่อมปุ่มประกาศ
         findViewById<CardView>(R.id.cv_announce).setOnClickListener {
             startActivity(Intent(this, AdminAddAnnouncementActivity::class.java))
         }
+
+        // เชื่อมปุ่มจดมิเตอร์
         findViewById<CardView>(R.id.cv_meter).setOnClickListener {
             startActivity(Intent(this, AdminMeterActivity::class.java))
         }
+
+        // เชื่อมปุ่มตรวจสอบสลิป
         findViewById<CardView>(R.id.cv_check_slip).setOnClickListener {
-            startActivity(Intent(this, AdminSelectRoomActivity::class.java).apply { putExtra("MODE", "CHECK_SLIP") })
+            val intent = Intent(this, AdminSelectRoomActivity::class.java)
+            intent.putExtra("MODE", "CHECK_SLIP")
+            startActivity(intent)
         }
+
+        // เชื่อมปุ่มสร้างบิล
         findViewById<CardView>(R.id.cv_create_bill).setOnClickListener {
-            startActivity(Intent(this, AdminSelectRoomActivity::class.java).apply { putExtra("MODE", "CREATE_BILL") })
+            val intent = Intent(this, AdminSelectRoomActivity::class.java)
+            intent.putExtra("MODE", "CREATE_BILL")
+            startActivity(intent)
         }
+
+        // เชื่อมปุ่มแจ้งซ่อม
+        findViewById<CardView>(R.id.cv_technician).setOnClickListener {
+            startActivity(Intent(this, AdminRepairListActivity::class.java))
+        }
+
+        // เชื่อมปุ่มย้ายเข้า/ออก
         findViewById<CardView>(R.id.cv_move).setOnClickListener {
             startActivity(Intent(this, AdminMoveSelectionActivity::class.java))
         }
+
+        // เชื่อมไอคอนตั้งค่า
         findViewById<ImageView>(R.id.iv_menu).setOnClickListener {
             startActivity(Intent(this, AdminSettingActivity::class.java))
         }
     }
 
-    private fun checkUnreadGeneralNotifications() {
+    private fun checkUnreadAdminNotifications() {
         val viewNotifDot = findViewById<View>(R.id.view_notif_dot)
+        // ฟังรายการแจ้งเตือนจากลูกหอที่ส่งมาหาแอดมิน (คอลเลกชัน Admin_Notifications)
         db.collection("Admin_Notifications")
             .whereEqualTo("isRead", false)
-            .addSnapshotListener { snapshots, _ ->
-                viewNotifDot?.visibility = if (snapshots != null && !snapshots.isEmpty) View.VISIBLE else View.GONE
-            }
-    }
-
-    // 2 & 3. นับจำนวน Unread และควบคุมการแสดงผล Dot สำหรับแจ้งซ่อม
-    private fun checkNewRepairRequests() {
-        val viewRepairDot = findViewById<View>(R.id.view_repair_card_dot)
-        db.collection("repair_requests")
-            .whereEqualTo("isRead", false) // กรองเฉพาะที่ยังไม่ได้อ่าน
             .addSnapshotListener { snapshots, e ->
                 if (snapshots != null && !snapshots.isEmpty) {
-                    viewRepairDot?.visibility = View.VISIBLE
+                    viewNotifDot?.visibility = View.VISIBLE
                 } else {
-                    viewRepairDot?.visibility = View.GONE
-                }
-            }
-    }
-
-    // Logic การอัปเดตสถานะเป็นอ่านแล้ว
-    private fun markRepairRequestsAsRead() {
-        db.collection("repair_requests")
-            .whereEqualTo("isRead", false)
-            .get()
-            .addOnSuccessListener { documents ->
-                for (doc in documents) {
-                    db.collection("repair_requests").document(doc.id).update("isRead", true)
+                    viewNotifDot?.visibility = View.GONE
                 }
             }
     }
@@ -120,11 +114,18 @@ class AdminHomeActivity : AppCompatActivity() {
 
     private fun loadVacantRoomCount() {
         val tvVacantCount = findViewById<TextView>(R.id.tv_vacant_count)
-        db.collection("rooms").get().addOnSuccessListener { documents ->
-            if (tvVacantCount == null) return@addOnSuccessListener
-            val total = documents.size()
-            val vacant = documents.count { it.getBoolean("isVacant") ?: true }
-            tvVacantCount.text = "$vacant/$total"
-        }
+        db.collection("rooms")
+            .get()
+            .addOnSuccessListener { documents ->
+                if (tvVacantCount == null) return@addOnSuccessListener
+                val totalRooms = documents.size()
+                val vacantRooms = documents.count { doc ->
+                    doc.getBoolean("isVacant") ?: true
+                }
+                tvVacantCount.text = "$vacantRooms/$totalRooms"
+            }
+            .addOnFailureListener {
+                tvVacantCount?.text = "--/--"
+            }
     }
 }

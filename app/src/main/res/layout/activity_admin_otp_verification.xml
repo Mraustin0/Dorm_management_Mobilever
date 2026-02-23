@@ -23,10 +23,10 @@
         android:id="@+id/tv_title_otp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="100dp"
-        android:text="OTP Verification"
+        android:layout_marginTop="120dp"
+        android:text="ลืมรหัสผ่าน"
         android:textColor="@color/black"
-        android:textSize="24sp"
+        android:textSize="26sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -34,94 +34,84 @@
 
     <TextView
         android:id="@+id/tv_subtitle_otp"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:text="Enter OTP sent to phakawat@outlook.com"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginEnd="32dp"
+        android:gravity="center"
+        android:text="กรอกอีเมลที่ใช้สมัคร\nระบบจะส่งลิงก์รีเซ็ตรหัสผ่านให้ทางอีเมล"
         android:textColor="@color/gray_text"
-        android:textSize="16sp"
+        android:textSize="15sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tv_title_otp" />
 
-    <!-- OTP Input Boxes -->
+    <!-- Email Input -->
     <LinearLayout
-        android:id="@+id/ll_otp_inputs"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="48dp"
+        android:id="@+id/ll_email_input"
+        android:layout_width="0dp"
+        android:layout_height="56dp"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="40dp"
+        android:layout_marginEnd="32dp"
+        android:background="@drawable/edittext_background"
+        android:gravity="center_vertical"
         android:orientation="horizontal"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:elevation="2dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tv_subtitle_otp">
 
-        <EditText
-            android:layout_width="45dp"
-            android:layout_height="55dp"
-            android:layout_margin="8dp"
-            android:background="@drawable/edittext_background"
-            android:gravity="center"
-            android:inputType="number"
-            android:maxLength="1"
-            android:textSize="20sp" />
+        <ImageView
+            android:layout_width="22dp"
+            android:layout_height="22dp"
+            android:src="@drawable/ic_person" />
 
         <EditText
-            android:layout_width="45dp"
-            android:layout_height="55dp"
-            android:layout_margin="8dp"
-            android:background="@drawable/edittext_background"
-            android:gravity="center"
-            android:inputType="number"
-            android:maxLength="1"
-            android:textSize="20sp" />
-
-        <EditText
-            android:layout_width="45dp"
-            android:layout_height="55dp"
-            android:layout_margin="8dp"
-            android:background="@drawable/edittext_background"
-            android:gravity="center"
-            android:inputType="number"
-            android:maxLength="1"
-            android:textSize="20sp" />
-
-        <EditText
-            android:layout_width="45dp"
-            android:layout_height="55dp"
-            android:layout_margin="8dp"
-            android:background="@drawable/edittext_background"
-            android:gravity="center"
-            android:inputType="number"
-            android:maxLength="1"
-            android:textSize="20sp" />
+            android:id="@+id/et_reset_email"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginStart="12dp"
+            android:background="@android:color/transparent"
+            android:hint="กรอกอีเมลของคุณ"
+            android:inputType="textEmailAddress"
+            android:textColor="@color/black"
+            android:textColorHint="@color/gray_text"
+            android:textSize="15sp" />
     </LinearLayout>
 
+    <!-- Send Button -->
     <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/btn_verify_otp"
         android:layout_width="0dp"
         android:layout_height="56dp"
         android:layout_marginStart="32dp"
+        android:layout_marginTop="24dp"
         android:layout_marginEnd="32dp"
-        android:layout_marginBottom="100dp"
         android:background="@drawable/button_background"
         android:backgroundTint="#2D5496"
-        android:text="Verify"
+        android:text="ส่งลิงก์รีเซ็ตรหัสผ่าน"
         android:textAllCaps="false"
         android:textColor="@color/white"
-        android:textSize="18sp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:textSize="16sp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/ll_email_input" />
 
+    <!-- Status text -->
     <TextView
         android:id="@+id/tv_resend"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:text="Resend again"
+        android:layout_marginTop="12dp"
+        android:text=""
         android:textColor="#7B5CFF"
         android:textSize="14sp"
-        app:layout_constraintEnd_toEndOf="@id/btn_verify_otp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/btn_verify_otp" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
