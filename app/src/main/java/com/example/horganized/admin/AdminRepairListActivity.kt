@@ -32,12 +32,20 @@ class AdminRepairListActivity : AppCompatActivity() {
         
         findViewById<ImageView>(R.id.btn_back).setOnClickListener { finish() }
         findViewById<ImageView>(R.id.btn_tech_contacts).setOnClickListener {
-            // ไปหน้าเบอร์โทรช่างเดิม
             startActivity(Intent(this, AdminTechnicianActivity::class.java))
         }
 
         rvRepairList.layoutManager = LinearLayoutManager(this)
         adapter = AdminRepairAdapter(repairList) { item ->
+            // เมื่อกดที่รายการ เปลี่ยนสถานะเป็นอ่านแล้วใน Firebase
+            if (!item.isRead) {
+                db.collection("repair_requests").document(item.requestId)
+                    .update("isRead", true)
+                    .addOnSuccessListener {
+                        Log.d("AdminRepair", "Marked as read: ${item.requestId}")
+                    }
+            }
+
             val intent = Intent(this, AdminRepairUpdateActivity::class.java)
             intent.putExtra("repair_id", item.requestId)
             startActivity(intent)

@@ -5,7 +5,8 @@ data class BillDetails(
     val electricUnit: String = "",
     val otherPrice: Double = 0.0,
     val roomPrice: Double = 0.0,
-    val waterPrice: Double = 0.0
+    val waterPrice: Double = 0.0,
+    val waterUnit: String = ""
 )
 
 data class Bill(
@@ -14,6 +15,7 @@ data class Bill(
     val details: BillDetails = BillDetails(),
     val dueDate: com.google.firebase.Timestamp? = null,
     val month: String = "",
+    val year: String = "",
     val status: String = "",
     val slipUrl: String = "",
     val paymentDate: com.google.firebase.Timestamp? = null,

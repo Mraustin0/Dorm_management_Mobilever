@@ -10,5 +10,6 @@ data class RepairRequest(
     val description: String = "",
     val imageUrl: String = "",
     val status: String = "pending", // pending, in_progress, completed
-    val timestamp: Long = 0
+    val timestamp: Long = 0,
+    val isRead: Boolean = true // default as true for old data, new ones from user should be false
 )
