@@ -14,10 +14,12 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.example.horganized.R
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 
 class AdminOtpVerificationActivity : AppCompatActivity() {
 
     private lateinit var auth: FirebaseAuth
+    private lateinit var db: FirebaseFirestore
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,6 +33,7 @@ class AdminOtpVerificationActivity : AppCompatActivity() {
         }
 
         auth = FirebaseAuth.getInstance()
+        db = FirebaseFirestore.getInstance()
 
         val etEmail = findViewById<EditText>(R.id.et_reset_email)
         val btnSend = findViewById<AppCompatButton>(R.id.btn_verify_otp)
@@ -61,34 +64,49 @@ class AdminOtpVerificationActivity : AppCompatActivity() {
 
             // disable ปุ่มกัน spam กด
             btnSend.isEnabled = false
-            btnSend.text = "กำลังส่ง..."
+            btnSend.text = "กำลังตรวจสอบ..."
             tvStatus.visibility = View.GONE
 
-            auth.sendPasswordResetEmail(email)
-                .addOnSuccessListener {
-                    tvStatus.text = "✓ ส่งลิงก์รีเซ็ตรหัสผ่านไปที่ $email แล้ว\nกรุณาตรวจสอบกล่องจดหมาย"
-                    tvStatus.setTextColor(0xFF1B9E44.toInt())
-                    tvStatus.visibility = View.VISIBLE
-                    btnSend.text = "ส่งอีกครั้ง"
-                    btnSend.isEnabled = true
-                    Toast.makeText(this, "ส่ง email รีเซ็ตรหัสผ่านเรียบร้อย", Toast.LENGTH_LONG).show()
+            // Step 1: เช็คว่า email นี้มีอยู่ใน Firestore (collection "users") ก่อน
+            db.collection("users")
+                .whereEqualTo("email", email)
+                .get()
+                .addOnSuccessListener { snapshot ->
+                    if (snapshot.isEmpty) {
+                        // ไม่พบ email นี้ในระบบ
+                        btnSend.text = "ส่งลิงก์รีเซ็ตรหัสผ่าน"
+                        btnSend.isEnabled = true
+                        tvStatus.text = "✗ ไม่พบอีเมลนี้ในระบบ"
+                        tvStatus.setTextColor(0xFFE53935.toInt())
+                        tvStatus.visibility = View.VISIBLE
+                        return@addOnSuccessListener
+                    }
+
+                    // Step 2: พบใน Firestore → ส่ง reset email ได้เลย
+                    btnSend.text = "กำลังส่ง..."
+                    auth.sendPasswordResetEmail(email)
+                        .addOnSuccessListener {
+                            tvStatus.text = "✓ ส่งลิงก์รีเซ็ตรหัสผ่านไปที่ $email แล้ว\nกรุณาตรวจสอบกล่องจดหมาย"
+                            tvStatus.setTextColor(0xFF1B9E44.toInt())
+                            tvStatus.visibility = View.VISIBLE
+                            btnSend.text = "ส่งอีกครั้ง"
+                            btnSend.isEnabled = true
+                        }
+                        .addOnFailureListener { e ->
+                            btnSend.text = "ส่งลิงก์รีเซ็ตรหัสผ่าน"
+                            btnSend.isEnabled = true
+                            val msg = when {
+                                e.message?.contains("network") == true ->
+                                    "ไม่มีการเชื่อมต่ออินเทอร์เน็ต"
+                                else -> "เกิดข้อผิดพลาด: ${e.message}"
+                            }
+                            Toast.makeText(this, msg, Toast.LENGTH_LONG).show()
+                        }
                 }
                 .addOnFailureListener { e ->
                     btnSend.text = "ส่งลิงก์รีเซ็ตรหัสผ่าน"
                     btnSend.isEnabled = true
-
-                    val msg = when {
-                        e.message?.contains("no user record") == true ||
-                        e.message?.contains("user-not-found") == true ->
-                            "ไม่พบบัญชีที่ใช้อีเมลนี้"
-                        e.message?.contains("badly formatted") == true ||
-                        e.message?.contains("invalid-email") == true ->
-                            "รูปแบบอีเมลไม่ถูกต้อง"
-                        e.message?.contains("network") == true ->
-                            "ไม่มีการเชื่อมต่ออินเทอร์เน็ต"
-                        else -> "เกิดข้อผิดพลาด: ${e.message}"
-                    }
-                    Toast.makeText(this, msg, Toast.LENGTH_LONG).show()
+                    Toast.makeText(this, "เกิดข้อผิดพลาด: ${e.message}", Toast.LENGTH_LONG).show()
                 }
         }
     }
