@@ -14,12 +14,27 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.horganized.R
+import com.google.firebase.Timestamp
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
-data class ChatMessage(val roomName: String, val lastMessage: String, val time: String)
+data class ChatRoom(
+    val chatRoomId: String = "",
+    val userName: String = "",
+    val roomNumber: String = "",
+    val lastMessage: String = "",
+    val lastTimestamp: Timestamp? = null
+)
 
 class ChatListActivity : AppCompatActivity() {
 
+    private val db = FirebaseFirestore.getInstance()
     private lateinit var rvChatList: RecyclerView
+    private val chatRooms = mutableListOf<ChatRoom>()
+    private lateinit var adapter: ChatRoomAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,8 +48,38 @@ class ChatListActivity : AppCompatActivity() {
         }
 
         rvChatList = findViewById(R.id.rv_chat_list)
-        setupRecyclerView()
+        adapter = ChatRoomAdapter(chatRooms) { room ->
+            val intent = Intent(this, ChatDetailActivity::class.java)
+            intent.putExtra("CHAT_ROOM_ID", room.chatRoomId)
+            intent.putExtra("ROOM_NAME", "ห้อง ${room.roomNumber}")
+            intent.putExtra("USER_NAME", room.userName)
+            startActivity(intent)
+        }
+        rvChatList.layoutManager = LinearLayoutManager(this)
+        rvChatList.adapter = adapter
+
+        listenChatRooms()
         setupBottomNavigation()
+    }
+
+    private fun listenChatRooms() {
+        db.collection("chats")
+            .orderBy("lastTimestamp", Query.Direction.DESCENDING)
+            .addSnapshotListener { snapshots, error ->
+                if (error != null || snapshots == null) return@addSnapshotListener
+
+                chatRooms.clear()
+                chatRooms.addAll(snapshots.documents.mapNotNull { doc ->
+                    ChatRoom(
+                        chatRoomId    = doc.id,
+                        userName      = doc.getString("userName") ?: "",
+                        roomNumber    = doc.getString("roomNumber") ?: "",
+                        lastMessage   = doc.getString("lastMessage") ?: "",
+                        lastTimestamp = doc.getTimestamp("lastTimestamp")
+                    )
+                })
+                adapter.notifyDataSetChanged()
+            }
     }
 
     private fun setupBottomNavigation() {
@@ -48,51 +93,42 @@ class ChatListActivity : AppCompatActivity() {
         }
 
         navApartment.setOnClickListener {
-            val intent = Intent(this, AdminSelectRoomActivity::class.java)
-            startActivity(intent)
-        }
-    }
-
-    private fun setupRecyclerView() {
-        val chatList = listOf(
-            ChatMessage("ห้อง 101", "สอบถามเรื่องค่าน้ำครับ", "10:30"),
-            ChatMessage("ห้อง 204", "แจ้งซ่อมไฟทางเดินครับ", "09:15"),
-            ChatMessage("ห้อง 302", "จ่ายค่าเช่าแล้วครับ ส่งสลิปในแอป", "Yesterday"),
-            ChatMessage("ห้อง 105", "ขอบคุณมากค่ะ", "Yesterday"),
-            ChatMessage("ห้อง 410", "มีพัสดุมาส่งไหมครับ?", "Monday")
-        )
-
-        rvChatList.layoutManager = LinearLayoutManager(this)
-        rvChatList.adapter = ChatAdapter(chatList) { chat ->
-            // เมื่อกดที่รายการแชท ให้เปิดหน้า Chat Detail
-            val intent = Intent(this, ChatDetailActivity::class.java)
-            intent.putExtra("ROOM_NAME", chat.roomName)
-            startActivity(intent)
+            startActivity(Intent(this, AdminSelectRoomActivity::class.java))
         }
     }
 }
 
-class ChatAdapter(private val chats: List<ChatMessage>, private val onItemClick: (ChatMessage) -> Unit) :
-    RecyclerView.Adapter<ChatAdapter.ChatViewHolder>() {
+class ChatRoomAdapter(
+    private val rooms: List<ChatRoom>,
+    private val onClick: (ChatRoom) -> Unit
+) : RecyclerView.Adapter<ChatRoomAdapter.VH>() {
 
-    class ChatViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+    class VH(view: View) : RecyclerView.ViewHolder(view) {
         val tvRoomName: TextView = view.findViewById(R.id.tv_chat_room_name)
-        val tvLastMessage: TextView = view.findViewById(R.id.tv_last_message)
-        val tvTime: TextView = view.findViewById(R.id.tv_chat_time)
+        val tvLastMsg: TextView  = view.findViewById(R.id.tv_last_message)
+        val tvTime: TextView     = view.findViewById(R.id.tv_chat_time)
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ChatViewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_chat, parent, false)
-        return ChatViewHolder(view)
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
+        VH(LayoutInflater.from(parent.context).inflate(R.layout.item_chat, parent, false))
+
+    override fun onBindViewHolder(holder: VH, position: Int) {
+        val room = rooms[position]
+        holder.tvRoomName.text = "ห้อง ${room.roomNumber}  ${room.userName}"
+        holder.tvLastMsg.text  = room.lastMessage.ifEmpty { "ยังไม่มีข้อความ" }
+        holder.tvTime.text     = room.lastTimestamp?.toDate()?.let { formatTime(it) } ?: ""
+        holder.itemView.setOnClickListener { onClick(room) }
     }
 
-    override fun onBindViewHolder(holder: ChatViewHolder, position: Int) {
-        val chat = chats[position]
-        holder.tvRoomName.text = chat.roomName
-        holder.tvLastMessage.text = chat.lastMessage
-        holder.tvTime.text = chat.time
-        holder.itemView.setOnClickListener { onItemClick(chat) }
-    }
+    override fun getItemCount() = rooms.size
 
-    override fun getItemCount() = chats.size
+    private fun formatTime(date: Date): String {
+        val now = Date()
+        val diff = now.time - date.time
+        return when {
+            diff < 60 * 60 * 1000 -> SimpleDateFormat("HH:mm", Locale.getDefault()).format(date)
+            diff < 24 * 60 * 60 * 1000 -> SimpleDateFormat("HH:mm", Locale.getDefault()).format(date)
+            else -> SimpleDateFormat("d MMM", Locale("th")).format(date)
+        }
+    }
 }

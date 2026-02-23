@@ -2,18 +2,133 @@ package com.example.horganized.user
 
 import android.content.Intent
 import android.os.Bundle
+import android.widget.EditText
+import android.widget.ImageView
+import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.horganized.R
+import com.example.horganized.model.ChatMessage
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.firebase.Timestamp
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
 
 class ChatActivity : AppCompatActivity() {
+
+    private val auth = FirebaseAuth.getInstance()
+    private val db = FirebaseFirestore.getInstance()
+
+    private lateinit var rvChat: RecyclerView
+    private lateinit var etMessage: EditText
+    private lateinit var btnSend: ImageView
+    private lateinit var tvBanner: TextView
+
+    private val messages = mutableListOf<ChatMessage>()
+    private lateinit var chatAdapter: ChatAdapter
+
+    // chatRoomId = uid ของ user เอง
+    private val chatRoomId get() = auth.currentUser?.uid ?: ""
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_chat)
 
+        rvChat = findViewById(R.id.rv_chat)
+        etMessage = findViewById(R.id.et_chat_message)
+        btnSend = findViewById(R.id.btn_send_chat)
+        tvBanner = findViewById(R.id.room_banner)
+
+        chatAdapter = ChatAdapter(messages)
+        rvChat.layoutManager = LinearLayoutManager(this).apply { stackFromEnd = true }
+        rvChat.adapter = chatAdapter
+
+        loadUserInfo()
+        listenMessages()
+
+        btnSend.setOnClickListener {
+            sendMessage()
+        }
+
+        setupBottomNavigation()
+    }
+
+    private fun loadUserInfo() {
+        val uid = auth.currentUser?.uid ?: return
+        db.collection("users").document(uid).get()
+            .addOnSuccessListener { doc ->
+                val name = doc.getString("name") ?: ""
+                val room = doc.getString("roomNumber") ?: ""
+                tvBanner.text = "📢 ห้อง $room  คุณ $name"
+
+                // สร้าง/อัปเดต chat room document ไว้ให้ admin เห็นใน list
+                db.collection("chats").document(chatRoomId)
+                    .set(mapOf(
+                        "userId"      to uid,
+                        "userName"    to name,
+                        "roomNumber"  to room,
+                        "lastMessage" to "",
+                        "lastTimestamp" to Timestamp.now()
+                    ), com.google.firebase.firestore.SetOptions.merge())
+            }
+    }
+
+    private fun listenMessages() {
+        if (chatRoomId.isEmpty()) return
+
+        db.collection("chats").document(chatRoomId)
+            .collection("messages")
+            .orderBy("timestamp", Query.Direction.ASCENDING)
+            .addSnapshotListener { snapshots, error ->
+                if (error != null || snapshots == null) return@addSnapshotListener
+
+                messages.clear()
+                messages.addAll(snapshots.documents.mapNotNull { it.toObject(ChatMessage::class.java) })
+                chatAdapter.notifyDataSetChanged()
+
+                // scroll ไปล่างสุดเสมอ
+                if (messages.isNotEmpty()) {
+                    rvChat.scrollToPosition(messages.size - 1)
+                }
+            }
+    }
+
+    private fun sendMessage() {
+        val text = etMessage.text.toString().trim()
+        if (text.isEmpty()) return
+        if (chatRoomId.isEmpty()) {
+            Toast.makeText(this, "กรุณา login ก่อน", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val message = hashMapOf(
+            "senderId"  to chatRoomId,
+            "message"   to text,
+            "timestamp" to Timestamp.now()
+        )
+
+        // เพิ่ม message ใน subcollection
+        db.collection("chats").document(chatRoomId)
+            .collection("messages").add(message)
+            .addOnSuccessListener {
+                etMessage.setText("")
+                // อัปเดต lastMessage บน chat room doc เพื่อให้ admin list แสดงผล
+                db.collection("chats").document(chatRoomId)
+                    .update(mapOf(
+                        "lastMessage"   to text,
+                        "lastTimestamp" to Timestamp.now()
+                    ))
+            }
+            .addOnFailureListener {
+                Toast.makeText(this, "ส่งข้อความไม่สำเร็จ", Toast.LENGTH_SHORT).show()
+            }
+    }
+
+    private fun setupBottomNavigation() {
         val bottomNav = findViewById<BottomNavigationView>(R.id.bottom_nav)
-        
-        // กำหนดให้ไอคอนแชทสว่างขึ้น
         bottomNav.selectedItemId = R.id.navigation_chat
 
         bottomNav.setOnItemSelectedListener { item ->

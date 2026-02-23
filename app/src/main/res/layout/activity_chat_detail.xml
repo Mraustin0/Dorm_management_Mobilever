@@ -112,8 +112,18 @@
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 
-    <!-- Chat Messages Scroll -->
+    <!-- Chat RecyclerView (real-time) -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv_chat_detail"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:padding="8dp"
+        app:layout_constraintBottom_toTopOf="@id/layout_input"
+        app:layout_constraintTop_toBottomOf="@id/cv_banner" />
+
+    <!-- Chat Messages Scroll (hidden) -->
     <ScrollView
+        android:visibility="gone"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_marginBottom="8dp"
@@ -256,7 +266,8 @@
                 android:layout_marginStart="12dp"
                 android:layout_weight="1"
                 android:background="@android:color/transparent"
-                android:hint="พิมพ์ข้อความ..."
+                android:id="@+id/et_chat_detail_message"
+            android:hint="พิมพ์ข้อความ..."
                 android:textSize="14sp" />
 
             <ImageView
@@ -269,6 +280,7 @@
             <ImageView
                 android:layout_width="24dp"
                 android:layout_height="24dp"
+                android:id="@+id/btn_send_chat_detail"
                 android:src="@drawable/ic_chat"
                 app:tint="@color/black" />
         </LinearLayout>

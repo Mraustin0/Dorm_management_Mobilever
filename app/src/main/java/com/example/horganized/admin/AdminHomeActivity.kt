@@ -50,7 +50,9 @@ class AdminHomeActivity : AppCompatActivity() {
 
         // เชื่อมไอคอนแชท
         findViewById<ImageView>(R.id.iv_nav_chat).setOnClickListener {
-            startActivity(Intent(this, ChatListActivity::class.java))
+            val chatIntent = Intent(this, AdminSelectRoomActivity::class.java)
+            chatIntent.putExtra("MODE", "CHAT")
+            startActivity(chatIntent)
         }
 
         // เชื่อมปุ่มประกาศ
