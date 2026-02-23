@@ -4,7 +4,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.example.horganized.R
 import com.example.horganized.model.RepairRequest
@@ -21,6 +20,7 @@ class AdminRepairAdapter(
         val tvType: TextView = view.findViewById(R.id.tv_repair_type)
         val tvTime: TextView = view.findViewById(R.id.tv_repair_time)
         val tvStatus: TextView = view.findViewById(R.id.tv_repair_status)
+        val viewUnreadDot: View = view.findViewById(R.id.view_item_unread_dot)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -36,21 +36,24 @@ class AdminRepairAdapter(
         val sdf = SimpleDateFormat("dd MMM yyyy, HH:mm", Locale("th", "TH"))
         holder.tvTime.text = sdf.format(Date(item.timestamp))
 
+        // แสดงจุดแดงถ้ายังไม่อ่าน
+        holder.viewUnreadDot.visibility = if (item.isRead) View.GONE else View.VISIBLE
+
         // จัดการสถานะและสี
         when (item.status) {
             "pending" -> {
                 holder.tvStatus.text = "รอดำเนินการ"
-                holder.tvStatus.setTextColor(0xFFE53935.toInt()) // แดง
+                holder.tvStatus.setTextColor(0xFFE53935.toInt())
                 holder.tvStatus.setBackgroundColor(0xFFFFEBEB.toInt())
             }
             "in_progress" -> {
                 holder.tvStatus.text = "กำลังดำเนินการ"
-                holder.tvStatus.setTextColor(0xFFFB8C00.toInt()) // ส้ม
+                holder.tvStatus.setTextColor(0xFFFB8C00.toInt())
                 holder.tvStatus.setBackgroundColor(0xFFFFF3E0.toInt())
             }
             "completed" -> {
                 holder.tvStatus.text = "เสร็จสิ้น"
-                holder.tvStatus.setTextColor(0xFF43A047.toInt()) // เขียว
+                holder.tvStatus.setTextColor(0xFF43A047.toInt())
                 holder.tvStatus.setBackgroundColor(0xFFE8F5E9.toInt())
             }
         }

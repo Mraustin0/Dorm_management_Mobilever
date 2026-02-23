@@ -68,7 +68,6 @@
             android:layout_height="28dp"
             android:src="@drawable/ic_bell_gg" />
 
-        <!-- Red dot for notification -->
         <View
             android:id="@+id/view_notif_dot"
             android:layout_width="8dp"
@@ -88,7 +87,6 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@id/iv_admin_profile" />
 
-    <!-- Grid Menu -->
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -101,7 +99,6 @@
             android:columnCount="2"
             android:padding="8dp">
 
-            <!-- Card 1: ห้องว่าง -->
             <androidx.cardview.widget.CardView
                 android:id="@+id/cv_room_vacant"
                 android:layout_width="0dp"
@@ -110,37 +107,17 @@
                 android:layout_margin="8dp"
                 app:cardCornerRadius="16dp"
                 app:cardElevation="4dp">
-
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:gravity="center"
                     android:orientation="vertical">
-
-                    <ImageView
-                        android:layout_width="40dp"
-                        android:layout_height="40dp"
-                        android:src="@drawable/ic_door" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:text="ห้องว่าง"
-                        android:textColor="@color/black"
-                        android:textSize="16sp" />
-
-                    <TextView
-                        android:id="@+id/tv_vacant_count"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="--/--"
-                        android:textColor="@color/gray_text"
-                        android:textSize="12sp" />
+                    <ImageView android:layout_width="40dp" android:layout_height="40dp" android:src="@drawable/ic_door" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:text="ห้องว่าง" android:textColor="@color/black" android:textSize="16sp" />
+                    <TextView android:id="@+id/tv_vacant_count" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="--/--" android:textColor="@color/gray_text" android:textSize="12sp" />
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
-            <!-- Card 2: สแกนรับพัสดุ -->
             <androidx.cardview.widget.CardView
                 android:id="@+id/cv_scan"
                 android:layout_width="0dp"
@@ -149,29 +126,16 @@
                 android:layout_margin="8dp"
                 app:cardCornerRadius="16dp"
                 app:cardElevation="4dp">
-
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:gravity="center"
                     android:orientation="vertical">
-
-                    <ImageView
-                        android:layout_width="40dp"
-                        android:layout_height="40dp"
-                        android:src="@drawable/ic_scan" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:text="สแกนรับพัสดุ"
-                        android:textColor="@color/black"
-                        android:textSize="16sp" />
+                    <ImageView android:layout_width="40dp" android:layout_height="40dp" android:src="@drawable/ic_scan" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:text="สแกนรับพัสดุ" android:textColor="@color/black" android:textSize="16sp" />
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
-            <!-- Card 3: สร้างบิล -->
             <androidx.cardview.widget.CardView
                 android:id="@+id/cv_create_bill"
                 android:layout_width="0dp"
@@ -180,29 +144,16 @@
                 android:layout_margin="8dp"
                 app:cardCornerRadius="16dp"
                 app:cardElevation="4dp">
-
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:gravity="center"
                     android:orientation="vertical">
-
-                    <ImageView
-                        android:layout_width="40dp"
-                        android:layout_height="40dp"
-                        android:src="@drawable/ic_person" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:text="สร้างบิล"
-                        android:textColor="@color/black"
-                        android:textSize="16sp" />
+                    <ImageView android:layout_width="40dp" android:layout_height="40dp" android:src="@drawable/ic_person" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:text="สร้างบิล" android:textColor="@color/black" android:textSize="16sp" />
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
-            <!-- Card 4: ตรวจสอบสลิป -->
             <androidx.cardview.widget.CardView
                 android:id="@+id/cv_check_slip"
                 android:layout_width="0dp"
@@ -211,29 +162,16 @@
                 android:layout_margin="8dp"
                 app:cardCornerRadius="16dp"
                 app:cardElevation="4dp">
-
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:gravity="center"
                     android:orientation="vertical">
-
-                    <ImageView
-                        android:layout_width="40dp"
-                        android:layout_height="40dp"
-                        android:src="@drawable/ic_person" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:text="ตรวจสอบสลิป"
-                        android:textColor="@color/black"
-                        android:textSize="16sp" />
+                    <ImageView android:layout_width="40dp" android:layout_height="40dp" android:src="@drawable/ic_person" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:text="ตรวจสอบสลิป" android:textColor="@color/black" android:textSize="16sp" />
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
-            <!-- Card 5: จดมิเตอร์ -->
             <androidx.cardview.widget.CardView
                 android:id="@+id/cv_meter"
                 android:layout_width="0dp"
@@ -242,29 +180,16 @@
                 android:layout_margin="8dp"
                 app:cardCornerRadius="16dp"
                 app:cardElevation="4dp">
-
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:gravity="center"
                     android:orientation="vertical">
-
-                    <ImageView
-                        android:layout_width="40dp"
-                        android:layout_height="40dp"
-                        android:src="@drawable/ic_lock" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:text="จดมิเตอร์"
-                        android:textColor="@color/black"
-                        android:textSize="16sp" />
+                    <ImageView android:layout_width="40dp" android:layout_height="40dp" android:src="@drawable/ic_lock" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:text="จดมิเตอร์" android:textColor="@color/black" android:textSize="16sp" />
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
-            <!-- Card 6: แจ้งซ่อม -->
             <androidx.cardview.widget.CardView
                 android:id="@+id/cv_technician"
                 android:layout_width="0dp"
@@ -273,29 +198,26 @@
                 android:layout_margin="8dp"
                 app:cardCornerRadius="16dp"
                 app:cardElevation="4dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:gravity="center"
-                    android:orientation="vertical">
-
-                    <ImageView
-                        android:layout_width="40dp"
-                        android:layout_height="40dp"
-                        android:src="@drawable/ic_person" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:text="แจ้งซ่อม"
-                        android:textColor="@color/black"
-                        android:textSize="16sp" />
-                </LinearLayout>
+                <FrameLayout android:layout_width="match_parent" android:layout_height="match_parent">
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:orientation="vertical">
+                        <ImageView android:layout_width="40dp" android:layout_height="40dp" android:src="@drawable/ic_person" />
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:text="แจ้งซ่อม" android:textColor="@color/black" android:textSize="16sp" />
+                    </LinearLayout>
+                    <View
+                        android:id="@+id/view_repair_card_dot"
+                        android:layout_width="10dp"
+                        android:layout_height="10dp"
+                        android:layout_gravity="top|end"
+                        android:layout_margin="12dp"
+                        android:background="@drawable/bg_unread_dot"
+                        android:visibility="gone" />
+                </FrameLayout>
             </androidx.cardview.widget.CardView>
 
-            <!-- Card 7: ประกาศ -->
             <androidx.cardview.widget.CardView
                 android:id="@+id/cv_announce"
                 android:layout_width="0dp"
@@ -304,29 +226,16 @@
                 android:layout_margin="8dp"
                 app:cardCornerRadius="16dp"
                 app:cardElevation="4dp">
-
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:gravity="center"
                     android:orientation="vertical">
-
-                    <ImageView
-                        android:layout_width="40dp"
-                        android:layout_height="40dp"
-                        android:src="@drawable/ic_megaphone" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:text="ประกาศ"
-                        android:textColor="@color/black"
-                        android:textSize="16sp" />
+                    <ImageView android:layout_width="40dp" android:layout_height="40dp" android:src="@drawable/ic_megaphone" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:text="ประกาศ" android:textColor="@color/black" android:textSize="16sp" />
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
-            <!-- Card 8: ย้ายเข้า/ออก -->
             <androidx.cardview.widget.CardView
                 android:id="@+id/cv_move"
                 android:layout_width="0dp"
@@ -335,32 +244,19 @@
                 android:layout_margin="8dp"
                 app:cardCornerRadius="16dp"
                 app:cardElevation="4dp">
-
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:gravity="center"
                     android:orientation="vertical">
-
-                    <ImageView
-                        android:layout_width="40dp"
-                        android:layout_height="40dp"
-                        android:src="@drawable/ic_plus" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:text="ย้ายเข้า/ออก"
-                        android:textColor="@color/black"
-                        android:textSize="16sp" />
+                    <ImageView android:layout_width="40dp" android:layout_height="40dp" android:src="@drawable/ic_plus" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:text="ย้ายเข้า/ออก" android:textColor="@color/black" android:textSize="16sp" />
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
         </GridLayout>
     </androidx.core.widget.NestedScrollView>
 
-    <!-- Bottom Navigation Mock -->
     <LinearLayout
         android:id="@+id/bottom_navigation"
         android:layout_width="match_parent"
@@ -368,33 +264,9 @@
         android:background="@color/white"
         android:orientation="horizontal"
         app:layout_constraintBottom_toBottomOf="parent">
-
-        <ImageView
-            android:id="@+id/iv_sav_home"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:padding="16dp"
-            android:src="@drawable/ic_home"
-            app:tint="@color/blue_primary" />
-
-        <ImageView
-            android:id="@+id/iv_nav_apartment"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:padding="16dp"
-            android:src="@drawable/ic_list"
-            app:tint="@color/gray_text" />
-
-        <ImageView
-            android:id="@+id/iv_nav_chat"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:padding="18dp"
-            android:src="@drawable/ic_chat"
-            app:tint="@color/gray_text" />
+        <ImageView android:id="@+id/iv_sav_home" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:padding="16dp" android:src="@drawable/ic_home" app:tint="@color/blue_primary" />
+        <ImageView android:id="@+id/iv_nav_apartment" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:padding="16dp" android:src="@drawable/ic_list" app:tint="@color/gray_text" />
+        <ImageView android:id="@+id/iv_nav_chat" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:padding="18dp" android:src="@drawable/ic_chat" app:tint="@color/gray_text" />
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

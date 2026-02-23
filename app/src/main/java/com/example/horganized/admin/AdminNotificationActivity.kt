@@ -37,16 +37,23 @@ class AdminNotificationActivity : AppCompatActivity() {
 
         recyclerView.layoutManager = LinearLayoutManager(this)
         
-        // แก้ไข: เพิ่ม lambda สำหรับ onItemClick เพื่อแก้บัค No value passed for parameter
         adapter = AdminNotificationAdapter(notificationList) { item ->
-            // เมื่อกดที่แจ้งเตือน (สามารถเพิ่ม logic การทำงานต่อได้ที่นี่)
-            Log.d("AdminNotif", "Clicked on: ${item.message}")
+            // แก้ไข: ตรวจสอบ notificationId และอัปเดต Firebase
+            if (!item.isRead && item.notificationId.isNotEmpty()) {
+                db.collection("Admin_Notifications").document(item.notificationId)
+                    .update("isRead", true)
+                    .addOnSuccessListener {
+                        Log.d("AdminNotif", "Successfully marked as read")
+                    }
+                    .addOnFailureListener { e ->
+                        Log.e("AdminNotif", "Error marking as read", e)
+                    }
+            }
         }
         recyclerView.adapter = adapter
     }
 
     private fun fetchNotifications() {
-        // ดึงข้อมูลจากคอลเลกชัน Admin_Notifications ตามที่ระบุ
         db.collection("Admin_Notifications")
             .orderBy("timestamp", Query.Direction.DESCENDING)
             .addSnapshotListener { snapshots, e ->
@@ -59,7 +66,8 @@ class AdminNotificationActivity : AppCompatActivity() {
                 if (snapshots != null && !snapshots.isEmpty) {
                     for (doc in snapshots) {
                         val item = doc.toObject(AdminNotification::class.java)
-                        notificationList.add(item)
+                        // สำคัญ: ต้องเก็บ ID ของ Document ไว้เพื่อใช้อัปเดตตอนกดอ่าน
+                        notificationList.add(item.copy(notificationId = doc.id))
                     }
                     llEmptyState.visibility = View.GONE
                     recyclerView.visibility = View.VISIBLE
