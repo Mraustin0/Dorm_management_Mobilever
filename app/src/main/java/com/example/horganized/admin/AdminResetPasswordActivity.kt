@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatButton
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.example.horganized.LoginActivity
 import com.example.horganized.R
 
 class AdminResetPasswordActivity : AppCompatActivity() {
@@ -31,7 +32,7 @@ class AdminResetPasswordActivity : AppCompatActivity() {
             Toast.makeText(this, "เปลี่ยนรหัสผ่านเรียบร้อยแล้ว", Toast.LENGTH_SHORT).show()
             
             // กลับไปยังหน้า Login และเคลียร์หน้าจอที่ค้างอยู่ทั้งหมด
-            val intent = Intent(this, AdminLoginActivity::class.java)
+            val intent = Intent(this, LoginActivity::class.java)
             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
             startActivity(intent)
             finish()

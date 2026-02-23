@@ -7,8 +7,10 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.EditText
 import android.widget.RelativeLayout
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.example.horganized.admin.AdminOtpVerificationActivity
 import com.example.horganized.user.HomeUserActivity
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthException
@@ -45,46 +47,23 @@ class LoginActivity : AppCompatActivity() {
         val etEmail = findViewById<EditText>(R.id.et_email)
         val etPassword = findViewById<EditText>(R.id.et_password)
         val btnLogin = findViewById<RelativeLayout>(R.id.btn_login_submit_custom)
+        val tvForgot = findViewById<TextView>(R.id.tv_forgot_password)
 
         btnLogin.setOnClickListener {
             val email = etEmail.text.toString().trim()
             val password = etPassword.text.toString().trim()
-
-            // บัญชี Mock สำหรับทดสอบหน้าจอ
-            if (email == "tin" && password == "1234") {
-                Toast.makeText(this, "Mock Login Success", Toast.LENGTH_SHORT).show()
-                startActivity(Intent(this, HomeUserActivity::class.java))
-                finish()
-                return@setOnClickListener
-            }
 
             if (email.isEmpty() || password.isEmpty()) {
                 Toast.makeText(this, "กรุณากรอกอีเมลและรหัสผ่าน", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
-            // เช็ค network ก่อน login
             if (!isNetworkAvailable()) {
                 Toast.makeText(this, "ไม่มีการเชื่อมต่ออินเทอร์เน็ต กรุณาเชื่อมต่อแล้วลองใหม่", Toast.LENGTH_LONG).show()
                 return@setOnClickListener
             }
 
             Log.d(TAG, "Attempting login with: $email")
-            Log.d(TAG, "Network available: ${isNetworkAvailable()}")
-
-            // ทดสอบ ping Firebase ก่อน
-            Thread {
-                try {
-                    val url = java.net.URL("https://www.googleapis.com")
-                    val conn = url.openConnection() as java.net.HttpURLConnection
-                    conn.connectTimeout = 5000
-                    conn.connect()
-                    Log.d(TAG, "Google API reachable: ${conn.responseCode}")
-                    conn.disconnect()
-                } catch (e: Exception) {
-                    Log.e(TAG, "Cannot reach Google API: ${e.message}")
-                }
-            }.start()
 
             auth.signInWithEmailAndPassword(email, password)
                 .addOnSuccessListener { result ->
@@ -98,10 +77,10 @@ class LoginActivity : AppCompatActivity() {
                         is FirebaseAuthException -> {
                             Log.e(TAG, "Error code: ${exception.errorCode}")
                             when (exception.errorCode) {
-                                "ERROR_USER_NOT_FOUND" -> "ไม่พบบัญชีนี้ในระบบ"
-                                "ERROR_WRONG_PASSWORD" -> "รหัสผ่านไม่ถูกต้อง"
-                                "ERROR_INVALID_EMAIL" -> "รูปแบบอีเมลไม่ถูกต้อง"
-                                "ERROR_USER_DISABLED" -> "บัญชีถูกปิดใช้งาน"
+                                "ERROR_USER_NOT_FOUND"     -> "ไม่พบบัญชีนี้ในระบบ"
+                                "ERROR_WRONG_PASSWORD"     -> "รหัสผ่านไม่ถูกต้อง"
+                                "ERROR_INVALID_EMAIL"      -> "รูปแบบอีเมลไม่ถูกต้อง"
+                                "ERROR_USER_DISABLED"      -> "บัญชีถูกปิดใช้งาน"
                                 "ERROR_INVALID_CREDENTIAL" -> "อีเมลหรือรหัสผ่านไม่ถูกต้อง"
                                 else -> "เข้าสู่ระบบไม่สำเร็จ: ${exception.errorCode}"
                             }
@@ -110,6 +89,16 @@ class LoginActivity : AppCompatActivity() {
                     }
                     Toast.makeText(this, errorMessage, Toast.LENGTH_LONG).show()
                 }
+        }
+
+        // Forgot Password → ไปหน้า AdminOtpVerificationActivity (กรอก email ส่ง reset link)
+        tvForgot.setOnClickListener {
+            val prefillEmail = etEmail.text.toString().trim()
+            val intent = Intent(this, AdminOtpVerificationActivity::class.java)
+            if (prefillEmail.isNotEmpty()) {
+                intent.putExtra("ADMIN_EMAIL", prefillEmail)
+            }
+            startActivity(intent)
         }
     }
 
