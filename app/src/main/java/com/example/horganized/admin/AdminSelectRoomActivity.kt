@@ -123,32 +123,6 @@ class AdminSelectRoomActivity : AppCompatActivity() {
                         val intent = Intent(this, AdminCheckSlipActivity::class.java).putExtra("ROOM_NAME", room.name)
                         startActivity(intent)
                     }
-                    "CHAT" -> {
-                        // ดึง roomNumber จาก room.name เช่น "ห้อง 101" → "101"
-                        val roomNumber = room.name.replace("ห้อง ", "").trim()
-                        // หา userId จาก Firestore collection users ที่ roomNumber ตรงกัน
-                        db.collection("users")
-                            .whereEqualTo("roomNumber", roomNumber)
-                            .get()
-                            .addOnSuccessListener { snapshot ->
-                                val userDoc = snapshot.documents.firstOrNull()
-                                if (userDoc == null) {
-                                    Toast.makeText(this, "ไม่พบผู้เช่าในห้องนี้", Toast.LENGTH_SHORT).show()
-                                    return@addOnSuccessListener
-                                }
-                                val userId   = userDoc.id
-                                val userName = userDoc.getString("name") ?: ""
-                                val intent   = Intent(this, ChatDetailActivity::class.java).apply {
-                                    putExtra("CHAT_ROOM_ID", userId)
-                                    putExtra("ROOM_NAME", room.name)
-                                    putExtra("USER_NAME", userName)
-                                }
-                                startActivity(intent)
-                            }
-                            .addOnFailureListener {
-                                Toast.makeText(this, "เกิดข้อผิดพลาด กรุณาลองใหม่", Toast.LENGTH_SHORT).show()
-                            }
-                    }
                     else -> { // กรณีอื่นๆ หรือกดจากเมนูย้ายเข้า/ออกโดยตรง
                         val intent = Intent(this, AdminMoveOutActivity::class.java).putExtra("ROOM_NAME", room.name)
                         startActivity(intent)
