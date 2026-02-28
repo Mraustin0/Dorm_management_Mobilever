@@ -50,6 +50,8 @@ class AdminCreateBillActivity : AppCompatActivity() {
     
     private var roomNumber = ""
     private var tenantId = ""
+    private var selectedMonth = ""
+    private var selectedYear = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -62,13 +64,19 @@ class AdminCreateBillActivity : AppCompatActivity() {
             insets
         }
 
+        // รับข้อมูลเดือน/ปีจาก Intent
+        selectedMonth = intent.getStringExtra("BILL_MONTH") ?: ""
+        selectedYear = intent.getStringExtra("BILL_YEAR") ?: ""
+
         initViews()
         
         val roomName = intent.getStringExtra("ROOM_NAME") ?: ""
         if (roomName.isNotEmpty()) {
-            tvBillRoomNumber.text = "บิลค่าเช่า $roomName"
+            tvBillRoomNumber.text = "บิล $roomName ($selectedMonth $selectedYear)"
             roomNumber = roomName.replace("ห้อง ", "").trim()
             fetchTenantInfo(roomNumber)
+            // ดึงประวัติมิเตอร์มาแสดงในช่องลบกันโดยอัตโนมัติ
+            fetchMeterHistory(roomNumber, selectedMonth, selectedYear)
         }
 
         setupListeners()
@@ -109,6 +117,30 @@ class AdminCreateBillActivity : AppCompatActivity() {
         btnAddItem = findViewById(R.id.btn_add_item)
     }
 
+    private fun fetchMeterHistory(roomNum: String, month: String, year: String) {
+        db.collection("meter_history")
+            .whereEqualTo("roomNumber", roomNum)
+            .whereEqualTo("month", month)
+            .whereEqualTo("year", year)
+            .get()
+            .addOnSuccessListener { documents ->
+                for (doc in documents) {
+                    val type = doc.getString("type")
+                    val previous = doc.getString("previousValue") ?: "0"
+                    val current = doc.getString("currentValue") ?: "0"
+                    
+                    if (type == "electric") {
+                        etElecBefore.setText(previous)
+                        etElecAfter.setText(current)
+                    } else if (type == "water") {
+                        etWaterBefore.setText(previous)
+                        etWaterAfter.setText(current)
+                    }
+                }
+                calculateTotal()
+            }
+    }
+
     private fun fetchTenantInfo(roomNum: String) {
         db.collection("rooms").document(roomNum).get()
             .addOnSuccessListener { doc ->
@@ -129,31 +161,28 @@ class AdminCreateBillActivity : AppCompatActivity() {
 
     private fun setupElecRateSpinner() {
         val rates = arrayOf("4", "5", "6", "7", "8", "อื่นๆ")
-        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, rates)
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        spinnerElecRate.adapter = adapter
+        spinnerElecRate.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, rates).apply {
+            setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        }
         spinnerElecRate.setSelection(4)
-
         spinnerElecRate.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                val selected = rates[position]
-                if (selected == "อื่นๆ") showCustomRateDialog() else {
-                    selectedElecRate = selected.toInt()
+            override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
+                if (rates[p2] == "อื่นๆ") showCustomRateDialog() else {
+                    selectedElecRate = rates[p2].toInt()
                     calculateTotal()
                 }
             }
-            override fun onNothingSelected(parent: AdapterView<*>?) {}
+            override fun onNothingSelected(p0: AdapterView<*>?) {}
         }
     }
 
     private fun showCustomRateDialog() {
-        val input = EditText(this)
-        input.inputType = android.text.InputType.TYPE_CLASS_NUMBER
+        val input = EditText(this).apply { inputType = android.text.InputType.TYPE_CLASS_NUMBER }
         AlertDialog.Builder(this).setTitle("กรอกค่าไฟเอง").setView(input)
             .setPositiveButton("ตกลง") { _, _ ->
                 selectedElecRate = input.text.toString().toIntOrNull() ?: 8
                 calculateTotal()
-            }.setNegativeButton("ยกเลิก", null).show()
+            }.show()
     }
 
     private fun setupListeners() {
@@ -217,10 +246,9 @@ class AdminCreateBillActivity : AppCompatActivity() {
 
     private fun sendBillToFirestore() {
         val totalAmount = tvTotalPrice.text.toString().replace(Regex("[^0-9]"), "").toDoubleOrNull() ?: 0.0
+        val finalMonth = selectedMonth
+        val finalYear = selectedYear
         val calendar = Calendar.getInstance()
-        val months = arrayOf("มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม")
-        val currentMonth = months[calendar.get(Calendar.MONTH)]
-        val currentYear = calendar.get(Calendar.YEAR).toString()
         calendar.add(Calendar.DAY_OF_YEAR, 7)
         val dueDate = Timestamp(calendar.time)
 
@@ -228,8 +256,8 @@ class AdminCreateBillActivity : AppCompatActivity() {
             "userId" to tenantId,
             "roomNumber" to roomNumber,
             "amount" to totalAmount,
-            "month" to currentMonth,
-            "year" to currentYear,
+            "month" to finalMonth,
+            "year" to finalYear,
             "status" to "pending",
             "dueDate" to dueDate,
             "createdAt" to FieldValue.serverTimestamp(),
@@ -238,26 +266,39 @@ class AdminCreateBillActivity : AppCompatActivity() {
                 "electricPrice" to tvElecTotal.text.toString().replace(Regex("[^0-9]"), "").toDoubleOrNull(),
                 "electricUnit" to tvElecUnits.text.toString().replace("= ", "").replace(" * ", ""),
                 "waterPrice" to tvWaterTotal.text.toString().replace(Regex("[^0-9]"), "").toDoubleOrNull(),
+                "waterUnit" to tvWaterUnits.text.toString().replace("= ", "").replace(" * ", ""),
                 "otherPrice" to (etAdditional.text.toString().toDoubleOrNull() ?: 0.0) + dynamicItemPrices.values.sum().toDouble()
             )
         )
 
-        db.collection("bills").add(billData).addOnSuccessListener {
-            // สร้างการแจ้งเตือนส่งให้ User
-            val notifId = db.collection("notifications").document().id
-            val notification = hashMapOf(
-                "notificationId" to notifId,
-                "userId" to tenantId,
-                "title" to "บิลค่าเช่าใหม่",
-                "message" to "แอดมินได้ส่งบิลประจำเดือน $currentMonth $currentYear ให้คุณแล้ว กรุณาชำระเงินภายในวันที่ ${SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(dueDate.toDate())}",
-                "senderName" to "ADMIN1",
-                "timestamp" to System.currentTimeMillis(),
-                "isRead" to false
-            )
-            db.collection("notifications").document(notifId).set(notification)
-            
-            Toast.makeText(this, "ส่งบิลเรียบร้อยแล้ว", Toast.LENGTH_SHORT).show()
-            finish()
-        }
+        db.collection("bills").whereEqualTo("roomNumber", roomNumber).whereEqualTo("month", finalMonth).whereEqualTo("year", finalYear).get()
+            .addOnSuccessListener { snap ->
+                if (!snap.isEmpty) {
+                    db.collection("bills").document(snap.documents[0].id).set(billData).addOnSuccessListener { 
+                        onBillSuccess(finalMonth, finalYear, dueDate)
+                    }
+                } else {
+                    db.collection("bills").add(billData).addOnSuccessListener { 
+                        onBillSuccess(finalMonth, finalYear, dueDate)
+                    }
+                }
+            }
+    }
+
+    private fun onBillSuccess(month: String, year: String, dueDate: Timestamp) {
+        val notifId = db.collection("notifications").document().id
+        val notification = hashMapOf(
+            "notificationId" to notifId,
+            "userId" to tenantId,
+            "title" to "บิลค่าเช่าใหม่",
+            "message" to "แอดมินได้ส่งบิลประจำเดือน $month $year ให้คุณแล้ว กรุณาชำระเงินภายในวันที่ ${SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(dueDate.toDate())}",
+            "senderName" to "ADMIN1",
+            "timestamp" to System.currentTimeMillis(),
+            "isRead" to false
+        )
+        db.collection("notifications").document(notifId).set(notification)
+        
+        Toast.makeText(this, "ส่งบิลเรียบร้อยแล้ว", Toast.LENGTH_SHORT).show()
+        finish()
     }
 }

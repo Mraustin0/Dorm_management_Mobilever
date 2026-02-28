@@ -10,7 +10,6 @@ import android.widget.ImageView
 import android.widget.Spinner
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -102,7 +101,7 @@ class AdminSelectRoomActivity : AppCompatActivity() {
                 if (e != null) { Log.e("SelectRoom", "Listen failed.", e); return@addSnapshotListener }
 
                 val statusMap = snapshots?.documents?.associate { it.getString("roomNumber") to (it.getBoolean("isVacant") ?: true) } ?: emptyMap()
-                val rooms = List(10) { Room("ห้อง ${floor}${String.format("%02d", it + 1)}", statusMap["${floor}${String.format("%02d", it + 1)}"] ?: true) }
+                val rooms = List(10) { i -> Room("ห้อง ${floor}${String.format("%02d", i + 1)}", statusMap["${floor}${String.format("%02d", i + 1)}"] ?: true) }
                 
                 showRooms(rooms)
             }
@@ -113,18 +112,22 @@ class AdminSelectRoomActivity : AppCompatActivity() {
             if (room.isVacant) {
                 Toast.makeText(this, "${room.name} เป็นห้องว่าง", Toast.LENGTH_SHORT).show()
             } else {
-                // ไม่มี Pop-up: ทำงานตามโหมดที่ได้รับมาทันที
                 when (mode) {
                     "CREATE_BILL" -> {
-                        val intent = Intent(this, AdminCreateBillActivity::class.java).putExtra("ROOM_NAME", room.name)
+                        val intent = Intent(this, AdminCreateBillActivity::class.java)
+                        intent.putExtra("ROOM_NAME", room.name)
+                        intent.putExtra("BILL_MONTH", spinnerMonth.selectedItem.toString())
+                        intent.putExtra("BILL_YEAR", spinnerYear.selectedItem.toString())
                         startActivity(intent)
                     }
                     "CHECK_SLIP" -> {
-                        val intent = Intent(this, AdminCheckSlipActivity::class.java).putExtra("ROOM_NAME", room.name)
+                        val intent = Intent(this, AdminCheckSlipActivity::class.java)
+                        intent.putExtra("ROOM_NAME", room.name)
                         startActivity(intent)
                     }
-                    else -> { // กรณีอื่นๆ หรือกดจากเมนูย้ายเข้า/ออกโดยตรง
-                        val intent = Intent(this, AdminMoveOutActivity::class.java).putExtra("ROOM_NAME", room.name)
+                    else -> {
+                        val intent = Intent(this, AdminMoveOutActivity::class.java)
+                        intent.putExtra("ROOM_NAME", room.name)
                         startActivity(intent)
                     }
                 }
