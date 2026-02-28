@@ -6,8 +6,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -33,6 +35,7 @@ class ChatListActivity : AppCompatActivity() {
 
     private val db = FirebaseFirestore.getInstance()
     private lateinit var rvChatList: RecyclerView
+    private lateinit var layoutEmpty: LinearLayout
     private val chatRooms = mutableListOf<ChatRoom>()
     private lateinit var adapter: ChatRoomAdapter
 
@@ -47,7 +50,9 @@ class ChatListActivity : AppCompatActivity() {
             insets
         }
 
-        rvChatList = findViewById(R.id.rv_chat_list)
+        rvChatList  = findViewById(R.id.rv_chat_list)
+        layoutEmpty = findViewById(R.id.layout_empty_chat)
+
         adapter = ChatRoomAdapter(chatRooms) { room ->
             val intent = Intent(this, ChatDetailActivity::class.java)
             intent.putExtra("CHAT_ROOM_ID", room.chatRoomId)
@@ -60,6 +65,16 @@ class ChatListActivity : AppCompatActivity() {
 
         listenChatRooms()
         setupBottomNavigation()
+
+        // ปุ่ม back
+        findViewById<ImageView>(R.id.iv_back_chat_list).setOnClickListener {
+            finish()
+        }
+
+        // ปุ่ม + เริ่มแชทห้องใหม่ → เลือกห้องแบบ Dialog
+        findViewById<ImageView>(R.id.iv_new_chat).setOnClickListener {
+            openNewChatDialog()
+        }
     }
 
     private fun listenChatRooms() {
@@ -79,22 +94,71 @@ class ChatListActivity : AppCompatActivity() {
                     )
                 })
                 adapter.notifyDataSetChanged()
+
+                // แสดง empty state ถ้าไม่มีแชท
+                if (chatRooms.isEmpty()) {
+                    layoutEmpty.visibility = View.VISIBLE
+                    rvChatList.visibility = View.GONE
+                } else {
+                    layoutEmpty.visibility = View.GONE
+                    rvChatList.visibility = View.VISIBLE
+                }
+            }
+    }
+
+    // เลือกห้องที่มี user อาศัยอยู่ เพื่อเริ่มแชทใหม่
+    private fun openNewChatDialog() {
+        db.collection("users")
+            .whereEqualTo("role", "user")
+            .get()
+            .addOnSuccessListener { snapshot ->
+                val users = snapshot.documents
+                if (users.isEmpty()) {
+                    androidx.appcompat.app.AlertDialog.Builder(this)
+                        .setTitle("ไม่พบผู้เช่า")
+                        .setMessage("ยังไม่มีผู้เช่าในระบบ")
+                        .setPositiveButton("ตกลง", null)
+                        .show()
+                    return@addOnSuccessListener
+                }
+
+                // สร้าง label แสดงในรายการ เช่น "ห้อง 101 - คุณ สมชาย"
+                val labels = users.map { doc ->
+                    val room = doc.getString("roomNumber") ?: "-"
+                    val name = doc.getString("name") ?: "-"
+                    "ห้อง $room  $name"
+                }.toTypedArray()
+
+                AlertDialog.Builder(this)
+                    .setTitle("เลือกห้องที่ต้องการแชท")
+                    .setItems(labels) { _, index ->
+                        val userDoc  = users[index]
+                        val userId   = userDoc.id
+                        val roomNum  = userDoc.getString("roomNumber") ?: ""
+                        val userName = userDoc.getString("name") ?: ""
+
+                        val intent = Intent(this, ChatDetailActivity::class.java).apply {
+                            putExtra("CHAT_ROOM_ID", userId)
+                            putExtra("ROOM_NAME", "ห้อง $roomNum")
+                            putExtra("USER_NAME", userName)
+                        }
+                        startActivity(intent)
+                    }
+                    .setNegativeButton("ยกเลิก", null)
+                    .show()
             }
     }
 
     private fun setupBottomNavigation() {
-        val navHome = findViewById<ImageView>(R.id.iv_nav_home)
-        val navApartment = findViewById<ImageView>(R.id.iv_nav_apartment)
-
-        navHome.setOnClickListener {
+        findViewById<ImageView>(R.id.iv_nav_home).setOnClickListener {
             val intent = Intent(this, AdminHomeActivity::class.java)
             intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
             startActivity(intent)
         }
-
-        navApartment.setOnClickListener {
+        findViewById<ImageView>(R.id.iv_nav_apartment).setOnClickListener {
             startActivity(Intent(this, AdminSelectRoomActivity::class.java))
         }
+        // iv_nav_chat อยู่หน้านี้แล้ว ไม่ต้องทำอะไร
     }
 }
 
@@ -123,10 +187,9 @@ class ChatRoomAdapter(
     override fun getItemCount() = rooms.size
 
     private fun formatTime(date: Date): String {
-        val now = Date()
+        val now  = Date()
         val diff = now.time - date.time
         return when {
-            diff < 60 * 60 * 1000 -> SimpleDateFormat("HH:mm", Locale.getDefault()).format(date)
             diff < 24 * 60 * 60 * 1000 -> SimpleDateFormat("HH:mm", Locale.getDefault()).format(date)
             else -> SimpleDateFormat("d MMM", Locale("th")).format(date)
         }

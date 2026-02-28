@@ -23,12 +23,8 @@ class NotificationsActivity : AppCompatActivity() {
         rv.layoutManager = LinearLayoutManager(this)
 
         // เตรียมข้อมูลจำลอง (ใช้ชื่อฟิลด์ให้ตรงกับ Model)
-        notificationList.addAll(listOf(
-            Notification(senderName = "ADMIN1", message = "แอดมินได้ส่งร่างสัญญาฉบับที่ 2 ให้คุณแล้ว กรุณาตรวจสอบรายละเอียดและเซ็นสัญญาภายในวันที่ 01/06/2025", time = "1m ago.", isRead = false),
-            Notification(senderName = "ADMIN1", message = "ใบแจ้งหนี้ใหม่ค่ะ ตรวจสอบยอดและชำระเงินได้ภายในวันที่ 05/05/2026", time = "3d ago.", isRead = false),
-            Notification(senderName = "ADMIN1", message = "ชำระเงินสำเร็จ แอดมินตรวจสอบยอดเงินเรียบร้อยแล้ว ขอบคุณค่ะ", time = "1w ago.", isRead = true),
-            Notification(senderName = "ADMIN1", message = "รับเรื่องแจ้งซ่อมเรียบร้อย คำขอซ่อมหลอดไฟ ของคุณอยู่ระหว่างดำเนินการ", time = "1w ago.", isRead = true)
-        ))
+
+
 
         adapter = NotificationAdapter(notificationList) { position ->
             // Logic เมื่อกดอ่าน: เปลี่ยนสถานะเป็นอ่านแล้ว

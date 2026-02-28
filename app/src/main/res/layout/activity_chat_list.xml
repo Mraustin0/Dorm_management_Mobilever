@@ -16,6 +16,17 @@
         android:background="@color/white"
         app:layout_constraintTop_toTopOf="parent">
 
+        <ImageView
+            android:id="@+id/iv_back_chat_list"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:padding="4dp"
+            android:src="@drawable/ic_back"
+            app:tint="@color/black"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -27,11 +38,59 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
+
+        <!-- ปุ่มแชทห้องใหม่ (ค้นหา) -->
+        <ImageView
+            android:id="@+id/iv_new_chat"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:padding="4dp"
+            android:src="@drawable/ic_plus"
+            app:tint="@color/blue_primary"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <!-- Chat List RecyclerView - FIXED HORIZONTAL CONSTRAINTS -->
+    <!-- Empty state: แสดงเมื่อไม่มีแชท -->
+    <LinearLayout
+        android:id="@+id/layout_empty_chat"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/layout_top_bar_chat"
+        app:layout_constraintBottom_toTopOf="@id/bottom_navigation"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
 
-    <!-- Bottom Navigation Bar (Standardized) -->
+        <ImageView
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:src="@drawable/ic_chat"
+            app:tint="#CCCCCC" />
+
+        <TextView
+            android:layout_marginTop="12dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="ยังไม่มีการสนทนา"
+            android:textColor="@color/gray_text"
+            android:textSize="16sp" />
+
+        <TextView
+            android:layout_marginTop="4dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="กดปุ่ม + เพื่อเริ่มแชทกับห้องพัก"
+            android:textColor="#AAAAAA"
+            android:textSize="13sp" />
+
+    </LinearLayout>
+
+    <!-- Chat List RecyclerView -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_chat_list"
         android:layout_width="0dp"
@@ -39,12 +98,11 @@
         android:paddingTop="8dp"
         app:layout_constraintBottom_toTopOf="@id/bottom_navigation"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/layout_top_bar_chat"
-        app:layout_constraintVertical_bias="1.0"
         tools:listitem="@layout/item_chat" />
 
+    <!-- Bottom Navigation Bar -->
     <LinearLayout
         android:id="@+id/bottom_navigation"
         android:layout_width="match_parent"

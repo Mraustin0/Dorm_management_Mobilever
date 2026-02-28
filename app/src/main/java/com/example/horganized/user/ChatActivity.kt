@@ -33,6 +33,10 @@ class ChatActivity : AppCompatActivity() {
     // chatRoomId = uid ของ user เอง
     private val chatRoomId get() = auth.currentUser?.uid ?: ""
 
+    // ข้อมูล user สำหรับส่ง noti ไปหา admin
+    private var userRoomNumber = ""
+    private var userName = ""
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_chat)
@@ -60,17 +64,17 @@ class ChatActivity : AppCompatActivity() {
         val uid = auth.currentUser?.uid ?: return
         db.collection("users").document(uid).get()
             .addOnSuccessListener { doc ->
-                val name = doc.getString("name") ?: ""
-                val room = doc.getString("roomNumber") ?: ""
-                tvBanner.text = "📢 ห้อง $room  คุณ $name"
+                userName = doc.getString("name") ?: doc.getString("firstName") ?: ""
+                userRoomNumber = doc.getString("roomNumber") ?: ""
+                tvBanner.text = "📢 ห้อง $userRoomNumber  คุณ $userName"
 
                 // สร้าง/อัปเดต chat room document ไว้ให้ admin เห็นใน list
                 db.collection("chats").document(chatRoomId)
                     .set(mapOf(
-                        "userId"      to uid,
-                        "userName"    to name,
-                        "roomNumber"  to room,
-                        "lastMessage" to "",
+                        "userId"        to uid,
+                        "userName"      to userName,
+                        "roomNumber"    to userRoomNumber,
+                        "lastMessage"   to "",
                         "lastTimestamp" to Timestamp.now()
                     ), com.google.firebase.firestore.SetOptions.merge())
             }
@@ -115,16 +119,35 @@ class ChatActivity : AppCompatActivity() {
             .collection("messages").add(message)
             .addOnSuccessListener {
                 etMessage.setText("")
+                val now = Timestamp.now()
                 // อัปเดต lastMessage บน chat room doc เพื่อให้ admin list แสดงผล
                 db.collection("chats").document(chatRoomId)
                     .update(mapOf(
                         "lastMessage"   to text,
-                        "lastTimestamp" to Timestamp.now()
+                        "lastTimestamp" to now
                     ))
+                // ส่ง notification ไปหา admin (เก็บลง Admin_Notifications)
+                sendChatNotificationToAdmin(text)
             }
             .addOnFailureListener {
                 Toast.makeText(this, "ส่งข้อความไม่สำเร็จ", Toast.LENGTH_SHORT).show()
             }
+    }
+
+    /** ส่ง notification ไปหา admin เมื่อ user ส่งข้อความ (เก็บใน Admin_Notifications) */
+    private fun sendChatNotificationToAdmin(text: String) {
+        val uid = auth.currentUser?.uid ?: return
+        val notification = hashMapOf(
+            "userId"     to uid,
+            "title"      to "ข้อความจากห้อง $userRoomNumber",
+            "message"    to text,
+            "type"       to "chat",
+            "roomNumber" to userRoomNumber,
+            "senderName" to (userName.ifEmpty { "ผู้เช่า" }),
+            "timestamp"  to Timestamp.now(),
+            "isRead"     to false
+        )
+        db.collection("Admin_Notifications").add(notification)
     }
 
     private fun setupBottomNavigation() {

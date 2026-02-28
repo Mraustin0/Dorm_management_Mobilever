@@ -36,7 +36,7 @@ class DetailBillActivity : AppCompatActivity() {
 
         // Header icons
         findViewById<ImageView>(R.id.notification_icon).setOnClickListener {
-            startActivity(Intent(this, NotificationsActivity::class.java))
+            startActivity(Intent(this, NotificationActivity::class.java))
             overridePendingTransition(R.anim.fade_in, R.anim.fade_out)
         }
 

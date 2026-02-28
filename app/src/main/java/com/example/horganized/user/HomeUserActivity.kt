@@ -58,7 +58,7 @@ class HomeUserActivity : AppCompatActivity() {
         // ปุ่มกระดิ่งแจ้งเตือน (Header)
         val notificationIcon = findViewById<ImageView>(R.id.notification_icon)
         notificationIcon?.setOnClickListener {
-            val intent = Intent(this, NotificationsActivity::class.java)
+            val intent = Intent(this, NotificationActivity::class.java)
             startActivity(intent)
             overridePendingTransition(R.anim.fade_in, R.anim.fade_out)
         }
@@ -77,7 +77,7 @@ class HomeUserActivity : AppCompatActivity() {
         // ปุ่มบริการ - พัสดุ
         val cardParcel = findViewById<CardView>(R.id.card_parcel)
         cardParcel?.setOnClickListener {
-            val intent = Intent(this, NotificationsActivity::class.java)
+            val intent = Intent(this, NotificationActivity::class.java)
             startActivity(intent)
             overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
         }

@@ -129,7 +129,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
-                    android:text="ลิงก์สัญญา (Google Drive)"
+                    android:text="ลิงก์สัญญา"
                     android:textColor="@color/black"
                     android:textSize="16sp"
                     android:textStyle="bold" />
@@ -140,7 +140,7 @@
                     android:layout_height="45dp"
                     android:layout_marginTop="8dp"
                     android:background="@drawable/edittext_background"
-                    android:hint="วางลิงก์ Google Drive ที่แชร์แล้วที่นี่"
+                    android:hint="วางลิงก์สัญญา"
                     android:paddingStart="12dp"
                     android:paddingEnd="12dp"
                     android:textSize="12sp" />

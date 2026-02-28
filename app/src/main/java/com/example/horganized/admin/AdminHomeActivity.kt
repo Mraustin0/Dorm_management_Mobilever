@@ -48,11 +48,9 @@ class AdminHomeActivity : AppCompatActivity() {
             startActivity(Intent(this, AdminSelectRoomActivity::class.java))
         }
 
-        // เชื่อมไอคอนแชท
+        // เชื่อมไอคอนแชท → ไปหน้ารายการแชท (แบบ LINE)
         findViewById<ImageView>(R.id.iv_nav_chat).setOnClickListener {
-            val chatIntent = Intent(this, AdminSelectRoomActivity::class.java)
-            chatIntent.putExtra("MODE", "CHAT")
-            startActivity(chatIntent)
+            startActivity(Intent(this, ChatListActivity::class.java))
         }
 
         // เชื่อมปุ่มประกาศ
@@ -65,11 +63,9 @@ class AdminHomeActivity : AppCompatActivity() {
             startActivity(Intent(this, AdminMeterActivity::class.java))
         }
 
-        // เชื่อมปุ่มตรวจสอบสลิป
+        // เชื่อมปุ่มตรวจสอบสลิป → ไปตรวจสลิปได้เลยไม่ต้องเลือกห้อง
         findViewById<CardView>(R.id.cv_check_slip).setOnClickListener {
-            val intent = Intent(this, AdminSelectRoomActivity::class.java)
-            intent.putExtra("MODE", "CHECK_SLIP")
-            startActivity(intent)
+            startActivity(Intent(this, AdminCheckSlipActivity::class.java))
         }
 
         // เชื่อมปุ่มสร้างบิล

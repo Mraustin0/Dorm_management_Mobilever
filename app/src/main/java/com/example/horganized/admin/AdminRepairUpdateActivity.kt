@@ -10,6 +10,7 @@ import androidx.cardview.widget.CardView
 import com.bumptech.glide.Glide
 import com.example.horganized.R
 import com.example.horganized.model.RepairRequest
+import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FirebaseFirestore
 
 class AdminRepairUpdateActivity : AppCompatActivity() {
@@ -32,11 +33,11 @@ class AdminRepairUpdateActivity : AppCompatActivity() {
         }
 
         findViewById<View>(R.id.btn_status_in_progress).setOnClickListener {
-            updateStatus("in_progress", "รับเรื่องแล้ว กำลังดำเนินการ")
+            updateStatus("in_progress", "แอดมินรับเรื่องแล้ว กำลังดำเนินการซ่อม")
         }
 
         findViewById<View>(R.id.btn_status_completed).setOnClickListener {
-            updateStatus("completed", "ซ่อมเสร็จสิ้นเรียบร้อยแล้ว")
+            updateStatus("completed", "ดำเนินการซ่อมเสร็จสิ้นเรียบร้อยแล้ว")
         }
     }
 
@@ -73,8 +74,7 @@ class AdminRepairUpdateActivity : AppCompatActivity() {
         db.collection("repair_requests").document(requestId)
             .update("status", newStatus)
             .addOnSuccessListener {
-                // ส่งแจ้งเตือนกลับหา User
-                sendNotificationToUser(message)
+                sendNotificationToUser(newStatus, message)   // ส่ง noti พร้อม type
                 Toast.makeText(this, "อัปเดตสถานะเรียบร้อย", Toast.LENGTH_SHORT).show()
                 finish()
             }
@@ -83,19 +83,25 @@ class AdminRepairUpdateActivity : AppCompatActivity() {
             }
     }
 
-    private fun sendNotificationToUser(message: String) {
+    private fun sendNotificationToUser(statusKey: String, message: String) {
         if (userId.isEmpty()) return
 
-        val notifId = db.collection("notifications").document().id
+        val title = when (statusKey) {
+            "in_progress" -> "รับเรื่องแจ้งซ่อมแล้ว"
+            "completed"   -> "ซ่อมเสร็จเรียบร้อยแล้ว"
+            else          -> "อัปเดตการแจ้งซ่อม"
+        }
+
         val notification = hashMapOf(
-            "notificationId" to notifId,
-            "userId" to userId,
-            "title" to "อัปเดตการแจ้งซ่อม: ห้อง $roomNumber",
-            "message" to message,
-            "senderName" to "ADMIN1",
-            "timestamp" to System.currentTimeMillis(),
-            "isRead" to false
+            "userId"             to userId,
+            "title"              to "$title: ห้อง $roomNumber",
+            "message"            to message,
+            "type"               to "repair_update",
+            "senderName"         to "แอดมิน",
+            "timestamp"          to System.currentTimeMillis(),
+            "firestoreTimestamp" to Timestamp.now(),
+            "isRead"             to false
         )
-        db.collection("notifications").document(notifId).set(notification)
+        db.collection("notifications").add(notification)
     }
 }

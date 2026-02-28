@@ -1,5 +1,6 @@
 package com.example.horganized.user
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -13,7 +14,6 @@ import com.example.horganized.R
 import com.example.horganized.model.Notification
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.Query
 
 class NotificationActivity : AppCompatActivity() {
 
@@ -24,7 +24,6 @@ class NotificationActivity : AppCompatActivity() {
     private lateinit var tvNotifCount: TextView
     private val notificationList = mutableListOf<Notification>()
     private lateinit var adapter: NotificationAdapter
-    private var isAdmin = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,8 +31,6 @@ class NotificationActivity : AppCompatActivity() {
 
         db = FirebaseFirestore.getInstance()
         auth = FirebaseAuth.getInstance()
-
-        isAdmin = intent.getBooleanExtra("IS_ADMIN", false)
 
         val btnBack = findViewById<ImageView>(R.id.btn_back)
         rvNotifications = findViewById(R.id.rv_notifications)
@@ -49,55 +46,88 @@ class NotificationActivity : AppCompatActivity() {
     private fun setupRecyclerView() {
         adapter = NotificationAdapter(notificationList) { position ->
             val item = notificationList[position]
-            if (!item.isRead) {
-                if (item.notificationId.isNotEmpty()) {
-                    db.collection("notifications").document(item.notificationId)
-                        .update("isRead", true)
-                }
-                notificationList[position] = item.copy(isRead = true)
-                adapter.notifyItemChanged(position)
-                updateNotifCount()
+
+            // Mark as read in Firestore
+            if (!item.isRead && item.notificationId.isNotEmpty()) {
+                db.collection("notifications").document(item.notificationId)
+                    .update("isRead", true)
             }
+            // Update local state
+            notificationList[position] = item.copy(isRead = true)
+            adapter.notifyItemChanged(position)
+            updateNotifCount()
+
+            // Navigate based on type
+            navigateByType(item)
         }
         rvNotifications.layoutManager = LinearLayoutManager(this)
         rvNotifications.adapter = adapter
     }
 
+    private fun navigateByType(item: Notification) {
+        when (item.type) {
+            "chat" -> {
+                // ไปหน้า Chat กับ admin
+                val intent = Intent(this, ChatActivity::class.java)
+                startActivity(intent)
+                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
+            }
+            "repair_update" -> {
+                // ไปหน้าประวัติแจ้งซ่อม
+                val intent = Intent(this, RepairActivity::class.java)
+                startActivity(intent)
+                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
+            }
+            "new_bill", "payment_approved", "payment_rejected" -> {
+                // ไปหน้าบิล
+                val intent = Intent(this, DetailBillActivity::class.java)
+                startActivity(intent)
+                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
+            }
+            else -> {
+                // ประเภทอื่น: ไม่ navigate (แค่ mark as read)
+            }
+        }
+    }
+
     private fun fetchNotifications() {
-        // สร้าง Query พื้นฐานโดยไม่ใส่ OrderBy เพื่อเลี่ยงปัญหาเรื่อง Index ในช่วงแรก
-        val baseQuery = if (isAdmin) {
-            db.collection("notifications").whereEqualTo("userId", "admin")
-        } else {
-            val currentUserId = auth.currentUser?.uid ?: ""
-            if (currentUserId.isEmpty()) {
-                updateEmptyState()
-                return
-            }
-            db.collection("notifications").whereIn("userId", listOf(currentUserId, "all"))
+        val currentUserId = auth.currentUser?.uid ?: ""
+        if (currentUserId.isEmpty()) {
+            updateEmptyState()
+            return
         }
 
-        baseQuery.addSnapshotListener { snapshots, e ->
-            if (e != null) {
-                Log.e("NotificationActivity", "Error: ${e.message}")
-                updateEmptyState()
-                return@addSnapshotListener
-            }
+        db.collection("notifications")
+            .whereEqualTo("userId", currentUserId)
+            .addSnapshotListener { snapshots, e ->
+                if (e != null) {
+                    Log.e("NotificationActivity", "Error: ${e.message}")
+                    updateEmptyState()
+                    return@addSnapshotListener
+                }
 
-            if (snapshots != null) {
-                val items = snapshots.documents.mapNotNull { it.toObject(Notification::class.java) }
-                
-                // เรียงลำดับตาม Timestamp ในโค้ด (จากใหม่ไปเก่า)
-                val sortedItems = items.sortedByDescending { it.timestamp }
-                
-                notificationList.clear()
-                notificationList.addAll(sortedItems)
+                if (snapshots != null) {
+                    val items = snapshots.documents.mapNotNull { doc ->
+                        val base = doc.toObject(Notification::class.java) ?: return@mapNotNull null
+                        base.copy(
+                            notificationId     = doc.id,
+                            firestoreTimestamp = doc.getTimestamp("firestoreTimestamp")
+                        )
+                    }
 
-                adapter.notifyDataSetChanged()
-                updateEmptyState()
-                updateNotifCount()
-                Log.d("NotificationActivity", "Data loaded: ${notificationList.size} items")
+                    // เรียงจากใหม่ไปเก่า
+                    val sorted = items.sortedByDescending {
+                        it.firestoreTimestamp?.toDate()?.time ?: it.timestamp
+                    }
+
+                    notificationList.clear()
+                    notificationList.addAll(sorted)
+                    adapter.notifyDataSetChanged()
+                    updateEmptyState()
+                    updateNotifCount()
+                    Log.d("NotifActivity", "Loaded ${notificationList.size} items")
+                }
             }
-        }
     }
 
     private fun updateEmptyState() {
@@ -115,7 +145,7 @@ class NotificationActivity : AppCompatActivity() {
         val unreadCount = notificationList.count { !it.isRead }
         if (unreadCount > 0) {
             tvNotifCount.visibility = View.VISIBLE
-            tvNotifCount.text = "$unreadCount new"
+            tvNotifCount.text = "$unreadCount ใหม่"
         } else {
             tvNotifCount.visibility = View.GONE
         }

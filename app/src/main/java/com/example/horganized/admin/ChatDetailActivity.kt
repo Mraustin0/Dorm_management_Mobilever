@@ -91,10 +91,11 @@ class ChatDetailActivity : AppCompatActivity() {
         if (text.isEmpty()) return
         if (chatRoomId.isEmpty()) return
 
+        val now = Timestamp.now()
         val message = hashMapOf(
             "senderId"  to adminId,
             "message"   to text,
-            "timestamp" to Timestamp.now()
+            "timestamp" to now
         )
 
         db.collection("chats").document(chatRoomId)
@@ -105,11 +106,35 @@ class ChatDetailActivity : AppCompatActivity() {
                 db.collection("chats").document(chatRoomId)
                     .update(mapOf(
                         "lastMessage"   to text,
-                        "lastTimestamp" to Timestamp.now()
+                        "lastTimestamp" to now
                     ))
+                // ส่ง notification ไปหา user (chatRoomId = userId ของ user)
+                sendChatNotificationToUser(text)
             }
             .addOnFailureListener {
                 Toast.makeText(this, "ส่งข้อความไม่สำเร็จ", Toast.LENGTH_SHORT).show()
+            }
+    }
+
+    /** ส่ง notification ไปหา user เมื่อ admin ส่งข้อความ */
+    private fun sendChatNotificationToUser(text: String) {
+        if (chatRoomId.isEmpty()) return
+
+        // ดึง roomNumber จาก chat room doc เพื่อแสดงใน noti
+        db.collection("chats").document(chatRoomId).get()
+            .addOnSuccessListener { doc ->
+                val roomNumber = doc.getString("roomNumber") ?: ""
+                val notification = hashMapOf(
+                    "userId"             to chatRoomId,   // chatRoomId = userId ของ user
+                    "title"              to "ข้อความจากแอดมิน",
+                    "message"            to text,
+                    "type"               to "chat",
+                    "senderName"         to "แอดมิน",
+                    "timestamp"          to System.currentTimeMillis(),
+                    "firestoreTimestamp" to Timestamp.now(),
+                    "isRead"             to false
+                )
+                db.collection("notifications").add(notification)
             }
     }
 }
