@@ -10,7 +10,10 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.resource.bitmap.CircleCrop
 import com.example.horganized.R
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
 class AdminHomeActivity : AppCompatActivity() {
@@ -29,20 +32,22 @@ class AdminHomeActivity : AppCompatActivity() {
         }
 
         setupClickListeners()
+        loadAdminProfile()
         loadVacantRoomCount()
-        
-        // 1. ดึงข้อมูลแบบ Real-time เพื่อแสดงจุดแจ้งเตือน
         checkUnreadGeneralNotifications()
         checkNewRepairRequests()
     }
 
     private fun setupClickListeners() {
+        // Highlight home icon (active)
+        setupBottomNavigation()
+
         // ไอคอนการแจ้งเตือนรวม
         findViewById<ImageView>(R.id.iv_notification).setOnClickListener {
             startActivity(Intent(this, AdminNotificationActivity::class.java))
         }
 
-        // 4. Logic การลบ Dot (เมื่อคลิกการ์ดแจ้งซ่อม)
+        // แจ้งซ่อม
         findViewById<CardView>(R.id.cv_technician).setOnClickListener {
             markRepairRequestsAsRead()
             startActivity(Intent(this, AdminRepairListActivity::class.java))
@@ -52,12 +57,6 @@ class AdminHomeActivity : AppCompatActivity() {
         findViewById<CardView>(R.id.cv_room_vacant).setOnClickListener {
             startActivity(Intent(this, AdminVacantRoomActivity::class.java))
         }
-        findViewById<ImageView>(R.id.iv_nav_apartment).setOnClickListener {
-            startActivity(Intent(this, AdminSelectRoomActivity::class.java))
-        }
-        findViewById<ImageView>(R.id.iv_nav_chat).setOnClickListener {
-            startActivity(Intent(this, ChatListActivity::class.java))
-        }
         findViewById<CardView>(R.id.cv_announce).setOnClickListener {
             startActivity(Intent(this, AdminAddAnnouncementActivity::class.java))
         }
@@ -65,7 +64,7 @@ class AdminHomeActivity : AppCompatActivity() {
             startActivity(Intent(this, AdminMeterActivity::class.java))
         }
         findViewById<CardView>(R.id.cv_check_slip).setOnClickListener {
-            startActivity(Intent(this, AdminSelectRoomActivity::class.java).apply { putExtra("MODE", "CHECK_SLIP") })
+            startActivity(Intent(this, AdminCheckSlipActivity::class.java))
         }
         findViewById<CardView>(R.id.cv_create_bill).setOnClickListener {
             startActivity(Intent(this, AdminSelectRoomActivity::class.java).apply { putExtra("MODE", "CREATE_BILL") })
@@ -78,6 +77,55 @@ class AdminHomeActivity : AppCompatActivity() {
         }
     }
 
+    private fun setupBottomNavigation() {
+        // Highlight home icon (active), gray others
+        findViewById<ImageView>(R.id.iv_sav_home)
+            .setColorFilter(getColor(R.color.blue_primary))
+        findViewById<ImageView>(R.id.iv_nav_apartment)
+            .setColorFilter(getColor(R.color.gray_text))
+        findViewById<ImageView>(R.id.iv_nav_chat)
+            .setColorFilter(getColor(R.color.gray_text))
+
+        // iv_sav_home อยู่หน้านี้แล้ว ไม่ต้องทำอะไร
+        findViewById<ImageView>(R.id.iv_nav_apartment).setOnClickListener {
+            startActivity(Intent(this, AdminSelectRoomActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+            })
+        }
+        findViewById<ImageView>(R.id.iv_nav_chat).setOnClickListener {
+            startActivity(Intent(this, ChatListActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+            })
+        }
+    }
+
+    private fun loadAdminProfile() {
+        val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
+        val tvName = findViewById<TextView>(R.id.tv_admin_name)
+        val ivProfile = findViewById<ImageView>(R.id.iv_admin_profile)
+
+        db.collection("users").document(uid).get()
+            .addOnSuccessListener { doc ->
+                // username
+                val name = doc.getString("username")
+                    ?: doc.getString("firstName")
+                    ?: doc.getString("name")
+                    ?: "Admin"
+                tvName?.text = name
+
+                // รูปโปรไฟล์
+                val photoUrl = doc.getString("photoUrl")
+                if (!photoUrl.isNullOrEmpty() && ivProfile != null) {
+                    ivProfile.setPadding(0, 0, 0, 0)
+                    Glide.with(this)
+                        .load(photoUrl)
+                        .transform(CircleCrop())
+                        .placeholder(R.drawable.ic_person)
+                        .into(ivProfile)
+                }
+            }
+    }
+
     private fun checkUnreadGeneralNotifications() {
         val viewNotifDot = findViewById<View>(R.id.view_notif_dot)
         db.collection("Admin_Notifications")
@@ -87,21 +135,15 @@ class AdminHomeActivity : AppCompatActivity() {
             }
     }
 
-    // 2 & 3. นับจำนวน Unread และควบคุมการแสดงผล Dot สำหรับแจ้งซ่อม
     private fun checkNewRepairRequests() {
         val viewRepairDot = findViewById<View>(R.id.view_repair_card_dot)
         db.collection("repair_requests")
-            .whereEqualTo("isRead", false) // กรองเฉพาะที่ยังไม่ได้อ่าน
-            .addSnapshotListener { snapshots, e ->
-                if (snapshots != null && !snapshots.isEmpty) {
-                    viewRepairDot?.visibility = View.VISIBLE
-                } else {
-                    viewRepairDot?.visibility = View.GONE
-                }
+            .whereEqualTo("isRead", false)
+            .addSnapshotListener { snapshots, _ ->
+                viewRepairDot?.visibility = if (snapshots != null && !snapshots.isEmpty) View.VISIBLE else View.GONE
             }
     }
 
-    // Logic การอัปเดตสถานะเป็นอ่านแล้ว
     private fun markRepairRequestsAsRead() {
         db.collection("repair_requests")
             .whereEqualTo("isRead", false)
@@ -115,6 +157,7 @@ class AdminHomeActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+        loadAdminProfile()
         loadVacantRoomCount()
     }
 

@@ -150,13 +150,25 @@ class ChatListActivity : AppCompatActivity() {
     }
 
     private fun setupBottomNavigation() {
+        // highlight icon ที่ active (chat)
+        findViewById<ImageView>(R.id.iv_nav_chat)
+            .setColorFilter(getColor(R.color.blue_primary))
+        findViewById<ImageView>(R.id.iv_nav_home)
+            .setColorFilter(getColor(R.color.gray_text))
+        findViewById<ImageView>(R.id.iv_nav_apartment)
+            .setColorFilter(getColor(R.color.gray_text))
+
         findViewById<ImageView>(R.id.iv_nav_home).setOnClickListener {
-            val intent = Intent(this, AdminHomeActivity::class.java)
-            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
-            startActivity(intent)
+            startActivity(Intent(this, AdminHomeActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+            })
+            finish()
         }
         findViewById<ImageView>(R.id.iv_nav_apartment).setOnClickListener {
-            startActivity(Intent(this, AdminSelectRoomActivity::class.java))
+            startActivity(Intent(this, AdminSelectRoomActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+            })
+            finish()
         }
         // iv_nav_chat อยู่หน้านี้แล้ว ไม่ต้องทำอะไร
     }

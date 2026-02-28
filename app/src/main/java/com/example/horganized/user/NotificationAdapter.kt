@@ -3,6 +3,7 @@ package com.example.horganized.user
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.cardview.widget.CardView
@@ -18,13 +19,14 @@ class NotificationAdapter(
 ) : RecyclerView.Adapter<NotificationAdapter.ViewHolder>() {
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val cardView: CardView = view as CardView
-        val ivIcon: ImageView = view.findViewById(R.id.iv_icon)
+        val cardView: CardView    = view as CardView
+        val flIconBg: FrameLayout = view.findViewById(R.id.fl_icon_bg)
+        val ivIcon: ImageView     = view.findViewById(R.id.iv_icon)
         val tvItemTitle: TextView = view.findViewById(R.id.tv_item_title)
         val tvItemMessage: TextView = view.findViewById(R.id.tv_item_message)
-        val tvItemTime: TextView = view.findViewById(R.id.tv_item_time)
-        val viewUnreadDot: View = view.findViewById(R.id.view_unread_dot)
-        val viewUnreadBar: View = view.findViewById(R.id.view_unread_bar)
+        val tvItemTime: TextView  = view.findViewById(R.id.tv_item_time)
+        val viewUnreadDot: View   = view.findViewById(R.id.view_unread_dot)
+        val viewUnreadBar: View   = view.findViewById(R.id.view_unread_bar)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -36,31 +38,53 @@ class NotificationAdapter(
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val notification = notifications[position]
 
-        // Title: ใช้ title ถ้ามี ถ้าไม่มีใช้ senderName
-        holder.tvItemTitle.text = notification.title.ifEmpty { notification.senderName }
-        holder.tvItemMessage.text = notification.message
+        // --- Title dynamic ---
+        holder.tvItemTitle.text = notification.title.ifEmpty {
+            when (notification.type) {
+                "new_bill"          -> "บิลใหม่จากแอดมิน"
+                "payment_approved"  -> "ชำระเงินสำเร็จ"
+                "payment_rejected"  -> "สลิปถูกปฏิเสธ"
+                "repair_update"     -> "อัปเดตสถานะแจ้งซ่อม"
+                "chat"              -> "ข้อความจากแอดมิน"
+                else                -> notification.senderName.ifEmpty { "การแจ้งเตือน" }
+            }
+        }
 
-        // Icon + tint ตาม type
-        val (iconRes, iconTint) = when (notification.type) {
-            "payment_approved"  -> Pair(R.drawable.ic_bill_gg, 0xFF1B9E44.toInt())   // green
-            "payment_rejected"  -> Pair(R.drawable.ic_bill_gg, 0xFFE53935.toInt())   // red
-            "new_bill"          -> Pair(R.drawable.ic_bill_gg, 0xFF3D6FE8.toInt())   // blue
-            "repair_update"     -> Pair(R.drawable.ic_repair_gg, 0xFFF9A825.toInt()) // amber
-            "chat"              -> Pair(R.drawable.ic_chat_gg, 0xFF6C63FF.toInt())   // purple
-            else                -> Pair(R.drawable.ic_bell_gg, 0xFF3D6FE8.toInt())   // blue
+        // --- Message dynamic ---
+        holder.tvItemMessage.text = notification.message.ifEmpty {
+            when (notification.type) {
+                "new_bill"          -> "มีบิลใหม่รอการชำระเงิน"
+                "payment_approved"  -> "การชำระเงินของคุณได้รับการอนุมัติแล้ว"
+                "payment_rejected"  -> "กรุณาตรวจสอบและส่งสลิปใหม่อีกครั้ง"
+                "repair_update"     -> "แอดมินได้อัปเดตสถานะคำขอแจ้งซ่อมของคุณ"
+                "chat"              -> "มีข้อความใหม่จากแอดมิน"
+                else                -> ""
+            }
+        }
+
+        // --- Icon + tint + bg circle ตาม type ---
+        val (iconRes, iconTint, bgColor) = when (notification.type) {
+            "payment_approved"  -> Triple(R.drawable.ic_bill_gg,   0xFF1B9E44.toInt(), 0xFFE8F5E9.toInt()) // green
+            "payment_rejected"  -> Triple(R.drawable.ic_bill_gg,   0xFFE53935.toInt(), 0xFFFFEBEE.toInt()) // red
+            "new_bill"          -> Triple(R.drawable.ic_bill_gg,   0xFF3D6FE8.toInt(), 0xFFEEF2FF.toInt()) // blue
+            "repair_update"     -> Triple(R.drawable.ic_repair_gg, 0xFFF9A825.toInt(), 0xFFFFF8E1.toInt()) // amber
+            "chat"              -> Triple(R.drawable.ic_chat_gg,   0xFF6C63FF.toInt(), 0xFFEDE7FF.toInt()) // purple
+            else                -> Triple(R.drawable.ic_bell_gg,   0xFF3D6FE8.toInt(), 0xFFEEF2FF.toInt()) // blue
         }
         holder.ivIcon.setImageResource(iconRes)
         holder.ivIcon.setColorFilter(iconTint)
+        holder.flIconBg.background = holder.flIconBg.context.getDrawable(R.drawable.bg_notif_icon_circle)
+        holder.flIconBg.background?.setTint(bgColor)
 
-        // เวลา
+        // --- เวลา ---
         holder.tvItemTime.text = formatTime(notification)
 
-        // Unread indicators
+        // --- Unread indicators ---
         val isUnread = !notification.isRead
         holder.viewUnreadDot.visibility = if (isUnread) View.VISIBLE else View.GONE
         holder.viewUnreadBar.visibility = if (isUnread) View.VISIBLE else View.GONE
 
-        // สีพื้นหลัง card
+        // --- Card background ---
         holder.cardView.setCardBackgroundColor(
             if (isUnread) 0xFFF0F4FF.toInt() else 0xFFFFFFFF.toInt()
         )
@@ -78,7 +102,6 @@ class NotificationAdapter(
                 notification.timestamp
             else -> return "เพิ่งส่ง"
         }
-
         val diff = System.currentTimeMillis() - timeMs
         return when {
             diff < 60_000            -> "เพิ่งส่ง"

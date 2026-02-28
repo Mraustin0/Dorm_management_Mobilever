@@ -40,14 +40,15 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Hello"
+            android:text="Hello,"
             android:textColor="@color/gray_text"
             android:textSize="14sp" />
 
         <TextView
+            android:id="@+id/tv_admin_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Admin 1"
+            android:text="Admin"
             android:textColor="@color/black"
             android:textSize="18sp"
             android:textStyle="bold" />

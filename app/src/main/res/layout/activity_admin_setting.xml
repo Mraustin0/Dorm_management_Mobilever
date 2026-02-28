@@ -41,10 +41,11 @@
             app:tint="@color/white" />
 
         <TextView
+            android:id="@+id/tv_setting_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="Admin 1"
+            android:text="Admin"
             android:textColor="@color/black"
             android:textSize="22sp"
             android:textStyle="bold" />

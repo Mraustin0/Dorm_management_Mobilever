@@ -3,6 +3,7 @@ package com.example.horganized.adapter
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.cardview.widget.CardView
@@ -19,62 +20,80 @@ class AdminNotificationAdapter(
 ) : RecyclerView.Adapter<AdminNotificationAdapter.ViewHolder>() {
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val cardView: CardView = view as CardView
-        val icon: ImageView = view.findViewById(R.id.iv_icon)
-        val title: TextView = view.findViewById(R.id.tv_item_title)
-        val message: TextView = view.findViewById(R.id.tv_item_message)
-        val tvTime: TextView = view.findViewById(R.id.tv_item_time)
-        val unreadDot: View = view.findViewById(R.id.view_unread_dot)
+        val cardView: CardView   = view as CardView
+        val flIconBg: FrameLayout = view.findViewById(R.id.fl_icon_bg)
+        val icon: ImageView      = view.findViewById(R.id.iv_icon)
+        val title: TextView      = view.findViewById(R.id.tv_item_title)
+        val message: TextView    = view.findViewById(R.id.tv_item_message)
+        val tvTime: TextView     = view.findViewById(R.id.tv_item_time)
+        val unreadDot: View      = view.findViewById(R.id.view_unread_dot)
+        val unreadBar: View      = view.findViewById(R.id.view_unread_bar)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_notification, parent, false)
+        val view = LayoutInflater.from(parent.context)
+            .inflate(R.layout.item_notification, parent, false)
         return ViewHolder(view)
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = list[position]
 
-        // Title: ใช้ title ใน doc ถ้ามี ถ้าไม่มีสร้างจาก type
+        // --- Title dynamic ---
         holder.title.text = item.title.ifEmpty {
             when (item.type) {
-                "repair"  -> "แจ้งซ่อม: ห้อง ${item.roomNumber}"
-                "payment" -> "แจ้งชำระเงิน: ห้อง ${item.roomNumber}"
-                "chat"    -> "ข้อความจากห้อง ${item.roomNumber}"
-                else      -> if (item.roomNumber.isNotEmpty()) "ห้อง ${item.roomNumber}" else "แจ้งเตือน"
+                "repair"  -> "แจ้งซ่อม จากห้อง ${item.roomNumber}"
+                "payment" -> "แจ้งชำระเงิน จากห้อง ${item.roomNumber}"
+                "chat"    -> "ข้อความ จากห้อง ${item.roomNumber}"
+                else      -> if (item.roomNumber.isNotEmpty()) "ห้อง ${item.roomNumber}" else "การแจ้งเตือน"
             }
         }
-        holder.message.text = item.message
 
-        // เวลา: แสดงแบบ relative
-        val tsDate: Date? = item.timestamp?.toDate()
-        if (tsDate != null) {
-            val diff = System.currentTimeMillis() - tsDate.time
-            holder.tvTime.text = when {
-                diff < 60_000L        -> "เพิ่งส่ง"
-                diff < 3_600_000L     -> "${diff / 60_000} นาทีที่แล้ว"
-                diff < 86_400_000L    -> "${diff / 3_600_000} ชั่วโมงที่แล้ว"
-                else -> SimpleDateFormat("d MMM", Locale("th")).format(tsDate)
+        // --- Message dynamic ---
+        holder.message.text = item.message.ifEmpty {
+            when (item.type) {
+                "repair"  -> "ลูกหอส่งคำขอแจ้งซ่อมใหม่"
+                "payment" -> "ลูกหอแนบสลิปการชำระเงิน"
+                "chat"    -> "มีข้อความใหม่รอการตอบกลับ"
+                else      -> ""
             }
-        } else {
-            holder.tvTime.text = ""
         }
 
-        // จุดแดงถ้ายังไม่อ่าน
-        holder.unreadDot.visibility = if (item.isRead) View.GONE else View.VISIBLE
-        holder.cardView.setCardBackgroundColor(
-            if (item.isRead) 0xFFFFFFFF.toInt() else 0xFFF0F4FF.toInt()
-        )
-
-        // Icon ตาม type
-        val iconRes = when (item.type) {
-            "repair"  -> R.drawable.ic_repair_gg
-            "payment" -> R.drawable.ic_bill_gg
-            "chat"    -> R.drawable.ic_chat_gg
-            else      -> R.drawable.ic_bell_gg
+        // --- Icon + tint + bg circle color ตาม type ---
+        val (iconRes, iconTint, bgColor) = when (item.type) {
+            "repair"  -> Triple(R.drawable.ic_repair_gg, 0xFFF9A825.toInt(), 0xFFFFF8E1.toInt()) // amber
+            "payment" -> Triple(R.drawable.ic_bill_gg,   0xFF1B9E44.toInt(), 0xFFE8F5E9.toInt()) // green
+            "chat"    -> Triple(R.drawable.ic_chat_gg,   0xFF6C63FF.toInt(), 0xFFEDE7FF.toInt()) // purple
+            else      -> Triple(R.drawable.ic_bell_gg,   0xFF3D6FE8.toInt(), 0xFFEEF2FF.toInt()) // blue
         }
         holder.icon.setImageResource(iconRes)
-        holder.icon.clearColorFilter()   // ล้าง tint เดิมออก
+        holder.icon.setColorFilter(iconTint)
+        holder.flIconBg.setBackgroundColor(0)  // clear first
+        holder.flIconBg.background = holder.flIconBg.context.getDrawable(R.drawable.bg_notif_icon_circle)
+        holder.flIconBg.background?.setTint(bgColor)
+
+        // --- เวลา relative ---
+        val tsDate: Date? = item.timestamp?.toDate()
+        holder.tvTime.text = if (tsDate != null) {
+            val diff = System.currentTimeMillis() - tsDate.time
+            when {
+                diff < 60_000L         -> "เพิ่งส่ง"
+                diff < 3_600_000L      -> "${diff / 60_000} นาทีที่แล้ว"
+                diff < 86_400_000L     -> "${diff / 3_600_000} ชั่วโมงที่แล้ว"
+                diff < 7 * 86_400_000L -> "${diff / 86_400_000} วันที่แล้ว"
+                else -> SimpleDateFormat("d MMM", Locale("th")).format(tsDate)
+            }
+        } else ""
+
+        // --- Unread indicators ---
+        val isUnread = !item.isRead
+        holder.unreadDot.visibility = if (isUnread) View.VISIBLE else View.GONE
+        holder.unreadBar.visibility = if (isUnread) View.VISIBLE else View.GONE
+
+        // --- Card background ---
+        holder.cardView.setCardBackgroundColor(
+            if (isUnread) 0xFFF0F4FF.toInt() else 0xFFFFFFFF.toInt()
+        )
 
         holder.itemView.setOnClickListener { onItemClick(item) }
     }

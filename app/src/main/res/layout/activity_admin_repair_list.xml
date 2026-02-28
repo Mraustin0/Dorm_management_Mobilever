@@ -48,6 +48,77 @@
             app:layout_constraintTop_toTopOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
+    <!-- Filter Chips -->
+    <LinearLayout
+        android:id="@+id/hsv_filter"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:background="#FFFFFF"
+        android:paddingStart="10dp"
+        android:paddingEnd="10dp"
+        android:paddingTop="6dp"
+        android:paddingBottom="6dp"
+        android:weightSum="4"
+        app:layout_constraintTop_toBottomOf="@id/layout_top_bar_repair_list">
+
+        <!-- ทั้งหมด -->
+        <TextView
+            android:id="@+id/chip_all"
+            android:layout_width="0dp"
+            android:layout_height="30dp"
+            android:layout_weight="1"
+            android:layout_marginEnd="4dp"
+            android:gravity="center"
+            android:text="ทั้งหมด"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:background="@drawable/chip_selected"
+            android:textColor="#FFFFFF" />
+
+        <!-- รอดำเนินการ -->
+        <TextView
+            android:id="@+id/chip_pending"
+            android:layout_width="0dp"
+            android:layout_height="30dp"
+            android:layout_weight="1"
+            android:layout_marginEnd="4dp"
+            android:gravity="center"
+            android:text="รอดำเนินการ"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:background="@drawable/chip_unselected"
+            android:textColor="#666666" />
+
+        <!-- กำลังดำเนินการ -->
+        <TextView
+            android:id="@+id/chip_in_progress"
+            android:layout_width="0dp"
+            android:layout_height="30dp"
+            android:layout_weight="1"
+            android:layout_marginEnd="4dp"
+            android:gravity="center"
+            android:text="กำลังดำเนินการ"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:background="@drawable/chip_unselected"
+            android:textColor="#666666" />
+
+        <!-- เสร็จสิ้น -->
+        <TextView
+            android:id="@+id/chip_completed"
+            android:layout_width="0dp"
+            android:layout_height="30dp"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="เสร็จสิ้น"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:background="@drawable/chip_unselected"
+            android:textColor="#666666" />
+
+    </LinearLayout>
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_admin_repair_list"
         android:layout_width="match_parent"
@@ -55,8 +126,8 @@
         android:clipToPadding="false"
         android:padding="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/layout_top_bar_repair_list"
-        tools:listitem="@layout/item_notification" />
+        app:layout_constraintTop_toBottomOf="@id/hsv_filter"
+        tools:listitem="@layout/item_admin_repair" />
 
     <LinearLayout
         android:id="@+id/ll_empty_repair"
@@ -68,7 +139,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/layout_top_bar_repair_list">
+        app:layout_constraintTop_toBottomOf="@id/hsv_filter">
 
         <ImageView
             android:layout_width="80dp"
@@ -80,7 +151,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="ไม่มีรายการแจ้งซ่อมใหม่"
+            android:text="ไม่มีรายการแจ้งซ่อม"
             android:textColor="#999999"
             android:textSize="16sp" />
     </LinearLayout>

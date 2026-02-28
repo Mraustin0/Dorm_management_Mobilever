@@ -11,9 +11,15 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 class AdminRepairAdapter(
-    private val list: List<RepairRequest>,
+    private val list: MutableList<RepairRequest>,
     private val onItemClick: (RepairRequest) -> Unit
 ) : RecyclerView.Adapter<AdminRepairAdapter.ViewHolder>() {
+
+    fun updateList(newList: List<RepairRequest>) {
+        list.clear()
+        list.addAll(newList)
+        notifyDataSetChanged()
+    }
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val tvRoom: TextView = view.findViewById(R.id.tv_repair_room)

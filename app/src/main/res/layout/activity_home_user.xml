@@ -7,7 +7,6 @@
     android:layout_height="match_parent"
     android:background="#FFFFFF">
 
-    <!-- Scrollable Content Area -->
     <androidx.core.widget.NestedScrollView
         android:id="@+id/scroll_content"
         android:layout_width="0dp"
@@ -32,12 +31,16 @@
                 android:paddingTop="32dp"
                 android:paddingBottom="16dp">
 
-                <ImageView
+                <com.google.android.material.imageview.ShapeableImageView
                     android:id="@+id/user_avatar"
                     android:layout_width="50dp"
                     android:layout_height="50dp"
                     android:layout_centerVertical="true"
-                    android:src="@drawable/shape_circle_black" />
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/u1"
+                    app:shapeAppearanceOverlay="@style/CircleImage"
+                    app:strokeColor="#F0F0F0"
+                    app:strokeWidth="1dp" />
 
                 <LinearLayout
                     android:layout_width="wrap_content"
@@ -59,7 +62,7 @@
                         android:id="@+id/user_name"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Tzoey ห้อง 201"
+                        android:text="-"
                         android:textColor="#333333"
                         android:textSize="16sp"
                         android:textStyle="bold" />
@@ -104,76 +107,71 @@
                     android:orientation="vertical"
                     android:padding="20dp">
 
-                    <!-- แสดงเมื่อไม่มีบิล -->
                     <TextView
                         android:id="@+id/tv_no_bill"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:gravity="center"
-                        android:padding="24dp"
-                        android:text="ยังไม่มีบิลค้างชำระ"
+                        android:text="ไม่มีรายการค้างชำระ"
+                        android:textAlignment="center"
+                        android:padding="20dp"
                         android:textColor="#888888"
-                        android:textSize="16sp"
                         android:visibility="gone" />
 
-                    <!-- แสดงเมื่อมีบิล -->
-                    <RelativeLayout
+                    <LinearLayout
                         android:id="@+id/layout_bill_info"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content">
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
 
-                        <LinearLayout
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_centerVertical="true"
-                            android:layout_toStartOf="@id/btn_view_pay_bill"
-                            android:layout_alignParentStart="true"
-                            android:layout_marginEnd="8dp"
-                            android:orientation="vertical">
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content">
 
-                            <TextView
+                            <LinearLayout
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="ยอดค้างชำระ"
-                                android:textColor="#333333" />
+                                android:layout_centerVertical="true"
+                                android:layout_alignParentStart="true"
+                                android:layout_toStartOf="@id/btn_view_pay_bill"
+                                android:layout_marginEnd="8dp"
+                                android:orientation="vertical">
 
-                            <TextView
-                                android:id="@+id/outstanding_amount"
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="ยอดค้างชำระ"
+                                    android:textColor="#333333" />
+
+                                <TextView
+                                    android:id="@+id/outstanding_amount"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="0.00 บาท"
+                                    android:textColor="#E53935"
+                                    android:textSize="22sp"
+                                    android:textStyle="bold" />
+                            </LinearLayout>
+
+                            <Button
+                                android:id="@+id/btn_view_pay_bill"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="0.00 บาท"
-                                android:textColor="#E53935"
-                                android:textSize="22sp"
-                                android:textStyle="bold" />
+                                android:layout_alignParentEnd="true"
+                                android:layout_centerVertical="true"
+                                android:backgroundTint="#E53935"
+                                android:text="ดูและจ่ายบิล"
+                                android:textAllCaps="false"
+                                android:textColor="#FFFFFF"
+                                app:cornerRadius="25dp" />
+                        </RelativeLayout>
 
-                            <TextView
-                                android:id="@+id/tv_due_date"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text=""
-                                android:textColor="#E53935"
-                                android:textSize="11sp" />
-                        </LinearLayout>
-
-                        <Button
-                            android:id="@+id/btn_view_pay_bill"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_alignParentEnd="true"
-                            android:layout_centerVertical="true"
-                            android:backgroundTint="#E53935"
-                            android:text="ดูและจ่ายบิล"
-                            android:textAllCaps="false"
-                            android:textColor="#FFFFFF"
-                            app:cornerRadius="25dp" />
-                    </RelativeLayout>
-
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:layout_marginTop="16dp"
-                        android:layout_marginBottom="16dp"
-                        android:background="#F0F0F0" />
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="1dp"
+                            android:layout_marginTop="16dp"
+                            android:layout_marginBottom="16dp"
+                            android:background="#F0F0F0" />
+                    </LinearLayout>
 
                     <RelativeLayout
                         android:id="@+id/btn_toggle_usage"
@@ -212,100 +210,40 @@
                         <RelativeLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content">
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="ค่าเช่าห้อง"
-                                android:textColor="#666666" />
-
-                            <TextView
-                                android:id="@+id/tv_room_price"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_alignParentEnd="true"
-                                android:text="-" />
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="ค่าเช่าห้อง" android:textColor="#666666" />
+                            <TextView android:id="@+id/tv_room_price" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_alignParentEnd="true" android:text="-" />
                         </RelativeLayout>
 
                         <RelativeLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="8dp">
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="ค่าไฟฟ้า"
-                                android:textColor="#666666" />
-
-                            <TextView
-                                android:id="@+id/tv_electric_price"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_alignParentEnd="true"
-                                android:text="-"
-                                android:textSize="12sp" />
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="ค่าไฟฟ้า" android:textColor="#666666" />
+                            <TextView android:id="@+id/tv_electric_price" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_alignParentEnd="true" android:text="-" android:textSize="12sp" />
                         </RelativeLayout>
 
                         <RelativeLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="8dp">
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="ค่าน้ำ"
-                                android:textColor="#666666" />
-
-                            <TextView
-                                android:id="@+id/tv_water_price"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_alignParentEnd="true"
-                                android:text="-"
-                                android:textSize="12sp" />
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="ค่าน้ำ" android:textColor="#666666" />
+                            <TextView android:id="@+id/tv_water_price" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_alignParentEnd="true" android:text="-" android:textSize="12sp" />
                         </RelativeLayout>
 
                         <RelativeLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="8dp">
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="ค่าอื่นๆ"
-                                android:textColor="#666666" />
-
-                            <TextView
-                                android:id="@+id/tv_other_price"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_alignParentEnd="true"
-                                android:text="-"
-                                android:textSize="12sp" />
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="ค่าอื่นๆ" android:textColor="#666666" />
+                            <TextView android:id="@+id/tv_other_price" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_alignParentEnd="true" android:text="-" android:textSize="12sp" />
                         </RelativeLayout>
 
                         <RelativeLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="8dp">
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="รวม"
-                                android:textStyle="bold" />
-
-                            <TextView
-                                android:id="@+id/tv_total_price"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_alignParentEnd="true"
-                                android:text="-"
-                                android:textColor="#E53935"
-                                android:textStyle="bold" />
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="รวม" android:textStyle="bold" />
+                            <TextView android:id="@+id/tv_total_price" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_alignParentEnd="true" android:text="-" android:textColor="#E53935" android:textStyle="bold" />
                         </RelativeLayout>
                     </LinearLayout>
                 </LinearLayout>
@@ -338,31 +276,11 @@
                     android:layout_height="110dp"
                     android:layout_columnWeight="1"
                     android:layout_margin="6dp"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:foreground="?attr/selectableItemBackground"
                     app:cardCornerRadius="16dp"
                     app:cardElevation="2dp">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:gravity="center"
-                        android:orientation="vertical">
-
-                        <ImageView
-                            android:layout_width="32dp"
-                            android:layout_height="32dp"
-                            android:src="@drawable/ic_parcel_gg"
-                            app:tint="#333333" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="8dp"
-                            android:text="พัสดุ"
-                            android:textColor="#333333"
-                            android:textStyle="bold" />
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center" android:orientation="vertical">
+                        <ImageView android:layout_width="32dp" android:layout_height="32dp" android:src="@drawable/ic_parcel_gg" app:tint="#333333" />
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:text="พัสดุ" android:textColor="#333333" android:textStyle="bold" />
                     </LinearLayout>
                 </androidx.cardview.widget.CardView>
 
@@ -372,47 +290,12 @@
                     android:layout_height="110dp"
                     android:layout_columnWeight="1"
                     android:layout_margin="6dp"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:foreground="?attr/selectableItemBackground"
                     app:cardCornerRadius="16dp"
                     app:cardElevation="2dp">
-
-                    <FrameLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent">
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:gravity="center"
-                            android:orientation="vertical">
-
-                            <ImageView
-                                android:layout_width="32dp"
-                                android:layout_height="32dp"
-                                android:src="@drawable/ic_repair_gg"
-                                app:tint="#333333" />
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="8dp"
-                                android:text="แจ้งซ่อม"
-                                android:textColor="#333333"
-                                android:textStyle="bold" />
-                        </LinearLayout>
-
-                        <!-- Red dot for repair card -->
-                        <View
-                            android:id="@+id/view_repair_dot"
-                            android:layout_width="10dp"
-                            android:layout_height="10dp"
-                            android:layout_gravity="top|end"
-                            android:layout_margin="12dp"
-                            android:background="@drawable/bg_unread_dot"
-                            android:visibility="gone" />
-                    </FrameLayout>
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center" android:orientation="vertical">
+                        <ImageView android:layout_width="32dp" android:layout_height="32dp" android:src="@drawable/ic_repair_gg" app:tint="#333333" />
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:text="แจ้งซ่อม" android:textColor="#333333" android:textStyle="bold" />
+                    </LinearLayout>
                 </androidx.cardview.widget.CardView>
 
                 <androidx.cardview.widget.CardView
@@ -421,31 +304,11 @@
                     android:layout_height="110dp"
                     android:layout_columnWeight="1"
                     android:layout_margin="6dp"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:foreground="?attr/selectableItemBackground"
                     app:cardCornerRadius="16dp"
                     app:cardElevation="2dp">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:gravity="center"
-                        android:orientation="vertical">
-
-                        <ImageView
-                            android:layout_width="32dp"
-                            android:layout_height="32dp"
-                            android:src="@drawable/ic_announcement_gg"
-                            app:tint="#333333" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="8dp"
-                            android:text="ประกาศ"
-                            android:textColor="#333333"
-                            android:textStyle="bold" />
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center" android:orientation="vertical">
+                        <ImageView android:layout_width="32dp" android:layout_height="32dp" android:src="@drawable/ic_announcement_gg" app:tint="#333333" />
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:text="ประกาศ" android:textColor="#333333" android:textStyle="bold" />
                     </LinearLayout>
                 </androidx.cardview.widget.CardView>
 
@@ -455,39 +318,17 @@
                     android:layout_height="110dp"
                     android:layout_columnWeight="1"
                     android:layout_margin="6dp"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:foreground="?attr/selectableItemBackground"
                     app:cardCornerRadius="16dp"
                     app:cardElevation="2dp">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:gravity="center"
-                        android:orientation="vertical">
-
-                        <ImageView
-                            android:layout_width="32dp"
-                            android:layout_height="32dp"
-                            android:src="@android:drawable/ic_dialog_map"
-                            app:tint="#333333" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="8dp"
-                            android:text="แจ้งย้ายออก"
-                            android:textColor="#333333"
-                            android:textStyle="bold" />
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center" android:orientation="vertical">
+                        <ImageView android:layout_width="32dp" android:layout_height="32dp" android:src="@android:drawable/ic_dialog_map" app:tint="#333333" />
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:text="แจ้งย้ายออก" android:textColor="#333333" android:textStyle="bold" />
                     </LinearLayout>
                 </androidx.cardview.widget.CardView>
             </GridLayout>
-
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
-    <!-- Bottom Navigation -->
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottom_nav"
         android:layout_width="0dp"

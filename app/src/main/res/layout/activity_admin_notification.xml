@@ -37,16 +37,17 @@
         </FrameLayout>
 
         <!-- Title Section -->
+
         <TextView
             android:id="@+id/tv_header_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="12dp"
+            android:letterSpacing="0.02"
             android:text="การแจ้งเตือน"
             android:textColor="#FFFFFF"
             android:textSize="26sp"
             android:textStyle="bold"
-            android:letterSpacing="0.02"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/btn_back_container" />
 
