@@ -3,6 +3,7 @@ package com.example.horganized.model
 data class User(
     val name: String = "",
     val surname: String = "",
+    val citizenId: String = "", // เพิ่มเลขบัตรประชาชน
     val phone: String = "",
     val email: String = "",
     val profileImage: String = "",

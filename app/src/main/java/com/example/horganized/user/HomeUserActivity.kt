@@ -46,118 +46,65 @@ class HomeUserActivity : AppCompatActivity() {
             }
         }
 
-        // ปุ่มเมนู 3 ขีด (Header)
-        val menuIcon = findViewById<ImageView>(R.id.menu_icon)
-        menuIcon?.setOnClickListener {
-            val intent = Intent(this, UserProfileActivity::class.java)
-            startActivity(intent)
-            overridePendingTransition(R.anim.fade_in, R.anim.fade_out)
-        }
-        menuIcon?.applyHoverAnimation()
-
-        // ปุ่มกระดิ่งแจ้งเตือน (Header)
-        val notificationIcon = findViewById<ImageView>(R.id.notification_icon)
-        notificationIcon?.setOnClickListener {
-            val intent = Intent(this, NotificationsActivity::class.java)
-            startActivity(intent)
-            overridePendingTransition(R.anim.fade_in, R.anim.fade_out)
-        }
-        notificationIcon?.applyHoverAnimation()
-
-        // ปุ่ม "ดูและจ่ายบิล" → ไปหน้ารายละเอียดบิลก่อน เพื่อเลือกบิลที่จะจ่าย
-        findViewById<Button>(R.id.btn_view_pay_bill)?.setOnClickListener {
-            val intent = Intent(this, DetailBillActivity::class.java)
-            startActivity(intent)
-            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
+        // ปุ่มเมนู 3 ขีด
+        findViewById<ImageView>(R.id.menu_icon)?.setOnClickListener {
+            startActivity(Intent(this, UserProfileActivity::class.java))
         }
 
-        // Bill Card
-        findViewById<CardView>(R.id.bill_card)?.applyHoverAnimation()
-
-        // ปุ่มบริการ - พัสดุ
-        val cardParcel = findViewById<CardView>(R.id.card_parcel)
-        cardParcel?.setOnClickListener {
-            val intent = Intent(this, NotificationsActivity::class.java)
-            startActivity(intent)
-            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
+        // ปุ่มกระดิ่งแจ้งเตือน
+        findViewById<ImageView>(R.id.notification_icon)?.setOnClickListener {
+            startActivity(Intent(this, NotificationsActivity::class.java))
         }
-        cardParcel?.applyHoverAnimation()
 
         // ปุ่มบริการ - แจ้งซ่อม
-        val cardRepair = findViewById<CardView>(R.id.card_repair)
-        cardRepair?.setOnClickListener {
-            val intent = Intent(this, RepairActivity::class.java)
-            startActivity(intent)
-            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
+        findViewById<CardView>(R.id.card_repair)?.setOnClickListener {
+            startActivity(Intent(this, RepairActivity::class.java))
         }
-        cardRepair?.applyHoverAnimation()
 
         // ปุ่มบริการ - ประกาศ
-        val cardAnnouncement = findViewById<CardView>(R.id.card_announcement)
-        cardAnnouncement?.setOnClickListener {
-            val intent = Intent(this, AnnouncementActivity::class.java)
-            startActivity(intent)
-            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
+        findViewById<CardView>(R.id.card_announcement)?.setOnClickListener {
+            startActivity(Intent(this, AnnouncementActivity::class.java))
         }
-        cardAnnouncement?.applyHoverAnimation()
 
         // ปุ่มบริการ - แจ้งย้ายออก
-        val cardMoveOut = findViewById<CardView>(R.id.card_move_out)
-        cardMoveOut?.setOnClickListener {
-            val intent = Intent(this, ContractListActivity::class.java)
-            startActivity(intent)
-            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
+        findViewById<CardView>(R.id.card_move_out)?.setOnClickListener {
+            startActivity(Intent(this, UserMoveOutActivity::class.java))
         }
-        cardMoveOut?.applyHoverAnimation()
+
+        // ปุ่มดูและจ่ายบิล
+        findViewById<Button>(R.id.btn_view_pay_bill)?.setOnClickListener {
+            startActivity(Intent(this, DetailBillActivity::class.java))
+        }
 
         loadUserData()
         loadBillData()
         setupBottomNavigation()
     }
 
-    @SuppressLint("ClickableViewAccessibility")
-    private fun View.applyHoverAnimation() {
-        this.setOnTouchListener { v, event ->
-            when (event.action) {
-                MotionEvent.ACTION_DOWN -> {
-                    v.animate().scaleX(0.95f).scaleY(0.95f).setDuration(100).start()
-                }
-                MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
-                    v.animate().scaleX(1f).scaleY(1f).setDuration(100).start()
-                }
-            }
-            false // return false so onClickListener still works
-        }
-    }
-
     private fun loadUserData() {
         val uid = auth.currentUser?.uid ?: return
-
-        db.collection("users").document(uid).get()
-            .addOnSuccessListener { doc ->
-                if (doc != null && doc.exists()) {
-                    val name = doc.getString("name") ?: ""
-                    val room = doc.getString("roomNumber") ?: ""
-                    findViewById<TextView>(R.id.user_name)?.text = "$name ห้อง $room"
-                }
+        db.collection("users").document(uid).get().addOnSuccessListener { doc ->
+            if (doc != null && doc.exists()) {
+                val name = doc.getString("name") ?: ""
+                val room = doc.getString("roomNumber") ?: ""
+                findViewById<TextView>(R.id.user_name)?.text = "$name ห้อง $room"
             }
+        }
     }
 
     private fun loadBillData() {
         val uid = auth.currentUser?.uid ?: return
-
         db.collection("bills").whereEqualTo("userId", uid)
             .orderBy("dueDate", Query.Direction.DESCENDING).limit(1)
             .addSnapshotListener { snapshots, _ ->
-                if (snapshots == null || snapshots.isEmpty) {
-                    // ไม่มีบิล
-                    showNoBill()
-                    return@addSnapshotListener
-                }
-                val bill = snapshots.documents[0].toObject(Bill::class.java)
-                if (bill != null) {
-                    showHasBill()
-                    updateBillUI(bill)
+                if (snapshots != null && !snapshots.isEmpty) {
+                    val bill = snapshots.documents[0].toObject(Bill::class.java)
+                    if (bill != null) {
+                        showHasBill()
+                        updateBillUI(bill)
+                    } else {
+                        showNoBill()
+                    }
                 } else {
                     showNoBill()
                 }
@@ -183,46 +130,22 @@ class HomeUserActivity : AppCompatActivity() {
 
         tvAmount?.text = String.format("%,.2f บาท", bill.amount)
 
-        // แสดงข้อมูลการใช้งาน
+        // แสดงรายละเอียดการใช้งาน
         findViewById<TextView>(R.id.tv_room_price)?.text = String.format("%,.0f บาท", bill.details.roomPrice)
         findViewById<TextView>(R.id.tv_electric_price)?.text = "${bill.details.electricUnit} หน่วย = ${String.format("%,.0f", bill.details.electricPrice)} บาท"
-        findViewById<TextView>(R.id.tv_water_price)?.text = String.format("%,.0f บาท", bill.details.waterPrice)
+        findViewById<TextView>(R.id.tv_water_price)?.text = "${bill.details.waterUnit} หน่วย = ${String.format("%,.0f", bill.details.waterPrice)} บาท"
         findViewById<TextView>(R.id.tv_other_price)?.text = String.format("%,.0f บาท", bill.details.otherPrice)
         findViewById<TextView>(R.id.tv_total_price)?.text = String.format("%,.2f บาท", bill.amount)
 
-        when {
-            bill.isPaid -> {
-                // จ่ายแล้ว (admin ยืนยัน) → สีเขียว
-                btnPay?.text = "จ่ายแล้ว"
-                btnPay?.backgroundTintList = android.content.res.ColorStateList.valueOf(
-                    android.graphics.Color.parseColor("#1B9E44")
-                )
-                btnPay?.isEnabled = false
-            }
-            bill.isPending -> {
-                // ส่งสลิปแล้ว รอ admin ยืนยัน → สีเหลืองเข้ม
-                btnPay?.text = "รอการยืนยัน"
-                btnPay?.backgroundTintList = android.content.res.ColorStateList.valueOf(
-                    android.graphics.Color.parseColor("#F9A825")
-                )
-                btnPay?.isEnabled = false
-            }
-            bill.status == "rejected" -> {
-                // admin ปฏิเสธสลิป → สีแดง ให้จ่ายใหม่
-                btnPay?.text = "สลิปถูกปฏิเสธ จ่ายใหม่"
-                btnPay?.backgroundTintList = android.content.res.ColorStateList.valueOf(
-                    android.graphics.Color.parseColor("#E53935")
-                )
-                btnPay?.isEnabled = true
-            }
-            else -> {
-                // ยังไม่จ่าย → สีแดง
-                btnPay?.text = "ดูและจ่ายบิล"
-                btnPay?.backgroundTintList = android.content.res.ColorStateList.valueOf(
-                    android.graphics.Color.parseColor("#E53935")
-                )
-                btnPay?.isEnabled = true
-            }
+        if (bill.isPaid) {
+            btnPay?.text = "จ่ายแล้ว"
+            btnPay?.backgroundTintList = android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#1B9E44"))
+            btnPay?.isEnabled = false
+        } else {
+            // แก้ไขข้อความปุ่มถ้ายังไม่ชำระ
+            btnPay?.text = "ยังไม่ชำระ"
+            btnPay?.backgroundTintList = android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#E53935"))
+            btnPay?.isEnabled = true
         }
     }
 
@@ -232,24 +155,9 @@ class HomeUserActivity : AppCompatActivity() {
         bottomNav.setOnItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.navigation_home -> true
-                R.id.navigation_bill -> {
-                    startActivity(Intent(this, DetailBillActivity::class.java))
-                    overridePendingTransition(0, 0)
-                    finish()
-                    true
-                }
-                R.id.navigation_notifications -> {
-                    startActivity(Intent(this, DormInfoActivity::class.java))
-                    overridePendingTransition(0, 0)
-                    finish()
-                    true
-                }
-                R.id.navigation_chat -> {
-                    startActivity(Intent(this, ChatActivity::class.java))
-                    overridePendingTransition(0, 0)
-                    finish()
-                    true
-                }
+                R.id.navigation_bill -> { startActivity(Intent(this, DetailBillActivity::class.java)); true }
+                R.id.navigation_notifications -> { startActivity(Intent(this, DormInfoActivity::class.java)); true }
+                R.id.navigation_chat -> { startActivity(Intent(this, ChatActivity::class.java)); true }
                 else -> false
             }
         }

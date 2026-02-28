@@ -28,83 +28,82 @@ class AdminHomeActivity : AppCompatActivity() {
             insets
         }
 
+        setupClickListeners()
         loadVacantRoomCount()
-        checkUnreadAdminNotifications()
+        
+        // เริ่มต้นฟังการแจ้งเตือนแบบ Real-time
+        checkUnreadGeneralNotifications()
+        checkNewRepairRequests()
+    }
 
-        // ไอคอนการแจ้งเตือน (Notifications) เปิดหน้า AdminNotificationActivity
-        val ivNotification = findViewById<ImageView>(R.id.iv_notification)
-        ivNotification.setOnClickListener {
-            val intent = Intent(this, AdminNotificationActivity::class.java)
-            startActivity(intent)
+    private fun setupClickListeners() {
+        // ไอคอนการแจ้งเตือนรวม
+        findViewById<ImageView>(R.id.iv_notification).setOnClickListener {
+            startActivity(Intent(this, AdminNotificationActivity::class.java))
         }
 
-        // เชื่อมการ์ดห้องว่าง
-        findViewById<CardView>(R.id.cv_room_vacant).setOnClickListener {
-            startActivity(Intent(this, AdminVacantRoomActivity::class.java))
-        }
-
-        // เชื่อมไอคอนกลางล่างไปยังหน้าเลือกห้องพัก
-        findViewById<ImageView>(R.id.iv_nav_apartment).setOnClickListener {
-            startActivity(Intent(this, AdminSelectRoomActivity::class.java))
-        }
-
-        // เชื่อมไอคอนแชท
-        findViewById<ImageView>(R.id.iv_nav_chat).setOnClickListener {
-            startActivity(Intent(this, ChatListActivity::class.java))
-        }
-
-        // เชื่อมปุ่มประกาศ
-        findViewById<CardView>(R.id.cv_announce).setOnClickListener {
-            startActivity(Intent(this, AdminAddAnnouncementActivity::class.java))
-        }
-
-        // เชื่อมปุ่มจดมิเตอร์
-        findViewById<CardView>(R.id.cv_meter).setOnClickListener {
-            startActivity(Intent(this, AdminMeterActivity::class.java))
-        }
-
-        // เชื่อมปุ่มตรวจสอบสลิป
-        findViewById<CardView>(R.id.cv_check_slip).setOnClickListener {
-            val intent = Intent(this, AdminSelectRoomActivity::class.java)
-            intent.putExtra("MODE", "CHECK_SLIP")
-            startActivity(intent)
-        }
-
-        // เชื่อมปุ่มสร้างบิล
-        findViewById<CardView>(R.id.cv_create_bill).setOnClickListener {
-            val intent = Intent(this, AdminSelectRoomActivity::class.java)
-            intent.putExtra("MODE", "CREATE_BILL")
-            startActivity(intent)
-        }
-
-        // เชื่อมปุ่มแจ้งซ่อม
+        // เมนูแจ้งซ่อม
         findViewById<CardView>(R.id.cv_technician).setOnClickListener {
+            markRepairRequestsAsRead()
             startActivity(Intent(this, AdminRepairListActivity::class.java))
         }
 
-        // เชื่อมปุ่มย้ายเข้า/ออก
+        // คืนค่าเดิม: ปุ่มย้ายเข้า/ออก ให้ไปหน้าเลือกห้องเพื่อจัดการรายห้อง
         findViewById<CardView>(R.id.cv_move).setOnClickListener {
             startActivity(Intent(this, AdminMoveSelectionActivity::class.java))
         }
 
-        // เชื่อมไอคอนตั้งค่า
+        // เมนูอื่นๆ
+        findViewById<CardView>(R.id.cv_room_vacant).setOnClickListener {
+            startActivity(Intent(this, AdminVacantRoomActivity::class.java))
+        }
+        findViewById<ImageView>(R.id.iv_nav_apartment).setOnClickListener {
+            startActivity(Intent(this, AdminSelectRoomActivity::class.java))
+        }
+        findViewById<ImageView>(R.id.iv_nav_chat).setOnClickListener {
+            startActivity(Intent(this, ChatListActivity::class.java))
+        }
+        findViewById<CardView>(R.id.cv_announce).setOnClickListener {
+            startActivity(Intent(this, AdminAddAnnouncementActivity::class.java))
+        }
+        findViewById<CardView>(R.id.cv_meter).setOnClickListener {
+            startActivity(Intent(this, AdminMeterActivity::class.java))
+        }
+        findViewById<CardView>(R.id.cv_check_slip).setOnClickListener {
+            startActivity(Intent(this, AdminSelectRoomActivity::class.java).apply { putExtra("MODE", "CHECK_SLIP") })
+        }
+        findViewById<CardView>(R.id.cv_create_bill).setOnClickListener {
+            startActivity(Intent(this, AdminSelectRoomActivity::class.java).apply { putExtra("MODE", "CREATE_BILL") })
+        }
         findViewById<ImageView>(R.id.iv_menu).setOnClickListener {
             startActivity(Intent(this, AdminSettingActivity::class.java))
         }
     }
 
-    private fun checkUnreadAdminNotifications() {
+    private fun checkUnreadGeneralNotifications() {
         val viewNotifDot = findViewById<View>(R.id.view_notif_dot)
-        // ฟังรายการแจ้งเตือนจากลูกหอที่ส่งมาหาแอดมิน (คอลเลกชัน Admin_Notifications)
         db.collection("Admin_Notifications")
             .whereEqualTo("isRead", false)
-            .addSnapshotListener { snapshots, e ->
-                if (snapshots != null && !snapshots.isEmpty) {
-                    viewNotifDot?.visibility = View.VISIBLE
-                } else {
-                    viewNotifDot?.visibility = View.GONE
-                }
+            .addSnapshotListener { snapshots, _ ->
+                viewNotifDot?.visibility = if (snapshots != null && !snapshots.isEmpty) View.VISIBLE else View.GONE
             }
+    }
+
+    private fun checkNewRepairRequests() {
+        val viewRepairDot = findViewById<View>(R.id.view_repair_card_dot)
+        db.collection("repair_requests")
+            .whereEqualTo("isRead", false)
+            .addSnapshotListener { snapshots, _ ->
+                viewRepairDot?.visibility = if (snapshots != null && !snapshots.isEmpty) View.VISIBLE else View.GONE
+            }
+    }
+
+    private fun markRepairRequestsAsRead() {
+        db.collection("repair_requests").whereEqualTo("isRead", false).get().addOnSuccessListener { docs ->
+            for (doc in docs) {
+                db.collection("repair_requests").document(doc.id).update("isRead", true)
+            }
+        }
     }
 
     override fun onResume() {
@@ -114,18 +113,11 @@ class AdminHomeActivity : AppCompatActivity() {
 
     private fun loadVacantRoomCount() {
         val tvVacantCount = findViewById<TextView>(R.id.tv_vacant_count)
-        db.collection("rooms")
-            .get()
-            .addOnSuccessListener { documents ->
-                if (tvVacantCount == null) return@addOnSuccessListener
-                val totalRooms = documents.size()
-                val vacantRooms = documents.count { doc ->
-                    doc.getBoolean("isVacant") ?: true
-                }
-                tvVacantCount.text = "$vacantRooms/$totalRooms"
-            }
-            .addOnFailureListener {
-                tvVacantCount?.text = "--/--"
-            }
+        db.collection("rooms").get().addOnSuccessListener { documents ->
+            if (tvVacantCount == null) return@addOnSuccessListener
+            val total = documents.size()
+            val vacant = documents.count { it.getBoolean("isVacant") ?: true }
+            tvVacantCount.text = "$vacant/$total"
+        }
     }
 }

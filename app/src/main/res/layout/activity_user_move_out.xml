@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#F8F8F8">
+
+    <!-- Header Section -->
+    <RelativeLayout
+        android:id="@+id/rl_header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="32dp"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingBottom="16dp"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:id="@+id/btn_back"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:padding="4dp"
+            android:src="@drawable/ic_back_gg" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:text="แจ้งย้ายออก"
+            android:textColor="#000000"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+        <ImageView
+            android:id="@+id/btn_history"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_alignParentEnd="true"
+            android:layout_marginEnd="23dp"
+            android:src="@drawable/ic_history_gg"
+            app:tint="#333333" />
+    </RelativeLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintTop_toBottomOf="@id/rl_header"
+        app:layout_constraintBottom_toTopOf="@id/btn_submit_move_out">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="20dp">
+
+            <!-- ข้อมูลผู้เช่า -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="ข้อมูลผู้เช่า"
+                android:textColor="#000000"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="2dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
+                        <TextView android:layout_width="120dp" android:layout_height="wrap_content" android:text="ชื่อ-สกุล:" android:textColor="#666666" />
+                        <TextView android:id="@+id/tv_user_fullname" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="-" android:textColor="#000000" android:textStyle="bold" />
+                    </LinearLayout>
+
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:orientation="horizontal">
+                        <TextView android:layout_width="120dp" android:layout_height="wrap_content" android:text="เลขบัตรประชาชน:" android:textColor="#666666" />
+                        <TextView android:id="@+id/tv_user_citizen_id" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="-" android:textColor="#000000" />
+                    </LinearLayout>
+
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:orientation="horizontal">
+                        <TextView android:layout_width="120dp" android:layout_height="wrap_content" android:text="เบอร์โทรศัพท์:" android:textColor="#666666" />
+                        <TextView android:id="@+id/tv_user_phone" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="-" android:textColor="#000000" />
+                    </LinearLayout>
+
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:orientation="horizontal">
+                        <TextView android:layout_width="120dp" android:layout_height="wrap_content" android:text="อีเมล:" android:textColor="#666666" />
+                        <TextView android:id="@+id/tv_user_email" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="-" android:textColor="#000000" />
+                    </LinearLayout>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- ข้อมูลสัญญา -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:text="ข้อมูลสัญญา"
+                android:textColor="#000000"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="2dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <RelativeLayout
+                        android:id="@+id/layout_view_contract"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:background="?attr/selectableItemBackground">
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="สัญญาเช่า:" android:textColor="#666666" android:layout_centerVertical="true"/>
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentEnd="true"
+                            android:gravity="center_vertical">
+                            <ImageView android:layout_width="20dp" android:layout_height="20dp" android:src="@drawable/ic_list" app:tint="#666666" />
+                            <TextView android:id="@+id/tv_contract_filename" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="หนังสือสัญญาเช่าห้อง.pdf" android:textColor="#4A90E2" android:layout_marginStart="4dp" android:textStyle="bold" />
+                        </LinearLayout>
+                    </RelativeLayout>
+
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:orientation="horizontal">
+                        <TextView android:layout_width="120dp" android:layout_height="wrap_content" android:text="วันที่เริ่มเช่า:" android:textColor="#666666" />
+                        <TextView android:id="@+id/tv_move_in_date" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="-" android:textColor="#000000" />
+                    </LinearLayout>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- เลือกวันที่ -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:text="วันที่แจ้งย้ายออก *"
+                android:textColor="#333333"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+
+            <EditText
+                android:id="@+id/et_notify_date"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/shape_edittext_bg"
+                android:clickable="true"
+                android:focusable="false"
+                android:hint="วว/ดด/ปปปป"
+                android:paddingStart="16dp"
+                android:paddingEnd="40dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="วันที่ย้ายออกจริง *"
+                android:textColor="#333333"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+
+            <EditText
+                android:id="@+id/et_move_out_date"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/shape_edittext_bg"
+                android:clickable="true"
+                android:focusable="false"
+                android:hint="วว/ดด/ปปปป"
+                android:paddingStart="16dp"
+                android:paddingEnd="40dp" />
+
+        </LinearLayout>
+    </ScrollView>
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/btn_submit_move_out"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:layout_margin="20dp"
+        android:background="@drawable/button_background"
+        android:backgroundTint="#E53935"
+        android:text="แจ้งย้ายออก"
+        android:textAllCaps="false"
+        android:textColor="#FFFFFF"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
