@@ -33,18 +33,20 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tv_login_title" />
 
-    <!-- Email Input (ขยับลงมาให้สมส่วน) -->
+    <!-- Email Input -->
     <androidx.cardview.widget.CardView
         android:id="@+id/container_email"
         android:layout_width="match_parent"
-        android:layout_height="64dp"
+        android:layout_height="56dp"
         android:layout_marginStart="32dp"
-        android:layout_marginTop="95dp"
         android:layout_marginEnd="32dp"
         app:cardBackgroundColor="#F8F9FA"
         app:cardCornerRadius="16dp"
         app:cardElevation="0dp"
-        app:layout_constraintTop_toBottomOf="@id/tv_login_subtitle">
+        app:layout_constraintTop_toBottomOf="@id/tv_login_subtitle"
+        app:layout_constraintBottom_toTopOf="@id/btn_login_card"
+        app:layout_constraintVertical_bias="0.25"
+        app:layout_constraintVertical_chainStyle="packed">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -72,13 +74,13 @@
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 
-    <!-- Password Input (เพิ่ม marginTop จาก 16 เป็น 24 ให้ไม่ชิดกัน) -->
+    <!-- Password Input -->
     <androidx.cardview.widget.CardView
         android:id="@+id/container_password"
         android:layout_width="match_parent"
-        android:layout_height="64dp"
+        android:layout_height="56dp"
         android:layout_marginStart="32dp"
-        android:layout_marginTop="50dp"
+        android:layout_marginTop="24dp"
         android:layout_marginEnd="32dp"
         app:cardBackgroundColor="#F8F9FA"
         app:cardCornerRadius="20dp"
