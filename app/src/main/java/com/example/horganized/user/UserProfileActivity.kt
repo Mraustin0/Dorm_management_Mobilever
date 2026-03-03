@@ -66,7 +66,7 @@ class UserProfileActivity : AppCompatActivity() {
 
         // เมนูแจ้งย้ายออก
         findViewById<CardView>(R.id.menu_move_out).apply {
-            setOnClickListener { startActivity(Intent(this@UserProfileActivity, ContractListActivity::class.java)) }
+            setOnClickListener { startActivity(Intent(this@UserProfileActivity, UserMoveOutActivity::class.java)) }
             applyHoverAnimation()
         }
 

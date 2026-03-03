@@ -136,11 +136,35 @@
                                 android:layout_marginEnd="8dp"
                                 android:orientation="vertical">
 
-                                <TextView
+                                <LinearLayout
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:text="ยอดค้างชำระ"
-                                    android:textColor="#333333" />
+                                    android:orientation="horizontal"
+                                    android:gravity="center_vertical">
+
+                                    <TextView
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:text="ยอดค้างชำระ"
+                                        android:textColor="#555555"
+                                        android:textSize="13sp" />
+
+                                    <TextView
+                                        android:id="@+id/tv_bill_status_badge"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:layout_marginStart="8dp"
+                                        android:background="@drawable/bg_bill_status"
+                                        android:paddingStart="8dp"
+                                        android:paddingEnd="8dp"
+                                        android:paddingTop="2dp"
+                                        android:paddingBottom="2dp"
+                                        android:text="ค้างชำระ"
+                                        android:textColor="#FFFFFF"
+                                        android:textSize="11sp"
+                                        android:textStyle="bold"
+                                        android:visibility="gone" />
+                                </LinearLayout>
 
                                 <TextView
                                     android:id="@+id/outstanding_amount"
@@ -159,7 +183,7 @@
                                 android:layout_alignParentEnd="true"
                                 android:layout_centerVertical="true"
                                 android:backgroundTint="#E53935"
-                                android:text="ดูและจ่ายบิล"
+                                android:text="จ่ายเลย"
                                 android:textAllCaps="false"
                                 android:textColor="#FFFFFF"
                                 app:cornerRadius="25dp" />

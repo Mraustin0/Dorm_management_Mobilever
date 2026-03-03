@@ -176,8 +176,9 @@ class HomeUserActivity : AppCompatActivity() {
     }
 
     private fun updateBillUI(bill: Bill) {
-        val btnPay = findViewById<Button>(R.id.btn_view_pay_bill)
+        val btnPay  = findViewById<Button>(R.id.btn_view_pay_bill)
         val tvAmount = findViewById<TextView>(R.id.outstanding_amount)
+        val tvBadge = findViewById<TextView>(R.id.tv_bill_status_badge)
 
         tvAmount?.text = String.format("%,.2f บาท", bill.amount)
 
@@ -188,29 +189,47 @@ class HomeUserActivity : AppCompatActivity() {
         findViewById<TextView>(R.id.tv_other_price)?.text = String.format("%,.0f บาท", bill.details.otherPrice)
         findViewById<TextView>(R.id.tv_total_price)?.text = String.format("%,.2f บาท", bill.amount)
 
+        tvBadge?.visibility = View.VISIBLE
+
         when {
             bill.isPaid -> {
-                btnPay?.text = "จ่ายแล้ว"
-                btnPay?.backgroundTintList = android.content.res.ColorStateList.valueOf(
-                    android.graphics.Color.parseColor("#1B9E44")
-                )
+                // ยืนยันแล้ว → เขียว
+                val green = android.graphics.Color.parseColor("#1B9E44")
+                tvBadge?.text = "ชำระแล้ว"
+                setBadgeColor(tvBadge, green)
+                btnPay?.text = "ชำระแล้ว"
+                btnPay?.backgroundTintList = android.content.res.ColorStateList.valueOf(green)
                 btnPay?.isEnabled = false
             }
             bill.isPending -> {
+                // ส่งสลิปแล้ว รอยืนยัน → ส้ม
+                val orange = android.graphics.Color.parseColor("#FF9800")
+                tvBadge?.text = "รอการยืนยัน"
+                setBadgeColor(tvBadge, orange)
                 btnPay?.text = "รอการยืนยัน"
-                btnPay?.backgroundTintList = android.content.res.ColorStateList.valueOf(
-                    android.graphics.Color.parseColor("#FF9800")
-                )
+                btnPay?.backgroundTintList = android.content.res.ColorStateList.valueOf(orange)
                 btnPay?.isEnabled = false
             }
             else -> {
+                // ยังไม่ชำระ → แดง กดได้
+                val red = android.graphics.Color.parseColor("#E53935")
+                tvBadge?.text = "ค้างชำระ"
+                setBadgeColor(tvBadge, red)
                 btnPay?.text = "จ่ายเลย"
-                btnPay?.backgroundTintList = android.content.res.ColorStateList.valueOf(
-                    android.graphics.Color.parseColor("#E53935")
-                )
+                btnPay?.backgroundTintList = android.content.res.ColorStateList.valueOf(red)
                 btnPay?.isEnabled = true
             }
         }
+    }
+
+    private fun setBadgeColor(view: android.widget.TextView?, color: Int) {
+        val density = resources.displayMetrics.density
+        val bg = android.graphics.drawable.GradientDrawable().apply {
+            shape = android.graphics.drawable.GradientDrawable.RECTANGLE
+            cornerRadius = 20f * density
+            setColor(color)
+        }
+        view?.background = bg
     }
 
     private fun setupBottomNavigation() {
