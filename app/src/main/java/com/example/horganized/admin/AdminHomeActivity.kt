@@ -65,7 +65,7 @@ class AdminHomeActivity : AppCompatActivity() {
 
         // เชื่อมปุ่มตรวจสอบสลิป
         findViewById<CardView>(R.id.cv_check_slip).setOnClickListener {
-            val intent = Intent(this, AdminSelectRoomActivity::class.java)
+            val intent = Intent(this, AdminCheckSlipActivity::class.java)
             intent.putExtra("MODE", "CHECK_SLIP")
             startActivity(intent)
         }
