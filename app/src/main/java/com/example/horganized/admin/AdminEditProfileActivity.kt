@@ -118,8 +118,8 @@ class AdminEditProfileActivity : AppCompatActivity() {
                         Glide.with(this)
                             .load(photoUrl)
                             .transform(CircleCrop())
-                            .placeholder(R.drawable.ic_person)
-                            .error(R.drawable.ic_person)
+                            .placeholder(R.drawable.ic_user_gg)
+                            .error(R.drawable.ic_user_gg)
                             .into(ivProfilePic)
                     }
                 } else {
@@ -160,7 +160,6 @@ class AdminEditProfileActivity : AppCompatActivity() {
         progressUpload.visibility = View.VISIBLE
         btnSubmit.text = "กำลังอัปโหลดรูป..."
 
-        // อ่านไฟล์รูปแล้วแปลงเป็น Base64
         val bytes = contentResolver.openInputStream(selectedImageUri!!)?.use { it.readBytes() }
         if (bytes == null) {
             progressUpload.visibility = View.GONE
@@ -171,11 +170,10 @@ class AdminEditProfileActivity : AppCompatActivity() {
         }
         val base64Image = Base64.encodeToString(bytes, Base64.DEFAULT)
 
-        // สร้าง multipart request ส่งไป imgbb
-        val requestBody = MultipartBody.Builder()
-            .setType(MultipartBody.FORM)
-            .addFormDataPart("image", base64Image)
-            .addFormDataPart("name", "profile_$uid")
+        // Corrected: Use FormBody for Base64 string uploads
+        val requestBody = FormBody.Builder()
+            .add("image", base64Image)
+            .add("name", "profile_$uid")
             .build()
 
         val request = Request.Builder()
@@ -188,7 +186,7 @@ class AdminEditProfileActivity : AppCompatActivity() {
                 runOnUiThread {
                     progressUpload.visibility = View.GONE
                     Toast.makeText(this@AdminEditProfileActivity,
-                        "อัปโหลดรูปไม่สำเร็จ: ${e.message}", Toast.LENGTH_SHORT).show()
+                        "อัปโหลดรูปไม่สำเร็จ: ${e.message}", Toast.LENGTH_LONG).show()
                     btnSubmit.isEnabled = true
                     btnSubmit.text = "บันทึก"
                 }
@@ -204,14 +202,15 @@ class AdminEditProfileActivity : AppCompatActivity() {
                             val url = json.getJSONObject("data").getString("url")
                             saveToFirestore(uid, firstName, url)
                         } else {
+                            val error = json.getJSONObject("error").getString("message")
                             Toast.makeText(this@AdminEditProfileActivity,
-                                "อัปโหลดรูปไม่สำเร็จ", Toast.LENGTH_SHORT).show()
+                                "ImgBB Error: $error", Toast.LENGTH_LONG).show()
                             btnSubmit.isEnabled = true
                             btnSubmit.text = "บันทึก"
                         }
                     } catch (e: Exception) {
                         Toast.makeText(this@AdminEditProfileActivity,
-                            "parse error: ${e.message}", Toast.LENGTH_SHORT).show()
+                            "Parse error: ${e.message}", Toast.LENGTH_SHORT).show()
                         btnSubmit.isEnabled = true
                         btnSubmit.text = "บันทึก"
                     }
@@ -219,6 +218,7 @@ class AdminEditProfileActivity : AppCompatActivity() {
             }
         })
     }
+
 
     // ── บันทึกลง Firestore ─────────────────────────────────────────────────
     private fun saveToFirestore(uid: String, firstName: String, photoUrl: String?) {
