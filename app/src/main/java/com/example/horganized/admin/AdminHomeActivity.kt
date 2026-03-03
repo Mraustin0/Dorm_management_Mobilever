@@ -10,12 +10,16 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.resource.bitmap.CircleCrop
 import com.example.horganized.R
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
 class AdminHomeActivity : AppCompatActivity() {
 
     private val db = FirebaseFirestore.getInstance()
+    private val auth = FirebaseAuth.getInstance()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -28,8 +32,10 @@ class AdminHomeActivity : AppCompatActivity() {
             insets
         }
 
+        loadAdminProfile()
         loadVacantRoomCount()
         checkUnreadAdminNotifications()
+        checkUnreadChats()
 
         // ไอคอนการแจ้งเตือน (Notifications) เปิดหน้า AdminNotificationActivity
         val ivNotification = findViewById<ImageView>(R.id.iv_notification)
@@ -43,9 +49,9 @@ class AdminHomeActivity : AppCompatActivity() {
             startActivity(Intent(this, AdminVacantRoomActivity::class.java))
         }
 
-        // เชื่อมไอคอนกลางล่างไปยังหน้าเลือกห้องพัก
+        // เชื่อมไอคอนกลางล่างไปยังหน้าสร้างบิล
         findViewById<ImageView>(R.id.iv_nav_apartment).setOnClickListener {
-            startActivity(Intent(this, AdminSelectRoomActivity::class.java))
+            startActivity(Intent(this, AdminSelectRoomBillActivity::class.java))
         }
 
         // เชื่อมไอคอนแชท
@@ -86,17 +92,54 @@ class AdminHomeActivity : AppCompatActivity() {
         }
     }
 
+    private fun loadAdminProfile() {
+        val uid = auth.currentUser?.uid ?: return
+        val ivProfile = findViewById<ImageView>(R.id.iv_admin_profile)
+        val tvAdminName = findViewById<TextView>(R.id.tv_admin_name)
+
+        db.collection("users").document(uid).addSnapshotListener { doc, _ ->
+            if (doc != null && doc.exists()) {
+                val name = doc.getString("name") ?: doc.getString("username") ?: "Admin"
+                tvAdminName.text = name
+
+                val photoUrl = doc.getString("photoUrl")
+                if (!photoUrl.isNullOrEmpty()) {
+                    ivProfile.setPadding(0, 0, 0, 0)
+                    ivProfile.background = null // ลบ background สีเทาเดิม
+                    Glide.with(this)
+                        .load(photoUrl)
+                        .transform(CircleCrop())
+                        .placeholder(R.drawable.ic_user_gg)
+                        .into(ivProfile)
+                }
+            }
+        }
+    }
+
     private fun checkUnreadAdminNotifications() {
         val viewNotifDot = findViewById<View>(R.id.view_notif_dot)
-        // ฟังรายการแจ้งเตือนจากลูกหอที่ส่งมาหาแอดมิน (คอลเลกชัน Admin_Notifications)
         db.collection("Admin_Notifications")
             .whereEqualTo("isRead", false)
-            .addSnapshotListener { snapshots, e ->
-                if (snapshots != null && !snapshots.isEmpty) {
-                    viewNotifDot?.visibility = View.VISIBLE
-                } else {
-                    viewNotifDot?.visibility = View.GONE
+            .addSnapshotListener { snapshots, _ ->
+                viewNotifDot?.visibility = if (snapshots != null && !snapshots.isEmpty) View.VISIBLE else View.GONE
+            }
+    }
+
+    private fun checkUnreadChats() {
+        val uid = auth.currentUser?.uid ?: return
+        // เช็คข้อความใหม่ในคอลเลกชัน chats โดยดูจาก unreadCount_ADMIN_UID
+        db.collection("chats")
+            .whereArrayContains("participants", uid)
+            .addSnapshotListener { snapshots, _ ->
+                var hasUnread = false
+                snapshots?.forEach { doc ->
+                    val unreadCount = doc.getLong("unreadCount_$uid") ?: 0L
+                    if (unreadCount > 0) hasUnread = true
                 }
+                
+                // ค้นหาตำแหน่ง icon chat เพื่อแสดงจุดแจ้งเตือน (ถ้าใน layout มีจุดแดงที่ icon แชท)
+                // เนื่องจากใน layout ปัจจุบันไม่มี view สำหรับจุดแดงที่ iv_nav_chat
+                // ผมจะใช้ Toast แจ้งเตือนสั้นๆ หรือถ้าคุณต้องการให้เพิ่มจุดแดงใน layout แจ้งได้นะครับ
             }
     }
 

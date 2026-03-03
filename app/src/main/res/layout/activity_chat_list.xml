@@ -16,6 +16,8 @@
         android:background="@color/white"
         app:layout_constraintTop_toTopOf="parent">
 
+        <!-- ปุ่มแชทห้องใหม่ (ค้นหา) -->
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -25,10 +27,11 @@
             android:textStyle="bold"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.498"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="1.0" />
 
-        <!-- ปุ่มแชทห้องใหม่ (ค้นหา) -->
         <ImageView
             android:id="@+id/iv_new_chat"
             android:layout_width="32dp"
@@ -39,8 +42,8 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.0"
-            app:tint="@color/blue_primary" />
+            app:layout_constraintVertical_bias="1.0"
+            app:tint="@color/black" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

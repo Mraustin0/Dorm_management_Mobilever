@@ -4,97 +4,108 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FFFFFF">
+    android:background="#F5F6FA">
 
-    <!-- Header Chat -->
+    <!-- Header -->
     <androidx.cardview.widget.CardView
         android:id="@+id/chat_header"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:cardElevation="2dp"
+        app:cardCornerRadius="0dp"
+        app:cardElevation="3dp"
         app:layout_constraintTop_toTopOf="parent">
-        <RelativeLayout
+
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="64dp"
-            android:paddingTop="32dp"
+            android:layout_height="wrap_content"
+            android:background="#FFFFFF"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
             android:paddingStart="16dp"
-            android:paddingEnd="16dp">
+            android:paddingEnd="16dp"
+            android:paddingTop="40dp"
+            android:paddingBottom="12dp">
+
             <ImageView
                 android:id="@+id/admin_avatar"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:src="@drawable/shape_circle_black" />
+                android:layout_width="42dp"
+                android:layout_height="42dp"
+                android:background="@drawable/bg_profile_circle"
+                android:padding="9dp"
+                android:src="@drawable/ic_person"
+                app:tint="#FFFFFF" />
+
             <LinearLayout
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="12dp"
-                android:layout_toEndOf="@id/admin_avatar"
+                android:layout_weight="1"
                 android:orientation="vertical">
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="ADMIN1" android:textStyle="bold" android:textColor="#000000"/>
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Online" android:textColor="#4CAF50" android:textSize="12sp"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="แอดมิน"
+                    android:textColor="#1A1A2E"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tv_banner"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="ห้อง -"
+                    android:textColor="#888888"
+                    android:textSize="12sp" />
             </LinearLayout>
-            <ImageView
-                android:id="@+id/btn_call_admin"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true"
-                android:src="@android:drawable/ic_menu_call" />
-        </RelativeLayout>
+        </LinearLayout>
     </androidx.cardview.widget.CardView>
 
-    <TextView
-        android:id="@+id/room_banner"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="#EEF2FF"
-        android:padding="8dp"
-        android:text="📢 ห้อง 214 คุณ Tzoey"
-        android:textColor="#3F51B5"
-        android:gravity="center"
-        android:textSize="12sp"
-        app:layout_constraintTop_toBottomOf="@id/chat_header" />
-
+    <!-- Chat Messages -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_chat"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:padding="8dp"
-        app:layout_constraintBottom_toTopOf="@id/quick_actions"
-        app:layout_constraintTop_toBottomOf="@id/room_banner" />
+        android:clipToPadding="false"
+        android:paddingHorizontal="8dp"
+        android:paddingVertical="8dp"
+        app:layout_constraintBottom_toTopOf="@id/chat_input_area"
+        app:layout_constraintTop_toBottomOf="@id/chat_header" />
 
-    <LinearLayout
-        android:id="@+id/quick_actions"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center"
-        android:padding="8dp"
-        app:layout_constraintBottom_toTopOf="@id/chat_input_area">
-        <Button id="@+id/btn_repair" style="@style/Widget.MaterialComponents.Button.OutlinedButton" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="แจ้งซ่อม" android:textSize="10sp" android:layout_marginEnd="4dp"/>
-        <Button id="@+id/btn_summary" style="@style/Widget.MaterialComponents.Button.OutlinedButton" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="สรุปยอด" android:textSize="10sp" android:layout_marginEnd="4dp"/>
-        <Button id="@+id/btn_clean" style="@style/Widget.MaterialComponents.Button.OutlinedButton" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="แจ้งทำความสะอาด" android:textSize="10sp"/>
-    </LinearLayout>
-
+    <!-- Input Area -->
     <LinearLayout
         android:id="@+id/chat_input_area"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#F8F9FA"
+        android:background="#FFFFFF"
+        android:elevation="4dp"
         android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:padding="8dp"
+        android:paddingHorizontal="12dp"
+        android:paddingVertical="8dp"
         app:layout_constraintBottom_toTopOf="@id/bottom_nav">
-        <ImageView android:id="@+id/btn_add_file" android:layout_width="32dp" android:layout_height="32dp" android:src="@android:drawable/ic_input_add" />
+
         <EditText
             android:id="@+id/et_chat_message"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:hint="แจ้งปัญหาหรือสอบถามแอดมิน"
-            android:background="@android:color/transparent"
-            android:padding="8dp" />
-        <ImageView android:id="@+id/btn_send_chat" android:layout_width="32dp" android:layout_height="32dp" android:src="@android:drawable/ic_menu_send" />
+            android:background="@drawable/bg_chat_input"
+            android:hint="พิมพ์ข้อความ..."
+            android:maxLines="4"
+            android:paddingHorizontal="14dp"
+            android:paddingVertical="10dp"
+            android:textSize="14sp" />
+
+        <ImageView
+            android:id="@+id/btn_send_chat"
+            android:layout_width="42dp"
+            android:layout_height="42dp"
+            android:layout_marginStart="8dp"
+            android:background="@drawable/bg_send_button"
+            android:padding="10dp"
+            android:src="@drawable/ic_send_gg"
+            app:tint="#FFFFFF" />
     </LinearLayout>
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
@@ -102,9 +113,9 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:background="#FFFFFF"
-        app:labelVisibilityMode="unlabeled"
-        app:itemIconSize="24dp"
         app:elevation="8dp"
+        app:itemIconSize="24dp"
+        app:labelVisibilityMode="unlabeled"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

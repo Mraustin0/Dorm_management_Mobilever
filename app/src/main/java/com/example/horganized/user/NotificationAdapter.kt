@@ -15,7 +15,7 @@ import java.util.*
 
 class NotificationAdapter(
     private val notifications: MutableList<Notification>,
-    private val onItemClick: (Int) -> Unit
+    private val onItemClick: (Notification) -> Unit
 ) : RecyclerView.Adapter<NotificationAdapter.ViewHolder>() {
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -46,7 +46,9 @@ class NotificationAdapter(
                 "payment_rejected"  -> "สลิปถูกปฏิเสธ"
                 "repair_update"     -> "อัปเดตสถานะแจ้งซ่อม"
                 "chat"              -> "ข้อความจากแอดมิน"
-                else                -> notification.senderName.ifEmpty { "การแจ้งเตือน" }
+                "move_out_approved" -> "อนุมัติการย้ายออกแล้ว"
+                "move_out_rejected" -> "คำขอย้ายออกถูกปฏิเสธ"
+                else                -> "การแจ้งเตือน"
             }
         }
 
@@ -89,26 +91,25 @@ class NotificationAdapter(
             if (isUnread) 0xFFF0F4FF.toInt() else 0xFFFFFFFF.toInt()
         )
 
-        holder.itemView.setOnClickListener { onItemClick(position) }
+        holder.itemView.setOnClickListener {
+            holder.viewUnreadDot.visibility = View.GONE
+            holder.viewUnreadBar.visibility = View.GONE
+            holder.cardView.setCardBackgroundColor(0xFFFFFFFF.toInt())
+            onItemClick(notification)
+        }
     }
 
     override fun getItemCount() = notifications.size
 
     private fun formatTime(notification: Notification): String {
-        val timeMs: Long = when {
-            notification.firestoreTimestamp != null ->
-                notification.firestoreTimestamp.toDate().time
-            notification.timestamp > 0 ->
-                notification.timestamp
-            else -> return "เพิ่งส่ง"
-        }
-        val diff = System.currentTimeMillis() - timeMs
+        val tsDate = notification.timestamp?.toDate() ?: return ""
+        val diff = System.currentTimeMillis() - tsDate.time
         return when {
             diff < 60_000            -> "เพิ่งส่ง"
             diff < 3_600_000         -> "${diff / 60_000} นาทีที่แล้ว"
             diff < 86_400_000        -> "${diff / 3_600_000} ชั่วโมงที่แล้ว"
             diff < 7 * 86_400_000    -> "${diff / 86_400_000} วันที่แล้ว"
-            else -> SimpleDateFormat("d MMM yy", Locale("th")).format(Date(timeMs))
+            else -> SimpleDateFormat("d MMM yy", Locale("th")).format(tsDate)
         }
     }
 }

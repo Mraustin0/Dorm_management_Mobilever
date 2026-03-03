@@ -95,7 +95,13 @@ class AdminNotificationAdapter(
             if (isUnread) 0xFFF0F4FF.toInt() else 0xFFFFFFFF.toInt()
         )
 
-        holder.itemView.setOnClickListener { onItemClick(item) }
+        holder.itemView.setOnClickListener {
+            // ซ่อน dot ทันทีโดยไม่รอ Firestore
+            holder.unreadDot.visibility = View.GONE
+            holder.unreadBar.visibility = View.GONE
+            holder.cardView.setCardBackgroundColor(0xFFFFFFFF.toInt())
+            onItemClick(item)
+        }
     }
 
     override fun getItemCount() = list.size

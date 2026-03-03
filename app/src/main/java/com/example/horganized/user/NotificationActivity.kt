@@ -44,17 +44,12 @@ class NotificationActivity : AppCompatActivity() {
     }
 
     private fun setupRecyclerView() {
-        adapter = NotificationAdapter(notificationList) { position ->
-            val item = notificationList[position]
-
+        adapter = NotificationAdapter(notificationList) { item ->
             // Mark as read in Firestore
             if (!item.isRead && item.notificationId.isNotEmpty()) {
                 db.collection("notifications").document(item.notificationId)
                     .update("isRead", true)
             }
-            // Update local state
-            notificationList[position] = item.copy(isRead = true)
-            adapter.notifyItemChanged(position)
             updateNotifCount()
 
             // Navigate based on type
@@ -108,17 +103,16 @@ class NotificationActivity : AppCompatActivity() {
 
                 if (snapshots != null) {
                     val items = snapshots.documents.mapNotNull { doc ->
-                        val base = doc.toObject(Notification::class.java) ?: return@mapNotNull null
-                        base.copy(
-                            notificationId     = doc.id,
-                            firestoreTimestamp = doc.getTimestamp("firestoreTimestamp")
-                        )
+                        try {
+                            val base = doc.toObject(Notification::class.java) ?: return@mapNotNull null
+                            base.copy(notificationId = doc.id)
+                        } catch (ex: Exception) {
+                            null
+                        }
                     }
 
                     // เรียงจากใหม่ไปเก่า
-                    val sorted = items.sortedByDescending {
-                        it.firestoreTimestamp?.toDate()?.time ?: it.timestamp
-                    }
+                    val sorted = items.sortedByDescending { it.timestamp?.seconds ?: 0L }
 
                     notificationList.clear()
                     notificationList.addAll(sorted)

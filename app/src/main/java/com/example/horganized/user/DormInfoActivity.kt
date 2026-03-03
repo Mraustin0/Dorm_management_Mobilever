@@ -57,7 +57,7 @@ class DormInfoActivity : AppCompatActivity() {
         }
 
         // ปุ่มดูเอกสารสัญญาเช่า
-        findViewById<TextView>(R.id.btn_view_contract)?.setOnClickListener {
+        findViewById<LinearLayout>(R.id.btn_view_contract)?.setOnClickListener {
             if (!contractUrl.isNullOrEmpty()) {
                 val intent = Intent(Intent.ACTION_VIEW, Uri.parse(contractUrl))
                 startActivity(intent)
@@ -113,10 +113,7 @@ class DormInfoActivity : AppCompatActivity() {
                         findViewById<TextView>(R.id.tv_contract_end)?.text = "-"
                     }
 
-                    // ปรับแต่งข้อความปุ่มสัญญา
-                    if (!contractUrl.isNullOrEmpty()) {
-                        findViewById<TextView>(R.id.btn_view_contract)?.text = "ดูเอกสารสัญญาเช่า (PDF/Link)"
-                    }
+                    // (btn_view_contract เป็น LinearLayout แล้ว ไม่ต้องเปลี่ยนข้อความ)
                 }
             }
             .addOnFailureListener { e ->

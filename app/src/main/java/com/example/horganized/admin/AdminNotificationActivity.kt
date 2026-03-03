@@ -84,6 +84,11 @@ class AdminNotificationActivity : AppCompatActivity() {
                 startActivity(intent)
                 overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
             }
+            "move_out" -> {
+                val intent = Intent(this, AdminMoveOutListActivity::class.java)
+                startActivity(intent)
+                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
+            }
             else -> {
                 // ประเภทอื่น: ไม่ navigate
             }

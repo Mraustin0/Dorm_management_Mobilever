@@ -18,13 +18,15 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.horganized.R
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FieldValue
+import java.util.Calendar
 
 data class MeterItem(
     val roomId: String, 
     val roomName: String, 
     val status: Boolean, 
-    val before: Int, 
-    var latest: Int
+    var before: Int, 
+    var latest: Int,
+    val tenantId: String? = null
 )
 
 class AdminMeterActivity : AppCompatActivity() {
@@ -51,8 +53,6 @@ class AdminMeterActivity : AppCompatActivity() {
         initViews()
         setupTabs()
         setupSpinners()
-        
-        initializeMeterFields()
         updateList(1)
     }
 
@@ -63,123 +63,13 @@ class AdminMeterActivity : AppCompatActivity() {
         spinnerYear = findViewById(R.id.spinner_year_meter)
 
         findViewById<ImageView>(R.id.btn_back_meter).setOnClickListener { finish() }
-        
-        findViewById<TextView>(R.id.btn_save_meter).setOnClickListener {
-            showSaveConfirmationDialog()
-        }
-    }
-
-    private fun initializeMeterFields() {
-        db.collection("rooms").get().addOnSuccessListener { documents ->
-            val batch = db.batch()
-            var needsUpdate = false
-            for (document in documents) {
-                if (!document.contains("lastElectricMeter") || !document.contains("lastWaterMeter")) {
-                    val ref = db.collection("rooms").document(document.id)
-                    batch.update(ref, mapOf(
-                        "lastElectricMeter" to 0,
-                        "lastWaterMeter" to 0
-                    ))
-                    needsUpdate = true
-                }
-            }
-            if (needsUpdate) batch.commit()
-        }
-    }
-
-    private fun showSaveConfirmationDialog() {
-        AlertDialog.Builder(this)
-            .setTitle("ยืนยันการบันทึก")
-            .setMessage("คุณต้องการบันทึกข้อมูลมิเตอร์และอัปเดตไปยังระบบบิลใช่หรือไม่?")
-            .setPositiveButton("ตกลง") { _, _ ->
-                saveMeterData()
-            }
-            .setNegativeButton("ยกเลิก", null)
-            .show()
-    }
-
-    private fun saveMeterData() {
-        val selectedMonth = spinnerMonth.selectedItem.toString()
-        val selectedYear = spinnerYear.selectedItem.toString()
-        val type = if (isWaterTab) "water" else "electric"
-        val roomFieldName = if (isWaterTab) "lastWaterMeter" else "lastElectricMeter"
-        
-        var completedCount = 0
-        val totalToProcess = meterList.size
-
-        for (item in meterList) {
-            val batch = db.batch()
-            
-            // 1. อัปเดตค่าล่าสุดในคอลเลกชัน rooms
-            val roomRef = db.collection("rooms").document(item.roomId)
-            batch.update(roomRef, roomFieldName, item.latest)
-
-            // 2. บันทึกลงในคอลเลกชัน meter_history
-            val historyRef = db.collection("meter_history").document()
-            val unitsUsed = (item.latest - item.before).coerceAtLeast(0)
-            
-            val historyData = hashMapOf(
-                "roomNumber" to item.roomName,
-                "month" to selectedMonth,
-                "year" to selectedYear,
-                "type" to type,
-                "previousValue" to item.before.toString(),
-                "currentValue" to item.latest.toString(),
-                "unitsUsed" to unitsUsed.toString(),
-                "timestamp" to FieldValue.serverTimestamp()
-            )
-            batch.set(historyRef, historyData)
-
-            // 3. ค้นหาและอัปเดต/สร้างบิล (Collection: bills)
-            db.collection("bills")
-                .whereEqualTo("roomNumber", item.roomName)
-                .whereEqualTo("month", selectedMonth)
-                .whereEqualTo("year", selectedYear)
-                .get()
-                .addOnSuccessListener { billDocs ->
-                    if (!billDocs.isEmpty) {
-                        // มีบิลอยู่แล้ว -> อัปเดตข้อมูลมิเตอร์ในบิลเดิม
-                        val billRef = db.collection("bills").document(billDocs.documents[0].id)
-                        val billUpdate = if (isWaterTab) {
-                            mapOf("details.waterUnit" to unitsUsed.toString())
-                        } else {
-                            mapOf("details.electricUnit" to unitsUsed.toString())
-                        }
-                        billRef.update(billUpdate)
-                    } else {
-                        // ยังไม่มีบิล -> สร้างร่างบิลใหม่ (เฉพาะกรณีห้องไม่ว่าง)
-                        if (item.status) {
-                            val newBillRef = db.collection("bills").document()
-                            val initialDetails = if (isWaterTab) {
-                                mapOf("waterUnit" to unitsUsed.toString(), "electricUnit" to "0")
-                            } else {
-                                mapOf("electricUnit" to unitsUsed.toString(), "waterUnit" to "0")
-                            }
-                            
-                            val newBillData = hashMapOf(
-                                "roomNumber" to item.roomName,
-                                "month" to selectedMonth,
-                                "year" to selectedYear,
-                                "status" to "pending",
-                                "details" to initialDetails,
-                                "createdAt" to FieldValue.serverTimestamp()
-                            )
-                            newBillRef.set(newBillData)
-                        }
-                    }
-                    
-                    batch.commit().addOnSuccessListener {
-                        completedCount++
-                        if (completedCount == totalToProcess) {
-                            Toast.makeText(this, "บันทึกข้อมูลและส่งไปยังระบบบิลเรียบร้อยแล้ว", Toast.LENGTH_SHORT).show()
-                            finish()
-                        }
-                    }
-                }
-        }
+        findViewById<TextView>(R.id.btn_save_meter).setOnClickListener { showSaveConfirmationDialog() }
     }
 
     private fun setupSpinners() {
+        val calendar = Calendar.getInstance()
+        
+        // Floor Spinner
         val floors = arrayOf("ชั้น 1", "ชั้น 2", "ชั้น 3", "ชั้น 4")
         spinnerFloor.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, floors)
         spinnerFloor.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
@@ -189,12 +79,16 @@ class AdminMeterActivity : AppCompatActivity() {
             override fun onNothingSelected(p0: AdapterView<*>?) {}
         }
 
+        // Month Spinner (เลือกเดือนปัจจุบันให้)
         val months = arrayOf("มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม")
         spinnerMonth.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, months)
+        spinnerMonth.setSelection(calendar.get(Calendar.MONTH))
 
-        val years = arrayOf("2024", "2025", "2026")
+        // Year Spinner (เลือกปีปัจจุบันให้)
+        val currentYear = calendar.get(Calendar.YEAR)
+        val years = arrayOf((currentYear-1).toString(), currentYear.toString(), (currentYear+1).toString())
         spinnerYear.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, years)
-        spinnerYear.setSelection(1)
+        spinnerYear.setSelection(1) // เลือกปีปัจจุบัน
     }
 
     private fun setupTabs() {
@@ -222,22 +116,117 @@ class AdminMeterActivity : AppCompatActivity() {
             .get()
             .addOnSuccessListener { documents ->
                 meterList.clear()
+                val tempItems = mutableListOf<MeterItem>()
+                
                 for (doc in documents) {
                     val roomNum = doc.getString("roomNumber") ?: ""
                     val isVacant = doc.getBoolean("isVacant") ?: true
+                    val tenantId = doc.getString("tenantId")
+                    
+                    // ค่าเริ่มต้นจาก Room
                     val beforeVal = if (isWaterTab) {
                         doc.getLong("lastWaterMeter")?.toInt() ?: 0
                     } else {
                         doc.getLong("lastElectricMeter")?.toInt() ?: 0
                     }
                     
-                    meterList.add(MeterItem(doc.id, roomNum, !isVacant, beforeVal, beforeVal))
+                    tempItems.add(MeterItem(doc.id, roomNum, !isVacant, beforeVal, beforeVal, tenantId))
                 }
-                meterList.sortBy { it.roomName }
                 
-                rvMeter.layoutManager = LinearLayoutManager(this)
-                rvMeter.adapter = MeterAdapter(meterList)
+                // ตรวจสอบห้องที่ไม่ว่าง เพื่อดึงมิเตอร์เริ่มต้นจาก User หากใน Room เป็น 0
+                checkAndLoadUserMeters(tempItems)
             }
+    }
+
+    private fun checkAndLoadUserMeters(items: List<MeterItem>) {
+        var processedCount = 0
+        if (items.isEmpty()) {
+            displayList()
+            return
+        }
+
+        for (item in items) {
+            if (item.status && item.tenantId != null && item.before == 0) {
+                // ถ้าห้องไม่ว่าง และมิเตอร์ในห้องเป็น 0 (อาจจะเพิ่งย้ายเข้า) ให้ไปดึงจาก User
+                db.collection("users").document(item.tenantId).get()
+                    .addOnSuccessListener { userDoc ->
+                        val userMeter = if (isWaterTab) {
+                            userDoc.getLong("waterMeter")?.toInt() ?: 0
+                        } else {
+                            userDoc.getLong("electricMeter")?.toInt() ?: 0
+                        }
+                        item.before = userMeter
+                        item.latest = userMeter
+                        
+                        processedCount++
+                        if (processedCount == items.size) displayList(items)
+                    }
+                    .addOnFailureListener {
+                        processedCount++
+                        if (processedCount == items.size) displayList(items)
+                    }
+            } else {
+                processedCount++
+                if (processedCount == items.size) displayList(items)
+            }
+        }
+    }
+
+    private fun displayList(items: List<MeterItem> = meterList) {
+        meterList.clear()
+        meterList.addAll(items.sortedBy { it.roomName })
+        rvMeter.layoutManager = LinearLayoutManager(this)
+        rvMeter.adapter = MeterAdapter(meterList)
+    }
+
+    private fun showSaveConfirmationDialog() {
+        AlertDialog.Builder(this)
+            .setTitle("ยืนยันการบันทึก")
+            .setMessage("คุณต้องการบันทึกข้อมูลมิเตอร์ใช่หรือไม่?")
+            .setPositiveButton("ตกลง") { _, _ -> saveMeterData() }
+            .setNegativeButton("ยกเลิก", null)
+            .show()
+    }
+
+    private fun saveMeterData() {
+        val selectedMonth = spinnerMonth.selectedItem.toString()
+        val selectedYear = spinnerYear.selectedItem.toString()
+        val type = if (isWaterTab) "water" else "electric"
+        val roomFieldName = if (isWaterTab) "lastWaterMeter" else "lastElectricMeter"
+        
+        var completedCount = 0
+        val totalToProcess = meterList.size
+
+        if (totalToProcess == 0) return
+
+        for (item in meterList) {
+            val batch = db.batch()
+            val roomRef = db.collection("rooms").document(item.roomId)
+            batch.update(roomRef, roomFieldName, item.latest)
+
+            val historyRef = db.collection("meter_history").document()
+            val unitsUsed = (item.latest - item.before).coerceAtLeast(0)
+            
+            val historyData = hashMapOf(
+                "roomNumber" to item.roomName,
+                "month" to selectedMonth,
+                "year" to selectedYear,
+                "type" to type,
+                "previousValue" to item.before.toString(),
+                "currentValue" to item.latest.toString(),
+                "unitsUsed" to unitsUsed.toString(),
+                "timestamp" to FieldValue.serverTimestamp()
+            )
+            batch.set(historyRef, historyData)
+
+            batch.commit().addOnSuccessListener {
+                completedCount++
+                if (completedCount == totalToProcess) {
+                    Toast.makeText(this, "บันทึกข้อมูลมิเตอร์เรียบร้อยแล้ว", Toast.LENGTH_SHORT).show()
+                    finish()
+                }
+            }
+        }
     }
 }
 

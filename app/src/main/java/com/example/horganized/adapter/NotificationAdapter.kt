@@ -3,8 +3,10 @@ package com.example.horganized.adapter
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.horganized.R
 import com.example.horganized.model.Notification
@@ -18,56 +20,80 @@ class NotificationAdapter(
 ) : RecyclerView.Adapter<NotificationAdapter.ViewHolder>() {
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val icon: ImageView = view.findViewById(R.id.iv_icon)
-        val title: TextView = view.findViewById(R.id.tv_item_title)
-        val message: TextView = view.findViewById(R.id.tv_item_message)
-        val tvTime: TextView = view.findViewById(R.id.tv_item_time)
-        val unreadDot: View = view.findViewById(R.id.view_unread_dot)
+        val cardView: CardView    = view as CardView
+        val flIconBg: FrameLayout = view.findViewById(R.id.fl_icon_bg)
+        val icon: ImageView       = view.findViewById(R.id.iv_icon)
+        val title: TextView       = view.findViewById(R.id.tv_item_title)
+        val message: TextView     = view.findViewById(R.id.tv_item_message)
+        val tvTime: TextView      = view.findViewById(R.id.tv_item_time)
+        val unreadDot: View       = view.findViewById(R.id.view_unread_dot)
+        val unreadBar: View       = view.findViewById(R.id.view_unread_bar)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_notification, parent, false)
+        val view = LayoutInflater.from(parent.context)
+            .inflate(R.layout.item_notification, parent, false)
         return ViewHolder(view)
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = list[position]
 
-        holder.title.text = item.title.ifEmpty { item.senderName }
+        holder.title.text = item.title.ifEmpty {
+            when (item.type) {
+                "payment_approved"       -> "ยืนยันการชำระเงินแล้ว"
+                "payment_rejected"       -> "ปฏิเสธการชำระเงิน"
+                "new_bill"               -> "บิลใหม่จากแอดมิน"
+                "repair_update"          -> "อัปเดตการแจ้งซ่อม"
+                "chat"                   -> "ข้อความใหม่"
+                "move_out_approved"      -> "อนุมัติการย้ายออกแล้ว"
+                "move_out_rejected"      -> "คำขอย้ายออกถูกปฏิเสธ"
+                else                     -> "การแจ้งเตือน"
+            }
+        }
         holder.message.text = item.message
 
-        val iconRes = when (item.type) {
-            "payment_approved", "payment_rejected", "new_bill" -> R.drawable.ic_bill_gg
-            "repair_update" -> R.drawable.ic_repair_gg
-            "chat"          -> R.drawable.ic_chat_gg
-            else            -> R.drawable.ic_bell_gg
+        val (iconRes, iconTint, bgColor) = when (item.type) {
+            "payment_approved"  -> Triple(R.drawable.ic_bill_gg,        0xFF1B9E44.toInt(), 0xFFE8F5E9.toInt()) // green
+            "payment_rejected"  -> Triple(R.drawable.ic_bill_gg,        0xFFE53935.toInt(), 0xFFFFEBEB.toInt()) // red
+            "new_bill"          -> Triple(R.drawable.ic_bill_gg,        0xFF3D6FE8.toInt(), 0xFFEEF2FF.toInt()) // blue
+            "repair_update"     -> Triple(R.drawable.ic_repair_gg,      0xFFF9A825.toInt(), 0xFFFFF8E1.toInt()) // amber
+            "chat"              -> Triple(R.drawable.ic_chat_gg,        0xFF6C63FF.toInt(), 0xFFEDE7FF.toInt()) // purple
+            "move_out_approved" -> Triple(R.drawable.ic_door_front_gg,  0xFF1B9E44.toInt(), 0xFFE8F5E9.toInt()) // green
+            "move_out_rejected" -> Triple(R.drawable.ic_door_front_gg,  0xFFE53935.toInt(), 0xFFFFEBEB.toInt()) // red
+            else                -> Triple(R.drawable.ic_bell_gg,        0xFF3D6FE8.toInt(), 0xFFEEF2FF.toInt()) // blue
         }
         holder.icon.setImageResource(iconRes)
+        holder.icon.setColorFilter(iconTint)
+        holder.flIconBg.background = holder.flIconBg.context.getDrawable(R.drawable.bg_notif_icon_circle)
+        holder.flIconBg.background?.setTint(bgColor)
 
-        val timeMs: Long? = when {
-            item.firestoreTimestamp != null -> item.firestoreTimestamp.toDate().time
-            item.timestamp > 0              -> item.timestamp
-            else                            -> null
-        }
-        holder.tvTime.text = if (timeMs != null) formatTime(timeMs) else ""
+        val tsDate: Date? = item.timestamp?.toDate()
+        holder.tvTime.text = if (tsDate != null) {
+            val diff = System.currentTimeMillis() - tsDate.time
+            when {
+                diff < 60_000L         -> "เพิ่งส่ง"
+                diff < 3_600_000L      -> "${diff / 60_000} นาทีที่แล้ว"
+                diff < 86_400_000L     -> "${diff / 3_600_000} ชั่วโมงที่แล้ว"
+                diff < 7 * 86_400_000L -> "${diff / 86_400_000} วันที่แล้ว"
+                else -> SimpleDateFormat("d MMM", Locale("th")).format(tsDate)
+            }
+        } else ""
 
-        holder.unreadDot.visibility = if (item.isRead) View.GONE else View.VISIBLE
+        val isUnread = !item.isRead
+        holder.unreadDot.visibility = if (isUnread) View.VISIBLE else View.GONE
+        holder.unreadBar.visibility = if (isUnread) View.VISIBLE else View.GONE
+        holder.cardView.setCardBackgroundColor(
+            if (isUnread) 0xFFF0F4FF.toInt() else 0xFFFFFFFF.toInt()
+        )
 
         holder.itemView.setOnClickListener {
+            holder.unreadDot.visibility = View.GONE
+            holder.unreadBar.visibility = View.GONE
+            holder.cardView.setCardBackgroundColor(0xFFFFFFFF.toInt())
             onItemClick(item)
         }
     }
 
     override fun getItemCount() = list.size
-
-    private fun formatTime(timeMs: Long): String {
-        val diff = System.currentTimeMillis() - timeMs
-        return when {
-            diff < 60_000L         -> "เพิ่งส่ง"
-            diff < 3_600_000L      -> "${diff / 60_000} นาทีที่แล้ว"
-            diff < 86_400_000L     -> "${diff / 3_600_000} ชั่วโมงที่แล้ว"
-            diff < 7 * 86_400_000L -> "${diff / 86_400_000} วันที่แล้ว"
-            else -> SimpleDateFormat("d MMM yy", Locale("th")).format(Date(timeMs))
-        }
-    }
 }

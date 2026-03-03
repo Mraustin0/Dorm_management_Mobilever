@@ -191,9 +191,12 @@ class UserMoveOutActivity : AppCompatActivity() {
             "timestamp" to FieldValue.serverTimestamp()
         )
 
-        db.collection("move_out_requests").add(requestData)
-        
-        db.collection("Admin_Notifications").add(notificationData)
+        val batch = db.batch()
+        val requestRef = db.collection("move_out_requests").document()
+        val notifRef = db.collection("Admin_Notifications").document()
+        batch.set(requestRef, requestData)
+        batch.set(notifRef, notificationData)
+        batch.commit()
             .addOnSuccessListener {
                 Toast.makeText(this, "ส่งข้อมูลแจ้งย้ายออกสำเร็จ", Toast.LENGTH_SHORT).show()
                 finish()

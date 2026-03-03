@@ -251,7 +251,8 @@
                         android:id="@+id/iv_preview"
                         android:layout_width="48dp"
                         android:layout_height="48dp"
-                        android:src="@android:drawable/ic_menu_upload" />
+                        android:src="@drawable/ic_add_photo_gg"
+                        app:tint="#999999" />
 
                     <TextView
                         android:id="@+id/tv_upload_label"

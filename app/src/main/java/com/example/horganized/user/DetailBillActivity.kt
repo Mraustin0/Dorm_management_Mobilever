@@ -11,6 +11,8 @@ import android.widget.LinearLayout
 import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.resource.bitmap.CircleCrop
 import com.example.horganized.R
 import com.example.horganized.model.Bill
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -59,6 +61,16 @@ class DetailBillActivity : AppCompatActivity() {
                     val name = doc.getString("name") ?: ""
                     val room = doc.getString("roomNumber") ?: ""
                     findViewById<TextView>(R.id.user_name)?.text = "$name ห้อง $room"
+
+                    val photoUrl = doc.getString("photoUrl")
+                    val ivAvatar = findViewById<ImageView>(R.id.user_avatar)
+                    if (!photoUrl.isNullOrEmpty() && ivAvatar != null) {
+                        Glide.with(this)
+                            .load(photoUrl)
+                            .transform(CircleCrop())
+                            .placeholder(R.drawable.u1)
+                            .into(ivAvatar)
+                    }
                 }
             }
     }
@@ -162,18 +174,30 @@ class DetailBillActivity : AppCompatActivity() {
             tvDue.text = "รอดำเนินการ..."
         }
 
-        if (bill.isPaid) {
-            btnPay.text = "จ่ายแล้ว"
-            btnPay.backgroundTintList = android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#1B9E44"))
-            btnPay.isEnabled = false
-        } else {
-            btnPay.text = "จ่ายเลย"
-            btnPay.setOnClickListener {
-                val payIntent = Intent(this, PayBillActivity::class.java)
-                payIntent.putExtra("BILL_ID", billId)
-                payIntent.putExtra("BILL_AMOUNT", bill.amount)
-                payIntent.putExtra("BILL_MONTH", bill.month)
-                startActivity(payIntent)
+        when {
+            bill.isPaid -> {
+                btnPay.text = "จ่ายแล้ว"
+                btnPay.backgroundTintList = android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#1B9E44"))
+                btnPay.isEnabled = false
+                tvDue.text = "ชำระแล้ว"
+                tvDue.setTextColor(android.graphics.Color.parseColor("#1B9E44"))
+            }
+            bill.isPending -> {
+                btnPay.text = "รอการยืนยัน"
+                btnPay.backgroundTintList = android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#FF9800"))
+                btnPay.isEnabled = false
+                tvDue.text = "รอการยืนยัน"
+                tvDue.setTextColor(android.graphics.Color.parseColor("#FF9800"))
+            }
+            else -> {
+                btnPay.text = "จ่ายเลย"
+                btnPay.setOnClickListener {
+                    val payIntent = Intent(this, PayBillActivity::class.java)
+                    payIntent.putExtra("BILL_ID", billId)
+                    payIntent.putExtra("BILL_AMOUNT", bill.amount)
+                    payIntent.putExtra("BILL_MONTH", bill.month)
+                    startActivity(payIntent)
+                }
             }
         }
 

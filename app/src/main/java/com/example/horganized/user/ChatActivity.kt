@@ -44,7 +44,7 @@ class ChatActivity : AppCompatActivity() {
         rvChat = findViewById(R.id.rv_chat)
         etMessage = findViewById(R.id.et_chat_message)
         btnSend = findViewById(R.id.btn_send_chat)
-        tvBanner = findViewById(R.id.room_banner)
+        tvBanner = findViewById(R.id.tv_banner)
 
         chatAdapter = ChatAdapter(messages)
         rvChat.layoutManager = LinearLayoutManager(this).apply { stackFromEnd = true }
@@ -66,7 +66,7 @@ class ChatActivity : AppCompatActivity() {
             .addOnSuccessListener { doc ->
                 userName = doc.getString("name") ?: doc.getString("firstName") ?: ""
                 userRoomNumber = doc.getString("roomNumber") ?: ""
-                tvBanner.text = "📢 ห้อง $userRoomNumber  คุณ $userName"
+                tvBanner.text = "ห้อง $userRoomNumber · $userName"
 
                 // สร้าง/อัปเดต chat room document ไว้ให้ admin เห็นใน list
                 db.collection("chats").document(chatRoomId)
