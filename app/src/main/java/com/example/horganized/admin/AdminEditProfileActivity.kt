@@ -12,6 +12,7 @@ import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatButton
@@ -24,14 +25,11 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
 import okhttp3.*
-import okhttp3.MediaType.Companion.toMediaType
-import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONObject
 import java.io.IOException
 
 class AdminEditProfileActivity : AppCompatActivity() {
 
-    // ใส่ imgbb API key ของตัวเอง (สมัครฟรีที่ https://api.imgbb.com/)
     private val IMGBB_API_KEY = "5d5ae17ff9575ef5b3f0b8e82f45fd64"
 
     private val auth = FirebaseAuth.getInstance()
@@ -49,12 +47,9 @@ class AdminEditProfileActivity : AppCompatActivity() {
 
     private var selectedImageUri: Uri? = null
 
-    // Launcher เลือกรูปจาก Gallery
-    private val pickImageLauncher = registerForActivityResult(
-        ActivityResultContracts.StartActivityForResult()
-    ) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
-            val uri = result.data?.data ?: return@registerForActivityResult
+    // ใช้ Photo Picker ตัวใหม่ของ Android (แนะนำสำหรับ API 30+)
+    private val pickMedia = registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
+        if (uri != null) {
             selectedImageUri = uri
             Glide.with(this)
                 .load(uri)
@@ -95,8 +90,8 @@ class AdminEditProfileActivity : AppCompatActivity() {
     }
 
     private fun openGallery() {
-        val intent = Intent(Intent.ACTION_PICK).apply { type = "image/*" }
-        pickImageLauncher.launch(intent)
+        // เรียกใช้ Photo Picker เพื่อเลือกรูปภาพเท่านั้น
+        pickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
     }
 
     private fun loadProfile() {
@@ -155,7 +150,6 @@ class AdminEditProfileActivity : AppCompatActivity() {
         }
     }
 
-    // ── อัปโหลดรูปไปยัง imgbb ──────────────────────────────────────────────
     private fun uploadToImgbb(uid: String, firstName: String) {
         progressUpload.visibility = View.VISIBLE
         btnSubmit.text = "กำลังอัปโหลดรูป..."
@@ -170,7 +164,6 @@ class AdminEditProfileActivity : AppCompatActivity() {
         }
         val base64Image = Base64.encodeToString(bytes, Base64.DEFAULT)
 
-        // Corrected: Use FormBody for Base64 string uploads
         val requestBody = FormBody.Builder()
             .add("image", base64Image)
             .add("name", "profile_$uid")
@@ -219,8 +212,6 @@ class AdminEditProfileActivity : AppCompatActivity() {
         })
     }
 
-
-    // ── บันทึกลง Firestore ─────────────────────────────────────────────────
     private fun saveToFirestore(uid: String, firstName: String, photoUrl: String?) {
         val data = mutableMapOf<String, Any>(
             "username"  to etUsername.text.toString().trim(),

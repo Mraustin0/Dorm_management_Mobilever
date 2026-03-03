@@ -12,14 +12,16 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-class NotificationAdapter(private val list: List<Notification>) :
-    RecyclerView.Adapter<NotificationAdapter.ViewHolder>() {
+class NotificationAdapter(
+    private val list: List<Notification>,
+    private val onItemClick: (Notification) -> Unit
+) : RecyclerView.Adapter<NotificationAdapter.ViewHolder>() {
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val icon: ImageView = view.findViewById(R.id.iv_icon)
         val title: TextView = view.findViewById(R.id.tv_item_title)
         val message: TextView = view.findViewById(R.id.tv_item_message)
-        val tvTime: TextView = view.findViewById(R.id.tv_item_time)   // เปลี่ยนจาก time → tvTime
+        val tvTime: TextView = view.findViewById(R.id.tv_item_time)
         val unreadDot: View = view.findViewById(R.id.view_unread_dot)
     }
 
@@ -34,7 +36,6 @@ class NotificationAdapter(private val list: List<Notification>) :
         holder.title.text = item.title.ifEmpty { item.senderName }
         holder.message.text = item.message
 
-        // Icon ตาม type
         val iconRes = when (item.type) {
             "payment_approved", "payment_rejected", "new_bill" -> R.drawable.ic_bill_gg
             "repair_update" -> R.drawable.ic_repair_gg
@@ -43,7 +44,6 @@ class NotificationAdapter(private val list: List<Notification>) :
         }
         holder.icon.setImageResource(iconRes)
 
-        // เวลา: ใช้ firestoreTimestamp ก่อน ถ้าไม่มีใช้ timestamp (Long)
         val timeMs: Long? = when {
             item.firestoreTimestamp != null -> item.firestoreTimestamp.toDate().time
             item.timestamp > 0              -> item.timestamp
@@ -51,8 +51,11 @@ class NotificationAdapter(private val list: List<Notification>) :
         }
         holder.tvTime.text = if (timeMs != null) formatTime(timeMs) else ""
 
-        // จุดแดงถ้ายังไม่อ่าน
         holder.unreadDot.visibility = if (item.isRead) View.GONE else View.VISIBLE
+
+        holder.itemView.setOnClickListener {
+            onItemClick(item)
+        }
     }
 
     override fun getItemCount() = list.size

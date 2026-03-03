@@ -1,25 +1,27 @@
 package com.example.horganized.admin
 
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Patterns
 import android.view.View
 import android.widget.EditText
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatButton
+import androidx.cardview.widget.CardView
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.example.horganized.R
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
 
 class AdminOtpVerificationActivity : AppCompatActivity() {
 
     private lateinit var auth: FirebaseAuth
-    private lateinit var db: FirebaseFirestore
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,13 +35,14 @@ class AdminOtpVerificationActivity : AppCompatActivity() {
         }
 
         auth = FirebaseAuth.getInstance()
-        db = FirebaseFirestore.getInstance()
 
         val etEmail = findViewById<EditText>(R.id.et_reset_email)
         val btnSend = findViewById<AppCompatButton>(R.id.btn_verify_otp)
-        val tvStatus = findViewById<TextView>(R.id.tv_resend)
+        val tvError = findViewById<TextView>(R.id.tv_resend)
+        val cardSuccess = findViewById<CardView>(R.id.card_success)
+        val layoutInput = findViewById<LinearLayout>(R.id.ll_email_input)
+        val tvSubtitle = findViewById<TextView>(R.id.tv_subtitle_otp)
 
-        // ถ้ามี email ส่งมาจาก AdminLoginActivity ให้ prefill ไว้เลย
         val prefillEmail = intent.getStringExtra("ADMIN_EMAIL") ?: ""
         if (prefillEmail.isNotEmpty()) {
             etEmail.setText(prefillEmail)
@@ -62,51 +65,37 @@ class AdminOtpVerificationActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            // disable ปุ่มกัน spam กด
             btnSend.isEnabled = false
-            btnSend.text = "กำลังตรวจสอบ..."
-            tvStatus.visibility = View.GONE
+            btnSend.text = "กำลังส่งลิงก์..."
+            tvError.visibility = View.GONE
 
-            // Step 1: เช็คว่า email นี้มีอยู่ใน Firestore (collection "users") ก่อน
-            db.collection("users")
-                .whereEqualTo("email", email)
-                .get()
-                .addOnSuccessListener { snapshot ->
-                    if (snapshot.isEmpty) {
-                        // ไม่พบ email นี้ในระบบ
-                        btnSend.text = "ส่งลิงก์รีเซ็ตรหัสผ่าน"
-                        btnSend.isEnabled = true
-                        tvStatus.text = "✗ ไม่พบอีเมลนี้ในระบบ"
-                        tvStatus.setTextColor(0xFFE53935.toInt())
-                        tvStatus.visibility = View.VISIBLE
-                        return@addOnSuccessListener
-                    }
-
-                    // Step 2: พบใน Firestore → ส่ง reset email ได้เลย
-                    btnSend.text = "กำลังส่ง..."
-                    auth.sendPasswordResetEmail(email)
-                        .addOnSuccessListener {
-                            tvStatus.text = "✓ ส่งลิงก์รีเซ็ตรหัสผ่านไปที่ $email แล้ว\nกรุณาตรวจสอบกล่องจดหมาย"
-                            tvStatus.setTextColor(0xFF1B9E44.toInt())
-                            tvStatus.visibility = View.VISIBLE
-                            btnSend.text = "ส่งอีกครั้ง"
-                            btnSend.isEnabled = true
+            auth.sendPasswordResetEmail(email)
+                .addOnSuccessListener {
+                    // แสดง UI สำเร็จแบบสวยงาม
+                    cardSuccess.visibility = View.VISIBLE
+                    
+                    // ซ่อนส่วน Input เพื่อให้ดูคลีนขึ้น
+                    layoutInput.visibility = View.GONE
+                    btnSend.visibility = View.GONE
+                    tvSubtitle.visibility = View.GONE
+                    
+                    // หน่วงเวลา 3 วินาทีแล้วกลับหน้า Login
+                    Handler(Looper.getMainLooper()).postDelayed({
+                        if (!isFinishing) {
+                            finish()
                         }
-                        .addOnFailureListener { e ->
-                            btnSend.text = "ส่งลิงก์รีเซ็ตรหัสผ่าน"
-                            btnSend.isEnabled = true
-                            val msg = when {
-                                e.message?.contains("network") == true ->
-                                    "ไม่มีการเชื่อมต่ออินเทอร์เน็ต"
-                                else -> "เกิดข้อผิดพลาด: ${e.message}"
-                            }
-                            Toast.makeText(this, msg, Toast.LENGTH_LONG).show()
-                        }
+                    }, 3500)
                 }
                 .addOnFailureListener { e ->
-                    btnSend.text = "ส่งลิงก์รีเซ็ตรหัสผ่าน"
                     btnSend.isEnabled = true
-                    Toast.makeText(this, "เกิดข้อผิดพลาด: ${e.message}", Toast.LENGTH_LONG).show()
+                    btnSend.text = "ส่งลิงก์รีเซ็ตรหัสผ่าน"
+                    val msg = when {
+                        e.message?.contains("network") == true -> "ไม่มีการเชื่อมต่ออินเทอร์เน็ต"
+                        e.message?.contains("user-not-found") == true -> "ไม่พบอีเมลนี้ในระบบ"
+                        else -> "เกิดข้อผิดพลาด: ${e.message}"
+                    }
+                    tvError.text = "✗ $msg"
+                    tvError.visibility = View.VISIBLE
                 }
         }
     }

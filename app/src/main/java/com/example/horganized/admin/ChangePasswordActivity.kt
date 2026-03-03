@@ -33,20 +33,19 @@ class ChangePasswordActivity : AppCompatActivity() {
         val etCurrent = findViewById<EditText>(R.id.et_current_password)
         val etNew = findViewById<EditText>(R.id.et_new_password)
         val etConfirm = findViewById<EditText>(R.id.et_confirm_password)
-        val btnSave = findViewById<AppCompatButton>(R.id.btn_get_otp)
+        val btnConfirm = findViewById<AppCompatButton>(R.id.btn_confirm_password)
 
         findViewById<ImageView>(R.id.btn_back_change_password).setOnClickListener {
             finish()
         }
 
-        btnSave.setOnClickListener {
+        btnConfirm.setOnClickListener {
             val currentPass = etCurrent.text.toString().trim()
             val newPass = etNew.text.toString().trim()
             val confirmPass = etConfirm.text.toString().trim()
 
-            // Validate
             if (currentPass.isEmpty() || newPass.isEmpty() || confirmPass.isEmpty()) {
-                Toast.makeText(this, "กรุณากรอกข้อมูลให้ครบ", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "กรุณากรอกข้อมูลให้ครบทุกช่อง", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
             if (newPass.length < 6) {
@@ -62,46 +61,40 @@ class ChangePasswordActivity : AppCompatActivity() {
             val email = user?.email
 
             if (user == null || email == null) {
-                Toast.makeText(this, "ไม่พบข้อมูลผู้ใช้ กรุณา login ใหม่", Toast.LENGTH_LONG).show()
+                Toast.makeText(this, "ไม่พบข้อมูลผู้ใช้ กรุณาเข้าสู่ระบบใหม่", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
-            btnSave.isEnabled = false
-            btnSave.text = "กำลังบันทึก..."
+            btnConfirm.isEnabled = false
+            btnConfirm.text = "กำลังบันทึก..."
 
-            // Re-authenticate ก่อน เพราะ Firebase ต้องการยืนยันตัวตนก่อนเปลี่ยน password
+            // ขั้นตอนการเปลี่ยนรหัสผ่านที่ "ใช้ได้จริง" และปลอดภัย:
+            // 1. Re-authenticate ด้วยรหัสผ่านเดิมก่อน
             val credential = EmailAuthProvider.getCredential(email, currentPass)
             user.reauthenticate(credential)
                 .addOnSuccessListener {
-                    // Re-auth สำเร็จ → เปลี่ยน password ได้เลย
+                    // 2. เมื่อยืนยันรหัสเดิมผ่านแล้ว จึงทำการ Update Password ใหม่
                     user.updatePassword(newPass)
                         .addOnSuccessListener {
-                            Toast.makeText(this, "เปลี่ยนรหัสผ่านเรียบร้อยแล้ว", Toast.LENGTH_LONG).show()
+                            Toast.makeText(this, "เปลี่ยนรหัสผ่านเรียบร้อยแล้ว ✓", Toast.LENGTH_LONG).show()
                             finish()
                         }
                         .addOnFailureListener { e ->
-                            resetButton(btnSave)
+                            btnConfirm.isEnabled = true
+                            btnConfirm.text = "Confirm"
                             Toast.makeText(this, "เปลี่ยนรหัสผ่านไม่สำเร็จ: ${e.message}", Toast.LENGTH_LONG).show()
                         }
                 }
                 .addOnFailureListener { e ->
-                    resetButton(btnSave)
+                    btnConfirm.isEnabled = true
+                    btnConfirm.text = "Confirm"
                     val msg = when {
-                        e.message?.contains("password is invalid") == true ||
-                        e.message?.contains("INVALID_PASSWORD") == true ||
-                        e.message?.contains("INVALID_LOGIN_CREDENTIALS") == true ->
-                            "รหัสผ่านปัจจุบันไม่ถูกต้อง"
-                        e.message?.contains("network") == true ->
-                            "ไม่มีการเชื่อมต่ออินเทอร์เน็ต"
-                        else -> "เกิดข้อผิดพลาด: ${e.message}"
+                        e.message?.contains("password is invalid") == true || 
+                        e.message?.contains("INVALID_LOGIN_CREDENTIALS") == true -> "รหัสผ่านปัจจุบันไม่ถูกต้อง"
+                        else -> "การยืนยันตัวตนล้มเหลว: ${e.message}"
                     }
                     Toast.makeText(this, msg, Toast.LENGTH_LONG).show()
                 }
         }
-    }
-
-    private fun resetButton(btn: AppCompatButton) {
-        btn.isEnabled = true
-        btn.text = "บันทึกรหัสผ่านใหม่"
     }
 }

@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.view.View
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -13,11 +14,24 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.horganized.R
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Locale
 
 class DormInfoActivity : AppCompatActivity() {
+
+    private lateinit var auth: FirebaseAuth
+    private lateinit var db: FirebaseFirestore
+    private var contractUrl: String? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_dorm_info)
+
+        auth = FirebaseAuth.getInstance()
+        db = FirebaseFirestore.getInstance()
 
         // ปุ่มคัดลอกที่อยู่
         findViewById<ImageView>(R.id.btn_copy_address)?.setOnClickListener {
@@ -44,12 +58,70 @@ class DormInfoActivity : AppCompatActivity() {
 
         // ปุ่มดูเอกสารสัญญาเช่า
         findViewById<TextView>(R.id.btn_view_contract)?.setOnClickListener {
-            val intent = Intent(this, ContractListActivity::class.java)
-            startActivity(intent)
-            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
+            if (!contractUrl.isNullOrEmpty()) {
+                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(contractUrl))
+                startActivity(intent)
+            } else {
+                // ถ้าไม่มี URL เฉพาะรายบุคคล ให้ไปหน้าแสดงรายการทั่วไป
+                val intent = Intent(this, ContractListActivity::class.java)
+                startActivity(intent)
+                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
+            }
         }
 
+        loadDormInfo()
         setupBottomNavigation()
+    }
+
+    private fun loadDormInfo() {
+        val uid = auth.currentUser?.uid ?: return
+        
+        db.collection("users").document(uid).get()
+            .addOnSuccessListener { document ->
+                if (document != null && document.exists()) {
+                    val roomNumber = document.getString("roomNumber") ?: "-"
+                    val moveInTimestamp = document.getTimestamp("moveInDate")
+                    val termString = document.getString("contractTerm") ?: ""
+                    contractUrl = document.getString("contractUrl")
+
+                    findViewById<TextView>(R.id.tv_room_number)?.text = "ห้อง $roomNumber"
+
+                    if (moveInTimestamp != null) {
+                        val sdf = SimpleDateFormat("d/M/yyyy", Locale.getDefault())
+                        val startDate = moveInTimestamp.toDate()
+                        findViewById<TextView>(R.id.tv_contract_start)?.text = sdf.format(startDate)
+
+                        // คำนวณวันสิ้นสุดจาก contractTerm (เช่น "6 เดือน")
+                        val calendar = Calendar.getInstance()
+                        calendar.time = startDate
+                        
+                        val monthsToAdd = when {
+                            termString.contains("3") -> 3
+                            termString.contains("6") -> 6
+                            termString.contains("12") -> 12
+                            else -> 0
+                        }
+                        
+                        if (monthsToAdd > 0) {
+                            calendar.add(Calendar.MONTH, monthsToAdd)
+                            findViewById<TextView>(R.id.tv_contract_end)?.text = sdf.format(calendar.time)
+                        } else {
+                            findViewById<TextView>(R.id.tv_contract_end)?.text = "-"
+                        }
+                    } else {
+                        findViewById<TextView>(R.id.tv_contract_start)?.text = "-"
+                        findViewById<TextView>(R.id.tv_contract_end)?.text = "-"
+                    }
+
+                    // ปรับแต่งข้อความปุ่มสัญญา
+                    if (!contractUrl.isNullOrEmpty()) {
+                        findViewById<TextView>(R.id.btn_view_contract)?.text = "ดูเอกสารสัญญาเช่า (PDF/Link)"
+                    }
+                }
+            }
+            .addOnFailureListener { e ->
+                Toast.makeText(this, "โหลดข้อมูลไม่สำเร็จ: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
     }
 
     private fun setupBottomNavigation() {

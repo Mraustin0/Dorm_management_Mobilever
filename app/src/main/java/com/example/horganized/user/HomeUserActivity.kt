@@ -12,6 +12,8 @@ import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.resource.bitmap.CircleCrop
 import com.example.horganized.R
 import com.example.horganized.model.Bill
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -64,9 +66,9 @@ class HomeUserActivity : AppCompatActivity() {
         }
         notificationIcon?.applyHoverAnimation()
 
-        // ปุ่ม "ดูและจ่ายบิล" → ไปหน้ารายละเอียดบิลก่อน เพื่อเลือกบิลที่จะจ่าย
+        // ปุ่ม "ดูและจ่ายบิล"
         findViewById<Button>(R.id.btn_view_pay_bill)?.setOnClickListener {
-            val intent = Intent(this, DetailBillActivity::class.java)
+            val intent = Intent(this, PayBillActivity::class.java)
             startActivity(intent)
             overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
         }
@@ -133,14 +135,24 @@ class HomeUserActivity : AppCompatActivity() {
     private fun loadUserData() {
         val uid = auth.currentUser?.uid ?: return
 
-        db.collection("users").document(uid).get()
-            .addOnSuccessListener { doc ->
-                if (doc != null && doc.exists()) {
-                    val name = doc.getString("name") ?: ""
-                    val room = doc.getString("roomNumber") ?: ""
-                    findViewById<TextView>(R.id.user_name)?.text = "$name ห้อง $room"
+        db.collection("users").document(uid).addSnapshotListener { doc, _ ->
+            if (doc != null && doc.exists()) {
+                val name = doc.getString("name") ?: ""
+                val room = doc.getString("roomNumber") ?: ""
+                findViewById<TextView>(R.id.user_name)?.text = "$name ห้อง $room"
+                
+                // เพิ่มการโหลดรูปโปรไฟล์
+                val photoUrl = doc.getString("photoUrl")
+                val ivAvatar = findViewById<ImageView>(R.id.user_avatar)
+                if (!photoUrl.isNullOrEmpty() && ivAvatar != null) {
+                    Glide.with(this)
+                        .load(photoUrl)
+                        .transform(CircleCrop())
+                        .placeholder(R.drawable.u1)
+                        .into(ivAvatar)
                 }
             }
+        }
     }
 
     private fun loadBillData() {
@@ -149,32 +161,18 @@ class HomeUserActivity : AppCompatActivity() {
         db.collection("bills").whereEqualTo("userId", uid)
             .orderBy("dueDate", Query.Direction.DESCENDING).limit(1)
             .addSnapshotListener { snapshots, _ ->
-                if (snapshots == null || snapshots.isEmpty) {
-                    // ไม่มีบิล
-                    showNoBill()
-                    return@addSnapshotListener
-                }
-                val bill = snapshots.documents[0].toObject(Bill::class.java)
-                if (bill != null) {
-                    showHasBill()
-                    updateBillUI(bill)
+                if (snapshots != null && !snapshots.isEmpty) {
+                    val bill = snapshots.documents[0].toObject(Bill::class.java)
+                    bill?.let { 
+                        findViewById<TextView>(R.id.tv_no_bill)?.visibility = View.GONE
+                        findViewById<LinearLayout>(R.id.layout_bill_info)?.visibility = View.VISIBLE
+                        updateBillUI(it) 
+                    }
                 } else {
-                    showNoBill()
+                    findViewById<TextView>(R.id.tv_no_bill)?.visibility = View.VISIBLE
+                    findViewById<LinearLayout>(R.id.layout_bill_info)?.visibility = View.GONE
                 }
             }
-    }
-
-    private fun showNoBill() {
-        findViewById<View>(R.id.tv_no_bill)?.visibility = View.VISIBLE
-        findViewById<View>(R.id.layout_bill_info)?.visibility = View.GONE
-        findViewById<View>(R.id.btn_toggle_usage)?.visibility = View.GONE
-        findViewById<View>(R.id.layout_usage_details)?.visibility = View.GONE
-    }
-
-    private fun showHasBill() {
-        findViewById<View>(R.id.tv_no_bill)?.visibility = View.GONE
-        findViewById<View>(R.id.layout_bill_info)?.visibility = View.VISIBLE
-        findViewById<View>(R.id.btn_toggle_usage)?.visibility = View.VISIBLE
     }
 
     private fun updateBillUI(bill: Bill) {
@@ -192,7 +190,6 @@ class HomeUserActivity : AppCompatActivity() {
 
         when {
             bill.isPaid -> {
-                // จ่ายแล้ว (admin ยืนยัน) → สีเขียว
                 btnPay?.text = "จ่ายแล้ว"
                 btnPay?.backgroundTintList = android.content.res.ColorStateList.valueOf(
                     android.graphics.Color.parseColor("#1B9E44")
@@ -200,24 +197,14 @@ class HomeUserActivity : AppCompatActivity() {
                 btnPay?.isEnabled = false
             }
             bill.isPending -> {
-                // ส่งสลิปแล้ว รอ admin ยืนยัน → สีเหลืองเข้ม
                 btnPay?.text = "รอการยืนยัน"
                 btnPay?.backgroundTintList = android.content.res.ColorStateList.valueOf(
-                    android.graphics.Color.parseColor("#F9A825")
+                    android.graphics.Color.parseColor("#FF9800")
                 )
                 btnPay?.isEnabled = false
             }
-            bill.status == "rejected" -> {
-                // admin ปฏิเสธสลิป → สีแดง ให้จ่ายใหม่
-                btnPay?.text = "สลิปถูกปฏิเสธ จ่ายใหม่"
-                btnPay?.backgroundTintList = android.content.res.ColorStateList.valueOf(
-                    android.graphics.Color.parseColor("#E53935")
-                )
-                btnPay?.isEnabled = true
-            }
             else -> {
-                // ยังไม่จ่าย → สีแดง
-                btnPay?.text = "ดูและจ่ายบิล"
+                btnPay?.text = "จ่ายเลย"
                 btnPay?.backgroundTintList = android.content.res.ColorStateList.valueOf(
                     android.graphics.Color.parseColor("#E53935")
                 )

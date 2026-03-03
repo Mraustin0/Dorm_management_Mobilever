@@ -17,13 +17,17 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <ImageView
+    <com.google.android.material.imageview.ShapeableImageView
         android:id="@+id/profile_image_edit"
         android:layout_width="100dp"
         android:layout_height="100dp"
         android:layout_marginTop="24dp"
-        android:src="@drawable/shape_circle_black"
+        android:src="@drawable/u1"
         android:scaleType="centerCrop"
+        android:padding="2dp"
+        app:shapeAppearanceOverlay="@style/CircleImage"
+        app:strokeColor="#F0F0F0"
+        app:strokeWidth="2dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/btn_back" />
@@ -36,9 +40,21 @@
         android:text="Edit pictures"
         android:textColor="#4A90E2"
         android:textStyle="bold"
+        android:padding="8dp"
+        android:background="?attr/selectableItemBackground"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/profile_image_edit" />
+
+    <ProgressBar
+        android:id="@+id/progress_upload"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="@id/profile_image_edit"
+        app:layout_constraintBottom_toBottomOf="@id/profile_image_edit"
+        app:layout_constraintStart_toStartOf="@id/profile_image_edit"
+        app:layout_constraintEnd_toEndOf="@id/profile_image_edit" />
 
     <ScrollView
         android:layout_width="match_parent"
