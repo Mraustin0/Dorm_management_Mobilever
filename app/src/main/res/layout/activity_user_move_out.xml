@@ -122,23 +122,19 @@
                     android:orientation="vertical"
                     android:padding="16dp">
 
-                    <RelativeLayout
+                    <LinearLayout
                         android:id="@+id/layout_view_contract"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
                         android:clickable="true"
                         android:focusable="true"
                         android:background="?attr/selectableItemBackground">
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="สัญญาเช่า:" android:textColor="#666666" android:layout_centerVertical="true"/>
-                        <LinearLayout
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_alignParentEnd="true"
-                            android:gravity="center_vertical">
-                            <ImageView android:layout_width="20dp" android:layout_height="20dp" android:src="@drawable/ic_list" app:tint="#666666" />
-                            <TextView android:id="@+id/tv_contract_filename" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="หนังสือสัญญาเช่าห้อง.pdf" android:textColor="#4A90E2" android:layout_marginStart="4dp" android:textStyle="bold" />
-                        </LinearLayout>
-                    </RelativeLayout>
+                        <TextView android:layout_width="120dp" android:layout_height="wrap_content" android:text="สัญญาเช่า:" android:textColor="#666666" />
+                        <ImageView android:layout_width="18dp" android:layout_height="18dp" android:src="@drawable/ic_list" app:tint="#666666" />
+                        <TextView android:id="@+id/tv_contract_filename" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="หนังสือสัญญาเช่าห้อง.pdf" android:textColor="#4A90E2" android:layout_marginStart="4dp" android:textStyle="bold" android:maxLines="1" android:ellipsize="end" />
+                    </LinearLayout>
 
                     <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:orientation="horizontal">
                         <TextView android:layout_width="120dp" android:layout_height="wrap_content" android:text="วันที่เริ่มเช่า:" android:textColor="#666666" />

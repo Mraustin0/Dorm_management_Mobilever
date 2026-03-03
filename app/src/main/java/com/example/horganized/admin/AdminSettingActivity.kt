@@ -11,6 +11,7 @@ import androidx.cardview.widget.CardView
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.load.resource.bitmap.CircleCrop
 import com.example.horganized.LoginActivity
 import com.example.horganized.R
@@ -68,11 +69,12 @@ class AdminSettingActivity : AppCompatActivity() {
 
                 val photoUrl = doc.getString("photoUrl")
                 if (!photoUrl.isNullOrEmpty() && ivProfile != null) {
-                    ivProfile.setPadding(0, 0, 0, 0)
                     Glide.with(this)
                         .load(photoUrl)
-                        .transform(CircleCrop())
+                        .diskCacheStrategy(DiskCacheStrategy.NONE)
+                        .skipMemoryCache(true)
                         .placeholder(R.drawable.ic_person)
+                        .error(R.drawable.ic_person)
                         .into(ivProfile)
                 }
             }

@@ -30,6 +30,7 @@ class AdminMoveInActivity : AppCompatActivity() {
     private lateinit var etSurname: EditText
     private lateinit var etPhone: EditText
     private lateinit var etEmail: EditText
+    private lateinit var etIdCard: EditText
     private lateinit var etContractLink: EditText
     private lateinit var etWater: EditText
     private lateinit var etElectric: EditText
@@ -62,6 +63,7 @@ class AdminMoveInActivity : AppCompatActivity() {
         etSurname = findViewById(R.id.et_move_in_surname)
         etPhone = findViewById(R.id.et_move_in_phone)
         etEmail = findViewById(R.id.et_move_in_email)
+        etIdCard = findViewById(R.id.et_move_in_id_card)
         etContractLink = findViewById(R.id.et_contract_link)
         etWater = findViewById(R.id.et_move_in_water)
         etElectric = findViewById(R.id.et_move_in_electric)
@@ -92,6 +94,9 @@ class AdminMoveInActivity : AppCompatActivity() {
         if (etSurname.text.toString().trim().isEmpty()) { etSurname.error = "กรุณากรอกนามสกุล"; return false }
         if (etPhone.text.toString().trim().isEmpty()) { etPhone.error = "กรุณากรอกเบอร์โทร"; return false }
         if (etEmail.text.toString().trim().isEmpty()) { etEmail.error = "กรุณากรอกอีเมล"; return false }
+        val idCard = etIdCard.text.toString().trim()
+        if (idCard.isEmpty()) { etIdCard.error = "กรุณากรอกเลขบัตรประชาชน"; return false }
+        if (idCard.length != 13) { etIdCard.error = "เลขบัตรประชาชนต้องมี 13 หลัก"; return false }
         if (etContractLink.text.toString().trim().isEmpty()) { etContractLink.error = "กรุณาใส่ลิงก์สัญญา"; return false }
         if (etWater.text.toString().trim().isEmpty()) { etWater.error = "กรุณากรอกเลขมิเตอร์น้ำ"; return false }
         if (etElectric.text.toString().trim().isEmpty()) { etElectric.error = "กรุณากรอกเลขมิเตอร์ไฟ"; return false }
@@ -177,6 +182,7 @@ class AdminMoveInActivity : AppCompatActivity() {
                     "surname" to etSurname.text.toString().trim(),
                     "phone" to phone,
                     "email" to email,
+                    "idCard" to etIdCard.text.toString().trim(),
                     "contractUrl" to contractUrl, // บันทึกลิงก์สัญญา
                     "role" to "user",
                     "roomNumber" to roomNumber,

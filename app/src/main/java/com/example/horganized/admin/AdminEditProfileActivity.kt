@@ -30,7 +30,7 @@ import java.io.IOException
 
 class AdminEditProfileActivity : AppCompatActivity() {
 
-    private val IMGBB_API_KEY = "5d5ae17ff9575ef5b3f0b8e82f45fd64"
+    private val IMGBB_API_KEY = "106d8c7ed1b4b416772d2a91f3327a5b"
 
     private val auth = FirebaseAuth.getInstance()
     private val db   = FirebaseFirestore.getInstance()
@@ -164,9 +164,10 @@ class AdminEditProfileActivity : AppCompatActivity() {
         }
         val base64Image = Base64.encodeToString(bytes, Base64.DEFAULT)
 
-        val requestBody = FormBody.Builder()
-            .add("image", base64Image)
-            .add("name", "profile_$uid")
+        val requestBody = MultipartBody.Builder()
+            .setType(MultipartBody.FORM)
+            .addFormDataPart("image", base64Image)
+            .addFormDataPart("name", "profile_$uid")
             .build()
 
         val request = Request.Builder()
@@ -191,13 +192,15 @@ class AdminEditProfileActivity : AppCompatActivity() {
                     progressUpload.visibility = View.GONE
                     try {
                         val json = JSONObject(body)
-                        if (json.getBoolean("success")) {
+                        val success = json.optBoolean("success", false)
+                        if (success) {
                             val url = json.getJSONObject("data").getString("url")
                             saveToFirestore(uid, firstName, url)
                         } else {
-                            val error = json.getJSONObject("error").getString("message")
-                            Toast.makeText(this@AdminEditProfileActivity,
-                                "ImgBB Error: $error", Toast.LENGTH_LONG).show()
+                            val errMsg = json.optJSONObject("error")?.optString("message")
+                                ?: json.optString("error")
+                                ?: "อัปโหลดรูปไม่สำเร็จ (${response.code})"
+                            Toast.makeText(this@AdminEditProfileActivity, errMsg, Toast.LENGTH_LONG).show()
                             btnSubmit.isEnabled = true
                             btnSubmit.text = "บันทึก"
                         }

@@ -74,7 +74,7 @@ class UserMoveOutActivity : AppCompatActivity() {
         etMoveOutDate = findViewById(R.id.et_move_out_date)
         btnHistory = findViewById(R.id.btn_history)
 
-        findViewById<android.widget.RelativeLayout>(R.id.layout_view_contract).setOnClickListener {
+        findViewById<android.widget.LinearLayout>(R.id.layout_view_contract).setOnClickListener {
             if (contractUrl.isNotEmpty()) {
                 val intent = Intent(Intent.ACTION_VIEW, Uri.parse(contractUrl))
                 startActivity(intent)
@@ -93,7 +93,7 @@ class UserMoveOutActivity : AppCompatActivity() {
                     val name = doc.getString("name") ?: ""
                     val surname = doc.getString("surname") ?: ""
                     tvFullName.text = "$name $surname"
-                    tvCitizenId.text = doc.getString("citizenId") ?: "-"
+                    tvCitizenId.text = doc.getString("idCard") ?: "-"
                     tvPhone.text = doc.getString("phone") ?: "-"
                     tvEmail.text = doc.getString("email") ?: "-"
                     

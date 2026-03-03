@@ -106,7 +106,7 @@ class HomeUserActivity : AppCompatActivity() {
         // ปุ่มบริการ - แจ้งย้ายออก
         val cardMoveOut = findViewById<CardView>(R.id.card_move_out)
         cardMoveOut?.setOnClickListener {
-            val intent = Intent(this, ContractListActivity::class.java)
+            val intent = Intent(this, UserMoveOutActivity::class.java)
             startActivity(intent)
             overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
         }
