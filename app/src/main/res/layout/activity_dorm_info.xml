@@ -158,7 +158,7 @@
                         <ImageView
                             android:layout_width="24dp"
                             android:layout_height="24dp"
-                            android:src="@drawable/ic_contract_gg"
+                            android:src="@drawable/ic_doo_contract_gg"
                             app:tint="#333333" />
 
                         <TextView
@@ -226,16 +226,37 @@
                         android:background="#F0F0F0" />
 
                     <!-- View Contract Link -->
-                    <TextView
+                    <LinearLayout
                         android:id="@+id/btn_view_contract"
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:background="?attr/selectableItemBackground"
-                        android:paddingVertical="4dp"
-                        android:text="ดูเอกสารสัญญาเช่า"
-                        android:textColor="#333333"
-                        android:textSize="14sp"
-                        android:textStyle="bold" />
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:paddingVertical="4dp">
+
+                        <ImageView
+                            android:layout_width="22dp"
+                            android:layout_height="22dp"
+                            android:src="@drawable/ic_history_contract_gg"
+                            app:tint="#333333" />
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="10dp"
+                            android:layout_weight="1"
+                            android:text="ดูเอกสารสัญญาเช่า"
+                            android:textColor="#333333"
+                            android:textSize="14sp"
+                            android:textStyle="bold" />
+
+                        <ImageView
+                            android:layout_width="18dp"
+                            android:layout_height="18dp"
+                            android:src="@drawable/ic_chevron_right_gg"
+                            app:tint="#AAAAAA" />
+                    </LinearLayout>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 

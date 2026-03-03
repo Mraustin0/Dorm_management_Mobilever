@@ -1,5 +1,6 @@
 package com.example.horganized.admin
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -80,7 +81,11 @@ class AdminVacantRoomActivity : AppCompatActivity() {
 
                 tvVacantCount.text = "${vacantRooms.size} ห้อง"
 
-                rvRooms.adapter = RoomAdapter(vacantRooms) { /* ไม่ต้องทำอะไรเมื่อกด */ }
+                rvRooms.adapter = RoomAdapter(vacantRooms) { room ->
+                    val intent = Intent(this, AdminMoveInActivity::class.java)
+                    intent.putExtra("ROOM_NAME", room.name)
+                    startActivity(intent)
+                }
             }
             .addOnFailureListener { e ->
                 Log.e("VacantRoom", "Error loading rooms", e)

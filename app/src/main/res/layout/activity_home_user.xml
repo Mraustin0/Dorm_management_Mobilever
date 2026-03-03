@@ -303,8 +303,20 @@
                     app:cardCornerRadius="16dp"
                     app:cardElevation="2dp">
                     <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center" android:orientation="vertical">
-                        <ImageView android:layout_width="32dp" android:layout_height="32dp" android:src="@drawable/ic_parcel_gg" app:tint="#333333" />
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:text="พัสดุ" android:textColor="#333333" android:textStyle="bold" />
+
+                        <ImageView
+                            android:layout_width="32dp"
+                            android:layout_height="32dp"
+                            android:src="@drawable/ic_contract_gg"
+                            app:tint="#333333" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:text="เอกสารสัญญาเช่า"
+                            android:textColor="#333333"
+                            android:textStyle="bold" />
                     </LinearLayout>
                 </androidx.cardview.widget.CardView>
 
@@ -345,7 +357,12 @@
                     app:cardCornerRadius="16dp"
                     app:cardElevation="2dp">
                     <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center" android:orientation="vertical">
-                        <ImageView android:layout_width="32dp" android:layout_height="32dp" android:src="@android:drawable/ic_dialog_map" app:tint="#333333" />
+
+                        <ImageView
+                            android:layout_width="32dp"
+                            android:layout_height="32dp"
+                            android:src="@drawable/move"
+                            app:tint="#333333" />
                         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:text="แจ้งย้ายออก" android:textColor="#333333" android:textStyle="bold" />
                     </LinearLayout>
                 </androidx.cardview.widget.CardView>

@@ -70,21 +70,14 @@ class AdminHomeActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
-        // เชื่อมปุ่มสร้างบิล
-        findViewById<CardView>(R.id.cv_create_bill).setOnClickListener {
-            val intent = Intent(this, AdminSelectRoomActivity::class.java)
-            intent.putExtra("MODE", "CREATE_BILL")
-            startActivity(intent)
-        }
-
         // เชื่อมปุ่มแจ้งซ่อม
         findViewById<CardView>(R.id.cv_technician).setOnClickListener {
             startActivity(Intent(this, AdminRepairListActivity::class.java))
         }
 
-        // เชื่อมปุ่มย้ายเข้า/ออก
+        // เชื่อมปุ่มย้ายออก
         findViewById<CardView>(R.id.cv_move).setOnClickListener {
-            startActivity(Intent(this, AdminMoveSelectionActivity::class.java))
+            startActivity(Intent(this, AdminMoveOutListActivity::class.java))
         }
 
         // เชื่อมไอคอนตั้งค่า

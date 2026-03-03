@@ -3,11 +3,11 @@ package com.example.horganized.admin
 import android.content.Intent
 import android.os.Bundle
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.cardview.widget.CardView
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.bumptech.glide.Glide
@@ -36,15 +36,15 @@ class AdminSettingActivity : AppCompatActivity() {
 
         findViewById<ImageView>(R.id.btn_back_setting).setOnClickListener { finish() }
 
-        findViewById<CardView>(R.id.cv_edit_profile).setOnClickListener {
+        findViewById<LinearLayout>(R.id.cv_edit_profile).setOnClickListener {
             startActivity(Intent(this, AdminEditProfileActivity::class.java))
         }
 
-        findViewById<CardView>(R.id.cv_change_password).setOnClickListener {
+        findViewById<LinearLayout>(R.id.cv_change_password).setOnClickListener {
             startActivity(Intent(this, ChangePasswordActivity::class.java))
         }
 
-        findViewById<CardView>(R.id.cv_logout).setOnClickListener {
+        findViewById<LinearLayout>(R.id.cv_logout).setOnClickListener {
             showLogoutDialog()
         }
     }

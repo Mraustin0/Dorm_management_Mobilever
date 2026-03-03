@@ -6,6 +6,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.example.horganized.R
 import com.example.horganized.model.Announcement
 
@@ -29,11 +30,22 @@ class AnnouncementAdapter(
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = announcements[position]
 
-        // ใส่รูปภาพ placeholder (ถ้ามี imageUrl ในอนาคตสามารถใช้ Glide/Coil โหลดได้)
-        holder.ivImage.setBackgroundResource(R.drawable.bg_announcement_placeholder)
-        holder.ivImage.setImageResource(R.drawable.ic_announcement_gg)
-        holder.ivImage.scaleType = ImageView.ScaleType.CENTER
-        holder.ivImage.visibility = View.VISIBLE
+        if (item.imageUrl.isNotEmpty()) {
+            holder.ivImage.scaleType = ImageView.ScaleType.CENTER_CROP
+            holder.ivImage.setBackgroundResource(R.drawable.bg_announcement_placeholder)
+            Glide.with(holder.ivImage.context)
+                .load(item.imageUrl)
+                .placeholder(R.drawable.bg_announcement_placeholder)
+                .error(R.drawable.ic_announcement_gg)
+                .centerCrop()
+                .into(holder.ivImage)
+            holder.ivImage.visibility = View.VISIBLE
+        } else {
+            holder.ivImage.setBackgroundResource(R.drawable.bg_announcement_placeholder)
+            holder.ivImage.setImageResource(R.drawable.ic_announcement_gg)
+            holder.ivImage.scaleType = ImageView.ScaleType.CENTER
+            holder.ivImage.visibility = View.VISIBLE
+        }
 
         holder.tvTitle.text = item.title
 

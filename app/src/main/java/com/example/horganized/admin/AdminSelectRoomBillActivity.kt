@@ -18,6 +18,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.horganized.R
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
+import java.util.Calendar
 
 class AdminSelectRoomBillActivity : AppCompatActivity() {
 
@@ -59,15 +60,18 @@ class AdminSelectRoomBillActivity : AppCompatActivity() {
     }
 
     private fun setupSpinners() {
+        val cal = Calendar.getInstance()
+        val currentMonth = cal.get(Calendar.MONTH)   // 0-based (มกราคม = 0)
+        val currentYear  = cal.get(Calendar.YEAR)
+
         val floors = arrayOf("ชั้น 1", "ชั้น 2", "ชั้น 3", "ชั้น 4")
-        val months = arrayOf("มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", 
-                            "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม")
-        val years = arrayOf("2024", "2025", "2026")
+        val months = arrayOf("มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน",
+                             "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม")
+        val years = Array(3) { (currentYear - 1 + it).toString() }  // ปีก่อน, ปีนี้, ปีหน้า
 
         spinnerFloor.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, floors)
         spinnerMonth.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, months)
         spinnerYear.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, years)
-        spinnerYear.setSelection(1) // 2025
 
         val listener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
@@ -79,6 +83,10 @@ class AdminSelectRoomBillActivity : AppCompatActivity() {
         spinnerFloor.onItemSelectedListener = listener
         spinnerMonth.onItemSelectedListener = listener
         spinnerYear.onItemSelectedListener = listener
+
+        // post() เพื่อให้ทำงานหลัง adapter's initial onItemSelected(0) ที่ Android post ไว้
+        spinnerMonth.post { spinnerMonth.setSelection(currentMonth) }
+        spinnerYear.post { spinnerYear.setSelection(1) }
     }
 
     private fun setupRecyclerView() {

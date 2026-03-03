@@ -66,11 +66,6 @@ class ChatListActivity : AppCompatActivity() {
         listenChatRooms()
         setupBottomNavigation()
 
-        // ปุ่ม back
-        findViewById<ImageView>(R.id.iv_back_chat_list).setOnClickListener {
-            finish()
-        }
-
         // ปุ่ม + เริ่มแชทห้องใหม่ → เลือกห้องแบบ Dialog
         findViewById<ImageView>(R.id.iv_new_chat).setOnClickListener {
             openNewChatDialog()

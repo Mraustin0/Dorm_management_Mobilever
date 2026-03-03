@@ -46,213 +46,187 @@
             android:orientation="vertical"
             android:padding="20dp">
 
-            <!-- Profile Card -->
+            <!-- Profile Section (เรียบ ไม่มี banner) -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:paddingTop="16dp"
+                android:paddingBottom="28dp">
+
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:id="@+id/iv_setting_profile"
+                    android:layout_width="80dp"
+                    android:layout_height="80dp"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/ic_person"
+                    app:shapeAppearanceOverlay="@style/CircleImage"
+                    app:strokeColor="#E0E0E0"
+                    app:strokeWidth="2dp" />
+
+                <TextView
+                    android:id="@+id/tv_setting_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:text="Admin"
+                    android:textColor="#1A1A2E"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="ผู้ดูแลระบบ"
+                    android:textColor="#888888"
+                    android:textSize="13sp" />
+            </LinearLayout>
+
+            <!-- Menu Rows รวมในการ์ดเดียว -->
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="24dp"
-                app:cardCornerRadius="20dp"
-                app:cardElevation="4dp">
+                app:cardCornerRadius="16dp"
+                app:cardElevation="2dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="#2D5496"
-                    android:gravity="center"
-                    android:orientation="vertical"
-                    android:paddingTop="32dp"
-                    android:paddingBottom="28dp">
-
-                    <com.google.android.material.imageview.ShapeableImageView
-                        android:id="@+id/iv_setting_profile"
-                        android:layout_width="90dp"
-                        android:layout_height="90dp"
-                        android:scaleType="centerCrop"
-                        android:src="@drawable/ic_person"
-                        app:shapeAppearanceOverlay="@style/CircleImage"
-                        app:strokeColor="#FFFFFF"
-                        app:strokeWidth="3dp" />
-
-                    <TextView
-                        android:id="@+id/tv_setting_name"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="12dp"
-                        android:text="Admin"
-                        android:textColor="#FFFFFF"
-                        android:textSize="20sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:text="ผู้ดูแลระบบ"
-                        android:textColor="#B0C4DE"
-                        android:textSize="13sp" />
-                </LinearLayout>
-            </androidx.cardview.widget.CardView>
-
-            <!-- Section Label -->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="12dp"
-                android:text="บัญชีของฉัน"
-                android:textColor="#888888"
-                android:textSize="12sp"
-                android:textStyle="bold"
-                android:letterSpacing="0.08" />
-
-            <!-- Edit Profile Row -->
-            <androidx.cardview.widget.CardView
-                android:id="@+id/cv_edit_profile"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="10dp"
-                app:cardCornerRadius="14dp"
-                app:cardElevation="2dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="64dp"
                     android:background="@color/white"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:paddingStart="16dp"
-                    android:paddingEnd="16dp">
+                    android:orientation="vertical">
 
+                    <!-- Edit Profile Row -->
                     <LinearLayout
-                        android:layout_width="40dp"
-                        android:layout_height="40dp"
-                        android:background="@drawable/bg_icon_blue"
-                        android:gravity="center">
+                        android:id="@+id/cv_edit_profile"
+                        android:layout_width="match_parent"
+                        android:layout_height="64dp"
+                        android:background="?attr/selectableItemBackground"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:paddingStart="16dp"
+                        android:paddingEnd="16dp">
+
+                        <LinearLayout
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:background="@drawable/bg_icon_blue"
+                            android:gravity="center">
+                            <ImageView
+                                android:layout_width="22dp"
+                                android:layout_height="22dp"
+                                android:src="@drawable/ic_user_gg"
+                                app:tint="#2D5496" />
+                        </LinearLayout>
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="14dp"
+                            android:layout_weight="1"
+                            android:text="แก้ไขข้อมูลส่วนตัว"
+                            android:textColor="#1A1A2E"
+                            android:textSize="15sp" />
+
                         <ImageView
-                            android:layout_width="22dp"
-                            android:layout_height="22dp"
-                            android:src="@drawable/ic_user_gg"
-                            app:tint="#2D5496" />
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:src="@drawable/ic_chevron_right_gg"
+                            app:tint="#CCCCCC" />
                     </LinearLayout>
 
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="14dp"
-                        android:layout_weight="1"
-                        android:text="แก้ไขข้อมูลส่วนตัว"
-                        android:textColor="#1A1A2E"
-                        android:textSize="15sp" />
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:layout_marginStart="70dp"
+                        android:background="#F0F0F0" />
 
-                    <ImageView
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
-                        android:src="@drawable/ic_arrow_forward"
-                        app:tint="#CCCCCC" />
-                </LinearLayout>
-            </androidx.cardview.widget.CardView>
-
-            <!-- Change Password Row -->
-            <androidx.cardview.widget.CardView
-                android:id="@+id/cv_change_password"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="24dp"
-                app:cardCornerRadius="14dp"
-                app:cardElevation="2dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="64dp"
-                    android:background="@color/white"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:paddingStart="16dp"
-                    android:paddingEnd="16dp">
-
+                    <!-- Change Password Row -->
                     <LinearLayout
-                        android:layout_width="40dp"
-                        android:layout_height="40dp"
-                        android:background="@drawable/bg_icon_orange"
-                        android:gravity="center">
+                        android:id="@+id/cv_change_password"
+                        android:layout_width="match_parent"
+                        android:layout_height="64dp"
+                        android:background="?attr/selectableItemBackground"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:paddingStart="16dp"
+                        android:paddingEnd="16dp">
+
+                        <LinearLayout
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:background="@drawable/bg_icon_orange"
+                            android:gravity="center">
+                            <ImageView
+                                android:layout_width="22dp"
+                                android:layout_height="22dp"
+                                android:src="@drawable/ic_lock_gg"
+                                app:tint="#E65100" />
+                        </LinearLayout>
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="14dp"
+                            android:layout_weight="1"
+                            android:text="เปลี่ยนรหัสผ่าน"
+                            android:textColor="#1A1A2E"
+                            android:textSize="15sp" />
+
                         <ImageView
-                            android:layout_width="22dp"
-                            android:layout_height="22dp"
-                            android:src="@drawable/ic_lock_gg"
-                            app:tint="#E65100" />
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:src="@drawable/ic_chevron_right_gg"
+                            app:tint="#CCCCCC" />
                     </LinearLayout>
 
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="14dp"
-                        android:layout_weight="1"
-                        android:text="เปลี่ยนรหัสผ่าน"
-                        android:textColor="#1A1A2E"
-                        android:textSize="15sp" />
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:layout_marginStart="70dp"
+                        android:background="#F0F0F0" />
 
-                    <ImageView
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
-                        android:src="@drawable/ic_arrow_forward"
-                        app:tint="#CCCCCC" />
-                </LinearLayout>
-            </androidx.cardview.widget.CardView>
-
-            <!-- Section Label -->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="12dp"
-                android:text="อื่นๆ"
-                android:textColor="#888888"
-                android:textSize="12sp"
-                android:textStyle="bold"
-                android:letterSpacing="0.08" />
-
-            <!-- Logout Row -->
-            <androidx.cardview.widget.CardView
-                android:id="@+id/cv_logout"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:cardCornerRadius="14dp"
-                app:cardElevation="2dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="64dp"
-                    android:background="@color/white"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:paddingStart="16dp"
-                    android:paddingEnd="16dp">
-
+                    <!-- Logout Row -->
                     <LinearLayout
-                        android:layout_width="40dp"
-                        android:layout_height="40dp"
-                        android:background="@drawable/bg_icon_red"
-                        android:gravity="center">
+                        android:id="@+id/cv_logout"
+                        android:layout_width="match_parent"
+                        android:layout_height="64dp"
+                        android:background="?attr/selectableItemBackground"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:paddingStart="16dp"
+                        android:paddingEnd="16dp">
+
+                        <LinearLayout
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:background="@drawable/bg_icon_red"
+                            android:gravity="center">
+                            <ImageView
+                                android:layout_width="22dp"
+                                android:layout_height="22dp"
+                                android:src="@drawable/ic_door"
+                                app:tint="#D32F2F" />
+                        </LinearLayout>
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="14dp"
+                            android:layout_weight="1"
+                            android:text="ออกจากระบบ"
+                            android:textColor="#D32F2F"
+                            android:textSize="15sp"
+                            android:textStyle="bold" />
+
                         <ImageView
-                            android:layout_width="22dp"
-                            android:layout_height="22dp"
-                            android:src="@drawable/ic_door"
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:src="@drawable/ic_chevron_right_gg"
                             app:tint="#D32F2F" />
                     </LinearLayout>
 
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="14dp"
-                        android:layout_weight="1"
-                        android:text="ออกจากระบบ"
-                        android:textColor="#D32F2F"
-                        android:textSize="15sp"
-                        android:textStyle="bold" />
-
-                    <ImageView
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
-                        android:src="@drawable/ic_arrow_forward"
-                        app:tint="#D32F2F" />
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
