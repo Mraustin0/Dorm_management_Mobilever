@@ -102,11 +102,12 @@ class ChatDetailActivity : AppCompatActivity() {
             .collection("messages").add(message)
             .addOnSuccessListener {
                 etMessage.setText("")
-                // อัปเดต lastMessage บน chat room doc
+                // อัปเดต lastMessage + แจ้ง user ว่ามีข้อความใหม่จาก admin
                 db.collection("chats").document(chatRoomId)
                     .update(mapOf(
-                        "lastMessage"   to text,
-                        "lastTimestamp" to now
+                        "lastMessage"      to text,
+                        "lastTimestamp"    to now,
+                        "hasUnreadForUser" to true
                     ))
                 // ส่ง notification ไปหา user (chatRoomId = userId ของ user)
                 sendChatNotificationToUser(text)

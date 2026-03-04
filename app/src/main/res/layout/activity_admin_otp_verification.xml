@@ -101,47 +101,20 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/ll_email_input" />
 
-    <!-- Success View (Hidden by default) -->
-    <androidx.cardview.widget.CardView
-        android:id="@+id/card_success"
-        android:layout_width="0dp"
+    <!-- Simplified Success Text -->
+    <TextView
+        android:id="@+id/tv_sent_success"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="32dp"
         android:layout_marginTop="32dp"
-        android:layout_marginEnd="32dp"
+        android:text="ส่งลิงก์เรียบร้อยแล้ว"
+        android:textColor="#1B9E44"
+        android:textSize="18sp"
+        android:textStyle="bold"
         android:visibility="gone"
-        app:cardCornerRadius="16dp"
-        app:cardElevation="4dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/btn_verify_otp">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="#E8F5E9"
-            android:gravity="center"
-            android:orientation="vertical"
-            android:padding="20dp">
-
-            <ImageView
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:src="@android:drawable/checkbox_on_background"
-                app:tint="#2E7D32" />
-
-            <TextView
-                android:id="@+id/tv_success_msg"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:gravity="center"
-                android:text="ส่งลิงก์เรียบร้อยแล้ว!\nระบบจะพากลับหน้าเข้าสู่ระบบใน 3 วินาที"
-                android:textColor="#2E7D32"
-                android:textSize="15sp"
-                android:textStyle="bold" />
-        </LinearLayout>
-    </androidx.cardview.widget.CardView>
+        app:layout_constraintTop_toBottomOf="@id/btn_verify_otp" />
 
     <!-- Status text for error only -->
     <TextView

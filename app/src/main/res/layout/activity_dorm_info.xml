@@ -123,8 +123,8 @@
 
                         <ImageView
                             android:id="@+id/btn_copy_address"
-                            android:layout_width="36dp"
-                            android:layout_height="36dp"
+                            android:layout_width="25dp"
+                            android:layout_height="25dp"
                             android:layout_alignParentEnd="true"
                             android:layout_centerVertical="true"
                             android:background="?attr/selectableItemBackgroundBorderless"
@@ -170,11 +170,6 @@
                             android:textSize="16sp"
                             android:textStyle="bold" />
 
-                        <ImageView
-                            android:layout_width="438dp"
-                            android:layout_height="22dp"
-                            android:src="@drawable/ic_history_contract_gg"
-                            app:tint="#333333" />
                     </LinearLayout>
 
                     <!-- Contract Dates -->
@@ -362,7 +357,7 @@
         android:layout_height="wrap_content"
         android:background="#FFFFFF"
         app:elevation="8dp"
-        app:itemIconSize="24dp"
+        app:itemIconSize="30dp"
         app:labelVisibilityMode="unlabeled"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

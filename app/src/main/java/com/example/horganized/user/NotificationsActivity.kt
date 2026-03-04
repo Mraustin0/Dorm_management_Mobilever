@@ -1,5 +1,6 @@
 package com.example.horganized.user
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -14,6 +15,7 @@ import com.example.horganized.adapter.NotificationAdapter
 import com.example.horganized.model.Notification
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
 
 class NotificationsActivity : AppCompatActivity() {
 
@@ -36,13 +38,19 @@ class NotificationsActivity : AppCompatActivity() {
         findViewById<ImageView>(R.id.btn_back).setOnClickListener { finish() }
 
         recyclerView.layoutManager = LinearLayoutManager(this)
+        
+        // แก้ไข onItemClick: เพิ่ม Logic การเปิดหน้าบิล
         adapter = NotificationAdapter(notificationList) { item ->
+            // 1. ทำเครื่องหมายว่าอ่านแล้ว
             if (!item.isRead && item.notificationId.isNotEmpty()) {
                 db.collection("notifications").document(item.notificationId)
                     .update("isRead", true)
-                    .addOnFailureListener { e ->
-                        Log.e("UserNotif", "Error marking as read", e)
-                    }
+            }
+
+            // 2. ไปยังหน้าบิลถ้าเป็นแจ้งเตือนบิลใหม่
+            if (item.type == "new_bill") {
+                val intent = Intent(this, DetailBillActivity::class.java)
+                startActivity(intent)
             }
         }
         recyclerView.adapter = adapter
@@ -55,11 +63,13 @@ class NotificationsActivity : AppCompatActivity() {
 
         db.collection("notifications")
             .whereEqualTo("userId", uid)
+            .orderBy("timestamp", Query.Direction.DESCENDING) // เรียงลำดับตามเวลาล่าสุด
             .addSnapshotListener { snapshots, e ->
                 if (e != null) {
                     Log.e("UserNotif", "Listen failed.", e)
                     return@addSnapshotListener
                 }
+                
                 notificationList.clear()
                 if (snapshots != null) {
                     for (doc in snapshots) {
@@ -70,7 +80,6 @@ class NotificationsActivity : AppCompatActivity() {
                             Log.e("UserNotif", "Skip doc ${doc.id}: ${ex.message}")
                         }
                     }
-                    notificationList.sortByDescending { it.timestamp?.seconds ?: 0L }
                 }
 
                 if (notificationList.isEmpty()) {

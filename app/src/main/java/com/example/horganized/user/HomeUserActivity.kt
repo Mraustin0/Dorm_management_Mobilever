@@ -76,10 +76,10 @@ class HomeUserActivity : AppCompatActivity() {
         // Bill Card
         findViewById<CardView>(R.id.bill_card)?.applyHoverAnimation()
 
-        // ปุ่มบริการ - พัสดุ
+        // ปุ่มบริการ - เอกสารสัญญาเช่า
         val cardParcel = findViewById<CardView>(R.id.card_parcel)
         cardParcel?.setOnClickListener {
-            val intent = Intent(this, NotificationsActivity::class.java)
+            val intent = Intent(this, ContractListActivity::class.java)
             startActivity(intent)
             overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
         }
@@ -104,17 +104,34 @@ class HomeUserActivity : AppCompatActivity() {
         cardAnnouncement?.applyHoverAnimation()
 
         // ปุ่มบริการ - แจ้งย้ายออก
+        // ถ้าเคยแจ้งไปแล้ว → ไปหน้าประวัติโดยตรง / ยังไม่เคย → เปิดฟอร์ม
         val cardMoveOut = findViewById<CardView>(R.id.card_move_out)
         cardMoveOut?.setOnClickListener {
-            val intent = Intent(this, UserMoveOutActivity::class.java)
-            startActivity(intent)
-            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
+            val uid = auth.currentUser?.uid ?: return@setOnClickListener
+            db.collection("move_out_requests")
+                .whereEqualTo("userId", uid)
+                .limit(1)
+                .get()
+                .addOnSuccessListener { docs ->
+                    if (!docs.isEmpty) {
+                        startActivity(Intent(this, MoveOutHistoryActivity::class.java))
+                    } else {
+                        startActivity(Intent(this, UserMoveOutActivity::class.java))
+                    }
+                    overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
+                }
+                .addOnFailureListener {
+                    // query ล้มเหลว → เปิดฟอร์มตามปกติ
+                    startActivity(Intent(this, UserMoveOutActivity::class.java))
+                    overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
+                }
         }
         cardMoveOut?.applyHoverAnimation()
 
         loadUserData()
         loadBillData()
         setupBottomNavigation()
+        observeUnreadChat()
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -202,7 +219,7 @@ class HomeUserActivity : AppCompatActivity() {
                 btnPay?.isEnabled = false
             }
             bill.isPending -> {
-                // ส่งสลิปแล้ว รอยืนยัน → ส้ม
+                // user ส่งสลิปแล้ว รอ admin ยืนยัน → ส้ม
                 val orange = android.graphics.Color.parseColor("#FF9800")
                 tvBadge?.text = "รอการยืนยัน"
                 setBadgeColor(tvBadge, orange)
@@ -211,7 +228,7 @@ class HomeUserActivity : AppCompatActivity() {
                 btnPay?.isEnabled = false
             }
             else -> {
-                // ยังไม่ชำระ → แดง กดได้
+                // "unpaid" (admin ส่งบิลใหม่) หรือ "rejected" (สลิปถูกปฏิเสธ) → แดง กดได้
                 val red = android.graphics.Color.parseColor("#E53935")
                 tvBadge?.text = "ค้างชำระ"
                 setBadgeColor(tvBadge, red)
@@ -259,5 +276,24 @@ class HomeUserActivity : AppCompatActivity() {
                 else -> false
             }
         }
+    }
+
+    /** ฟังก์ชันดู hasUnreadForUser จาก Firestore แบบ real-time
+     *  ถ้า admin ส่งข้อความมา → แสดงจุดแดงบน chat icon ใน bottom nav */
+    private fun observeUnreadChat() {
+        val uid = auth.currentUser?.uid ?: return
+        val bottomNav = findViewById<BottomNavigationView>(R.id.bottom_nav)
+
+        db.collection("chats").document(uid)
+            .addSnapshotListener { doc, _ ->
+                val hasUnread = doc?.getBoolean("hasUnreadForUser") ?: false
+                if (hasUnread) {
+                    // แสดงจุดแดง (ไม่มีตัวเลข) บน chat icon
+                    bottomNav.getOrCreateBadge(R.id.navigation_chat).isVisible = true
+                } else {
+                    // ลบจุดแดงออก
+                    bottomNav.removeBadge(R.id.navigation_chat)
+                }
+            }
     }
 }

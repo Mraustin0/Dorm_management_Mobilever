@@ -21,6 +21,8 @@ data class Bill(
     val paymentDate: com.google.firebase.Timestamp? = null,
     val roomNumber: String = ""
 ) {
-    val isPaid: Boolean get() = status == "paid"
-    val isPending: Boolean get() = status == "pending"
+    val isPaid: Boolean     get() = status == "paid"
+    val isPending: Boolean  get() = status == "pending"   // user ส่งสลิปแล้ว รอ admin ยืนยัน
+    val isUnpaid: Boolean   get() = status == "unpaid"    // admin ส่งบิล ยังไม่ได้ชำระ
+    val isRejected: Boolean get() = status == "rejected"  // admin ปฏิเสธสลิป
 }

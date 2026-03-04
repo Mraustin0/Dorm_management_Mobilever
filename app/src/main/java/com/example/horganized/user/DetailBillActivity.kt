@@ -176,6 +176,7 @@ class DetailBillActivity : AppCompatActivity() {
 
         when {
             bill.isPaid -> {
+                // admin ยืนยันแล้ว → เขียว
                 btnPay.text = "จ่ายแล้ว"
                 btnPay.backgroundTintList = android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#1B9E44"))
                 btnPay.isEnabled = false
@@ -183,6 +184,7 @@ class DetailBillActivity : AppCompatActivity() {
                 tvDue.setTextColor(android.graphics.Color.parseColor("#1B9E44"))
             }
             bill.isPending -> {
+                // user ส่งสลิปแล้ว รอ admin ยืนยัน → ส้ม
                 btnPay.text = "รอการยืนยัน"
                 btnPay.backgroundTintList = android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#FF9800"))
                 btnPay.isEnabled = false
@@ -190,7 +192,10 @@ class DetailBillActivity : AppCompatActivity() {
                 tvDue.setTextColor(android.graphics.Color.parseColor("#FF9800"))
             }
             else -> {
+                // "unpaid" (admin ส่งบิลใหม่) หรือ "rejected" (สลิปถูกปฏิเสธ) → แดง กดได้
                 btnPay.text = "จ่ายเลย"
+                btnPay.backgroundTintList = android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#E53935"))
+                btnPay.isEnabled = true
                 btnPay.setOnClickListener {
                     val payIntent = Intent(this, PayBillActivity::class.java)
                     payIntent.putExtra("BILL_ID", billId)

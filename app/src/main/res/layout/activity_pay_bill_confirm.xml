@@ -4,7 +4,9 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FFFFFF">
+    android:background="#FFFFFF"
+    android:clipChildren="false"
+    android:clipToPadding="false">
 
     <!-- Header -->
     <RelativeLayout
@@ -15,12 +17,16 @@
         android:paddingStart="16dp"
         android:paddingEnd="16dp"
         android:paddingBottom="16dp"
+        android:clipChildren="false"
         app:layout_constraintTop_toTopOf="parent">
         <ImageView
             android:id="@+id/btn_back"
             android:layout_width="32dp"
             android:layout_height="32dp"
-            android:src="@drawable/ic_back_gg" />
+            android:layout_centerVertical="true"
+            android:src="@drawable/ic_back_gg"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:padding="4dp" />
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -28,14 +34,17 @@
             android:layout_marginStart="16dp"
             android:layout_centerVertical="true"
             android:text="แจ้งโอนเงิน"
+            android:padding="5dp"
             android:textColor="#000000"
             android:textSize="20sp"
             android:textStyle="bold" />
     </RelativeLayout>
 
-    <ScrollView
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        android:clipChildren="false"
+        android:clipToPadding="false"
         app:layout_constraintTop_toBottomOf="@id/rl_header"
         app:layout_constraintBottom_toTopOf="@id/btn_confirm">
 
@@ -43,14 +52,19 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="20dp">
+            android:paddingHorizontal="20dp"
+            android:paddingBottom="40dp"
+            android:clipChildren="false"
+            android:clipToPadding="false">
 
-            <!-- Bank Card (Collapsed) -->
+            <!-- Bank Card -->
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_margin="4dp"
                 app:cardCornerRadius="16dp"
-                app:cardElevation="2dp">
+                app:cardElevation="6dp"
+                app:cardUseCompatPadding="true">
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -62,7 +76,8 @@
                             android:id="@+id/iv_bank_logo"
                             android:layout_width="48dp"
                             android:layout_height="48dp"
-                            android:src="@android:drawable/ic_menu_gallery" />
+                            android:scaleType="fitCenter"
+                            android:src="@drawable/logo_kasikorn" />
                         <LinearLayout
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
@@ -81,47 +96,56 @@
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
+                android:layout_margin="4dp"
                 app:cardCornerRadius="16dp"
-                app:cardElevation="2dp">
+                app:cardElevation="6dp"
+                app:cardUseCompatPadding="true">
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:padding="20dp">
-                    <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content">
-                        <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:orientation="vertical">
-                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="ยอดโอน" android:textColor="#333333" android:textSize="14sp"/>
-                            <TextView 
-                                android:id="@+id/tv_amount_value"
-                                android:layout_width="wrap_content" 
-                                android:layout_height="wrap_content" 
-                                android:text="6064 บาท" 
-                                android:textStyle="bold" 
-                                android:textColor="#000000" 
-                                android:textSize="18sp"/>
-                        </LinearLayout>
-                    </RelativeLayout>
-                    <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#EEEEEE" android:layout_marginTop="12dp" android:layout_marginBottom="12dp"/>
-                    <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content">
-                        <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:orientation="vertical">
-                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="วันที่และเวลา" android:textColor="#333333" android:textSize="14sp"/>
-                            <TextView 
-                                android:id="@+id/tv_date_value"
-                                android:layout_width="wrap_content" 
-                                android:layout_height="wrap_content" 
-                                android:text="03/01/2026" 
-                                android:textStyle="bold" 
-                                android:textColor="#000000" 
-                                android:textSize="18sp"/>
-                        </LinearLayout>
+                    
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="ยอดโอน" android:textColor="#333333" android:textSize="14sp"/>
+                    <TextView 
+                        android:id="@+id/tv_amount_value"
+                        android:layout_width="wrap_content" 
+                        android:layout_height="wrap_content" 
+                        android:text="0.00 บาท" 
+                        android:textStyle="bold" 
+                        android:textColor="#000000" 
+                        android:textSize="22sp"/>
+
+                    <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#EEEEEE" android:layout_marginTop="16dp" android:layout_marginBottom="16dp"/>
+                    
+                    <TextView 
+                        android:layout_width="wrap_content" 
+                        android:layout_height="wrap_content" 
+                        android:text="วันที่และเวลา" 
+                        android:textColor="#333333" 
+                        android:textSize="14sp"/>
+
+                    <RelativeLayout 
+                        android:layout_width="match_parent" 
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp">
+                        
+                        <TextView 
+                            android:id="@+id/tv_date_value"
+                            android:layout_width="wrap_content" 
+                            android:layout_height="wrap_content" 
+                            android:layout_alignParentStart="true"
+                            android:text="-" 
+                            android:textStyle="bold" 
+                            android:textColor="#000000" 
+                            android:textSize="18sp"/>
+
                         <TextView
                             android:id="@+id/tv_time_value"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_alignParentEnd="true"
-                            android:layout_centerVertical="true"
-                            android:text="16.44 น."
+                            android:text="-"
                             android:textStyle="bold"
                             android:textColor="#000000"
                             android:textSize="18sp"/>
@@ -134,19 +158,20 @@
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
+                android:layout_margin="4dp"
                 app:cardCornerRadius="16dp"
-                app:cardElevation="2dp">
+                app:cardElevation="6dp"
+                app:cardUseCompatPadding="true">
                 <ImageView
                     android:id="@+id/iv_slip_preview"
                     android:layout_width="match_parent"
-                    android:layout_height="300dp"
+                    android:layout_height="380dp"
                     android:scaleType="centerCrop"
                     android:src="@android:drawable/ic_menu_gallery" />
             </androidx.cardview.widget.CardView>
 
         </LinearLayout>
-    </ScrollView>
+    </androidx.core.widget.NestedScrollView>
 
     <Button
         android:id="@+id/btn_confirm"
@@ -157,6 +182,8 @@
         android:text="ยืนยันการชำระเงิน"
         android:textAllCaps="false"
         android:textColor="#FFFFFF"
+        android:textSize="16sp"
+        android:textStyle="bold"
         app:cornerRadius="28dp"
         app:layout_constraintBottom_toBottomOf="parent" />
 

@@ -16,6 +16,10 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
 import com.example.horganized.R
+import com.example.horganized.model.Bill
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
 
 class PayBillActivity : AppCompatActivity() {
 
@@ -26,24 +30,19 @@ class PayBillActivity : AppCompatActivity() {
     private var billAmount: Double = 0.0
     private var billMonth: String = ""
 
+    private val auth = FirebaseAuth.getInstance()
+    private val db = FirebaseFirestore.getInstance()
+
     private val pickImageLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
         uri?.let {
             selectedImageUri = it
-            
-            // ใช้ Glide ดึงรูปมาแสดงเพื่อให้ภาพไม่แตกและจัดการ Memory ได้ดี
-            Glide.with(this)
-                .load(it)
-                .into(ivPreview)
-
-            // ปรับขนาด ImageView ให้เต็ม CardView เมื่อเลือกรูปแล้ว
+            Glide.with(this).load(it).into(ivPreview)
             val params = ivPreview.layoutParams
             params.width = ViewGroup.LayoutParams.MATCH_PARENT
             params.height = ViewGroup.LayoutParams.MATCH_PARENT
             ivPreview.layoutParams = params
             ivPreview.scaleType = ImageView.ScaleType.CENTER_CROP
-            
-            tvUploadLabel.text = "เปลี่ยนรูปภาพ"
-            tvUploadLabel.visibility = View.GONE // ซ่อนข้อความไปเลยเพื่อให้เห็นสลิปชัดๆ
+            tvUploadLabel.visibility = View.GONE
         }
     }
 
@@ -51,20 +50,13 @@ class PayBillActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_pay_bill)
 
-        billId = intent.getStringExtra("BILL_ID") ?: ""
-        billAmount = intent.getDoubleExtra("BILL_AMOUNT", 0.0)
-        billMonth = intent.getStringExtra("BILL_MONTH") ?: ""
-
         ivPreview = findViewById(R.id.iv_preview)
         tvUploadLabel = findViewById(R.id.tv_upload_label)
-        
         val btnBack = findViewById<ImageView>(R.id.btn_back)
         val btnCopy = findViewById<ImageView>(R.id.btn_copy_acc)
         val btnSelectImage = findViewById<androidx.cardview.widget.CardView>(R.id.btn_select_image)
         val btnNext = findViewById<Button>(R.id.btn_next)
         val tvAmount = findViewById<TextView>(R.id.tv_amount)
-
-        tvAmount.text = "${String.format("%,.2f", billAmount)} บาท"
 
         btnBack.setOnClickListener { finish() }
 
@@ -80,6 +72,10 @@ class PayBillActivity : AppCompatActivity() {
         }
 
         btnNext.setOnClickListener {
+            if (billId.isEmpty()) {
+                Toast.makeText(this, "ไม่พบข้อมูลบิล กรุณาลองใหม่อีกครั้ง", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
             if (selectedImageUri != null) {
                 val intent = Intent(this, PayBillConfirmActivity::class.java)
                 intent.putExtra("BILL_ID", billId)
@@ -91,5 +87,35 @@ class PayBillActivity : AppCompatActivity() {
                 Toast.makeText(this, "กรุณาอัพโหลดหลักฐานการชำระเงิน", Toast.LENGTH_SHORT).show()
             }
         }
+
+        // ดึงข้อมูลบิลล่าสุดมาแสดงโดยอัตโนมัติ
+        fetchLatestBill(tvAmount)
+    }
+
+    private fun fetchLatestBill(tvAmount: TextView) {
+        val uid = auth.currentUser?.uid ?: return
+        db.collection("bills")
+            .whereEqualTo("userId", uid)
+            .orderBy("dueDate", Query.Direction.DESCENDING)
+            .limit(1)
+            .get()
+            .addOnSuccessListener { snapshots ->
+                if (snapshots != null && !snapshots.isEmpty) {
+                    val doc = snapshots.documents[0]
+                    val bill = doc.toObject(Bill::class.java)
+                    if (bill != null) {
+                        billId = doc.id
+                        billAmount = bill.amount
+                        billMonth = bill.month
+                        tvAmount.text = "${String.format("%,.2f", billAmount)} บาท"
+                    }
+                } else {
+                    tvAmount.text = "0.00 บาท"
+                    Toast.makeText(this, "ไม่พบรายการบิลค้างชำระ", Toast.LENGTH_SHORT).show()
+                }
+            }
+            .addOnFailureListener { e ->
+                Toast.makeText(this, "โหลดข้อมูลบิลล้มเหลว: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
     }
 }

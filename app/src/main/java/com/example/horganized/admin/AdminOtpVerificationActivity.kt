@@ -13,7 +13,6 @@ import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatButton
-import androidx.cardview.widget.CardView
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.example.horganized.R
@@ -39,9 +38,10 @@ class AdminOtpVerificationActivity : AppCompatActivity() {
         val etEmail = findViewById<EditText>(R.id.et_reset_email)
         val btnSend = findViewById<AppCompatButton>(R.id.btn_verify_otp)
         val tvError = findViewById<TextView>(R.id.tv_resend)
-        val cardSuccess = findViewById<CardView>(R.id.card_success)
+        val tvSentSuccess = findViewById<TextView>(R.id.tv_sent_success)
         val layoutInput = findViewById<LinearLayout>(R.id.ll_email_input)
         val tvSubtitle = findViewById<TextView>(R.id.tv_subtitle_otp)
+        val tvTitle = findViewById<TextView>(R.id.tv_title_otp)
 
         val prefillEmail = intent.getStringExtra("ADMIN_EMAIL") ?: ""
         if (prefillEmail.isNotEmpty()) {
@@ -71,20 +71,21 @@ class AdminOtpVerificationActivity : AppCompatActivity() {
 
             auth.sendPasswordResetEmail(email)
                 .addOnSuccessListener {
-                    // แสดง UI สำเร็จแบบสวยงาม
-                    cardSuccess.visibility = View.VISIBLE
+                    // แสดงข้อความสำเร็จแบบเรียบง่าย
+                    tvSentSuccess.visibility = View.VISIBLE
                     
-                    // ซ่อนส่วน Input เพื่อให้ดูคลีนขึ้น
+                    // ซ่อนส่วนอื่นๆ ทั้งหมด
                     layoutInput.visibility = View.GONE
                     btnSend.visibility = View.GONE
                     tvSubtitle.visibility = View.GONE
+                    tvTitle.visibility = View.GONE
                     
                     // หน่วงเวลา 3 วินาทีแล้วกลับหน้า Login
                     Handler(Looper.getMainLooper()).postDelayed({
                         if (!isFinishing) {
                             finish()
                         }
-                    }, 3500)
+                    }, 3000)
                 }
                 .addOnFailureListener { e ->
                     btnSend.isEnabled = true

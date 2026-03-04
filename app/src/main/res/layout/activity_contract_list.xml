@@ -19,6 +19,7 @@
             android:id="@+id/btn_back"
             android:layout_width="32dp"
             android:layout_height="32dp"
+            android:layout_centerVertical="true"
             android:src="@drawable/ic_back_gg"
             android:padding="4dp" />
         <TextView
@@ -56,6 +57,7 @@
                     android:textSize="18sp"
                     android:textStyle="bold" />
                 <TextView
+                    android:id="@+id/tv_contract_status"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignParentEnd="true"
@@ -70,15 +72,15 @@
 
             <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="16dp">
                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="วันที่เริ่มสัญญา" android:textColor="#666666" android:textSize="13sp"/>
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_alignParentEnd="true" android:text="1/12/2025" android:textColor="#333333"/>
+                <TextView android:id="@+id/tv_contract_start_list" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_alignParentEnd="true" android:text="-" android:textColor="#333333"/>
             </RelativeLayout>
 
             <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp">
                 <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:orientation="horizontal">
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="วันที่สิ้นสุดสัญญา" android:textColor="#666666" android:textSize="13sp"/>
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="8dp" android:text="(อีก 141 วัน)" android:textColor="#FFB74D" android:textSize="11sp"/>
+                    <TextView android:id="@+id/tv_days_remaining" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="8dp" android:text="-" android:textColor="#FFB74D" android:textSize="11sp"/>
                 </LinearLayout>
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_alignParentEnd="true" android:text="31/5/2026" android:textColor="#333333"/>
+                <TextView android:id="@+id/tv_contract_end_list" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_alignParentEnd="true" android:text="-" android:textColor="#333333"/>
             </RelativeLayout>
 
         </LinearLayout>

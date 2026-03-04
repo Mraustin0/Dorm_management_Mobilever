@@ -12,6 +12,8 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:fillViewport="true"
+        android:clipChildren="false"
+        android:clipToPadding="false"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toTopOf="@id/bottom_nav"
         app:layout_constraintStart_toStartOf="parent"
@@ -20,7 +22,9 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:clipChildren="false"
+            android:clipToPadding="false">
 
             <!-- Header Section -->
             <RelativeLayout
@@ -285,12 +289,14 @@
 
             <GridLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="247dp"
                 android:layout_marginStart="10dp"
                 android:layout_marginTop="16dp"
                 android:layout_marginEnd="10dp"
                 android:layout_marginBottom="24dp"
-                android:columnCount="2">
+                android:columnCount="2"
+                android:clipChildren="false"
+                android:clipToPadding="false">
 
                 <androidx.cardview.widget.CardView
                     android:id="@+id/card_parcel"
@@ -300,7 +306,12 @@
                     android:layout_margin="6dp"
                     app:cardCornerRadius="16dp"
                     app:cardElevation="2dp">
-                    <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center" android:orientation="vertical">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:orientation="vertical">
 
                         <ImageView
                             android:layout_width="32dp"
@@ -326,9 +337,26 @@
                     android:layout_margin="6dp"
                     app:cardCornerRadius="16dp"
                     app:cardElevation="2dp">
-                    <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center" android:orientation="vertical">
-                        <ImageView android:layout_width="32dp" android:layout_height="32dp" android:src="@drawable/ic_repair_gg" app:tint="#333333" />
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:text="แจ้งซ่อม" android:textColor="#333333" android:textStyle="bold" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:orientation="vertical">
+
+                        <ImageView
+                            android:layout_width="32dp"
+                            android:layout_height="32dp"
+                            android:src="@drawable/ic_repair_gg"
+                            app:tint="#333333" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:text="แจ้งซ่อม"
+                            android:textColor="#333333"
+                            android:textStyle="bold" />
                     </LinearLayout>
                 </androidx.cardview.widget.CardView>
 
@@ -340,9 +368,26 @@
                     android:layout_margin="6dp"
                     app:cardCornerRadius="16dp"
                     app:cardElevation="2dp">
-                    <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center" android:orientation="vertical">
-                        <ImageView android:layout_width="32dp" android:layout_height="32dp" android:src="@drawable/ic_announcement_gg" app:tint="#333333" />
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:text="ประกาศ" android:textColor="#333333" android:textStyle="bold" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:orientation="vertical">
+
+                        <ImageView
+                            android:layout_width="32dp"
+                            android:layout_height="32dp"
+                            android:src="@drawable/ic_announcement_gg"
+                            app:tint="#333333" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:text="ประกาศ"
+                            android:textColor="#333333"
+                            android:textStyle="bold" />
                     </LinearLayout>
                 </androidx.cardview.widget.CardView>
 
@@ -354,14 +399,26 @@
                     android:layout_margin="6dp"
                     app:cardCornerRadius="16dp"
                     app:cardElevation="2dp">
-                    <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center" android:orientation="vertical">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:orientation="vertical">
 
                         <ImageView
                             android:layout_width="32dp"
                             android:layout_height="32dp"
                             android:src="@drawable/move"
                             app:tint="#333333" />
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:text="แจ้งย้ายออก" android:textColor="#333333" android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:text="แจ้งย้ายออก"
+                            android:textColor="#333333"
+                            android:textStyle="bold" />
                     </LinearLayout>
                 </androidx.cardview.widget.CardView>
             </GridLayout>
@@ -374,7 +431,7 @@
         android:layout_height="wrap_content"
         android:background="#FFFFFF"
         app:elevation="8dp"
-        app:itemIconSize="24dp"
+        app:itemIconSize="30dp"
         app:labelVisibilityMode="unlabeled"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

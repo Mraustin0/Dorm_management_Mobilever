@@ -128,7 +128,7 @@
         android:layout_height="wrap_content"
         android:background="#FFFFFF"
         app:elevation="8dp"
-        app:itemIconSize="24dp"
+        app:itemIconSize="30dp"
         app:labelVisibilityMode="unlabeled"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

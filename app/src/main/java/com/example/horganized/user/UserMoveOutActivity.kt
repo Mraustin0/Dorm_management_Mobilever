@@ -128,10 +128,10 @@ class UserMoveOutActivity : AppCompatActivity() {
     private fun checkBillsBeforeSubmit() {
         val userId = auth.currentUser?.uid ?: return
         
-        // ตรวจสอบว่ามียอดค้างชำระ (status == pending) หรือไม่
+        // ตรวจสอบว่ามียอดค้างชำระ (unpaid = ยังไม่จ่าย, pending = รอ admin ยืนยันสลิป) หรือไม่
         db.collection("bills")
             .whereEqualTo("userId", userId)
-            .whereEqualTo("status", "pending")
+            .whereIn("status", listOf("unpaid", "pending"))
             .get()
             .addOnSuccessListener { documents ->
                 if (!documents.isEmpty) {
@@ -165,6 +165,35 @@ class UserMoveOutActivity : AppCompatActivity() {
             return
         }
 
+        // ตรวจสอบก่อนส่งว่าเคยแจ้งย้ายออกไปแล้วหรือไม่ (กันส่งซ้ำ)
+        db.collection("move_out_requests")
+            .whereEqualTo("userId", userId)
+            .limit(1)
+            .get()
+            .addOnSuccessListener { docs ->
+                if (!docs.isEmpty) {
+                    // แจ้งไปแล้ว → บล็อกและพาไปหน้าประวัติ
+                    AlertDialog.Builder(this)
+                        .setTitle("แจ้งย้ายออกแล้ว")
+                        .setMessage("คุณได้แจ้งย้ายออกไปแล้ว ไม่สามารถแจ้งซ้ำได้\nกรุณาตรวจสอบสถานะได้ที่หน้าประวัติ")
+                        .setPositiveButton("ดูสถานะ") { _, _ ->
+                            startActivity(Intent(this, MoveOutHistoryActivity::class.java))
+                            finish()
+                        }
+                        .setNegativeButton("ปิด", null)
+                        .show()
+                } else {
+                    // ยังไม่เคยแจ้ง → ส่งข้อมูลได้เลย
+                    doSubmitMoveOutRequest(userId, notifyDate, moveOutDate)
+                }
+            }
+            .addOnFailureListener {
+                // query ล้มเหลว → ส่งตามปกติ (ฝั่ง Firestore rules จะกันเองอยู่แล้ว)
+                doSubmitMoveOutRequest(userId, notifyDate, moveOutDate)
+            }
+    }
+
+    private fun doSubmitMoveOutRequest(userId: String, notifyDate: String, moveOutDate: String) {
         // 1. ข้อมูลสำหรับเก็บประวัติ
         val requestData = hashMapOf(
             "userId" to userId,
@@ -177,7 +206,7 @@ class UserMoveOutActivity : AppCompatActivity() {
             "isRead" to false
         )
 
-        // 2. ข้อมูลสำหรับการแจ้งเตือนแอดมิน (แสดงจุดแดง)
+        // 2. ข้อมูลสำหรับการแจ้งเตือนแอดมิน
         val notificationData = hashMapOf(
             "userId" to "admin",
             "roomNumber" to roomNumber,

@@ -69,13 +69,15 @@ class ChatActivity : AppCompatActivity() {
                 tvBanner.text = "ห้อง $userRoomNumber · $userName"
 
                 // สร้าง/อัปเดต chat room document ไว้ให้ admin เห็นใน list
+                // + ล้าง hasUnreadForUser เพราะ user กำลังเปิดดูแชทอยู่
                 db.collection("chats").document(chatRoomId)
                     .set(mapOf(
-                        "userId"        to uid,
-                        "userName"      to userName,
-                        "roomNumber"    to userRoomNumber,
-                        "lastMessage"   to "",
-                        "lastTimestamp" to Timestamp.now()
+                        "userId"           to uid,
+                        "userName"         to userName,
+                        "roomNumber"       to userRoomNumber,
+                        "lastMessage"      to "",
+                        "lastTimestamp"    to Timestamp.now(),
+                        "hasUnreadForUser" to false
                     ), com.google.firebase.firestore.SetOptions.merge())
             }
     }

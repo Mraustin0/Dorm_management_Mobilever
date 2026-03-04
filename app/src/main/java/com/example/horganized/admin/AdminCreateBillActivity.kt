@@ -186,7 +186,8 @@ class AdminCreateBillActivity : AppCompatActivity() {
     }
 
     private fun calculateTotal() {
-        val roomPrice = tvRoomPrice.text.toString().replace(Regex("[^0-9]"), "").toIntOrNull() ?: 0
+        val roomPriceString = tvRoomPrice.text.toString().replace(Regex("[^0-9]"), "")
+        val roomPrice = roomPriceString.toIntOrNull() ?: 0
         val elecAfter = etElecAfter.text.toString().toIntOrNull() ?: 0
         val elecBefore = etElecBefore.text.toString().toIntOrNull() ?: 0
         val unitsElec = (elecAfter - elecBefore).coerceAtLeast(0)
@@ -230,7 +231,7 @@ class AdminCreateBillActivity : AppCompatActivity() {
             "amount" to totalAmount,
             "month" to currentMonth,
             "year" to currentYear,
-            "status" to "pending",
+            "status" to "unpaid",
             "dueDate" to dueDate,
             "createdAt" to FieldValue.serverTimestamp(),
             "details" to hashMapOf(
@@ -244,17 +245,15 @@ class AdminCreateBillActivity : AppCompatActivity() {
         )
 
         db.collection("bills").add(billData).addOnSuccessListener {
-            val notifId = db.collection("notifications").document().id
             val notification = hashMapOf(
-                "notificationId" to notifId,
                 "userId" to tenantId,
                 "title" to "บิลค่าเช่าใหม่",
                 "message" to "แอดมินได้ส่งบิลประจำเดือน $currentMonth $currentYear ให้คุณแล้ว กรุณาชำระเงินภายในวันที่ ${SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(dueDate.toDate())}",
-                "senderName" to "ADMIN1",
-                "timestamp" to System.currentTimeMillis(),
+                "type" to "new_bill",
+                "timestamp" to FieldValue.serverTimestamp(), // แก้ไข: ใช้ serverTimestamp เพื่อให้ตรงกับ Model
                 "isRead" to false
             )
-            db.collection("notifications").document(notifId).set(notification)
+            db.collection("notifications").add(notification)
             
             Toast.makeText(this, "ส่งบิลเรียบร้อยแล้ว", Toast.LENGTH_SHORT).show()
             finish()
