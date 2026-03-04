@@ -4,9 +4,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FFFFFF"
-    android:clipChildren="false"
-    android:clipToPadding="false">
+    android:background="#FFFFFF">
 
     <!-- Header -->
     <RelativeLayout
@@ -17,16 +15,12 @@
         android:paddingStart="16dp"
         android:paddingEnd="16dp"
         android:paddingBottom="16dp"
-        android:clipChildren="false"
         app:layout_constraintTop_toTopOf="parent">
         <ImageView
             android:id="@+id/btn_back"
             android:layout_width="32dp"
             android:layout_height="32dp"
-            android:layout_centerVertical="true"
-            android:src="@drawable/ic_back_gg"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:padding="4dp" />
+            android:src="@drawable/ic_back_gg" />
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -34,17 +28,14 @@
             android:layout_marginStart="16dp"
             android:layout_centerVertical="true"
             android:text="แจ้งโอนเงิน"
-            android:padding="5dp"
             android:textColor="#000000"
             android:textSize="20sp"
             android:textStyle="bold" />
     </RelativeLayout>
 
-    <androidx.core.widget.NestedScrollView
+    <ScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:clipChildren="false"
-        android:clipToPadding="false"
         app:layout_constraintTop_toBottomOf="@id/rl_header"
         app:layout_constraintBottom_toTopOf="@id/btn_next">
 
@@ -52,19 +43,14 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingHorizontal="20dp"
-            android:paddingBottom="40dp"
-            android:clipChildren="false"
-            android:clipToPadding="false">
+            android:padding="20dp">
 
             <!-- Bank Card -->
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="4dp"
                 app:cardCornerRadius="16dp"
-                app:cardElevation="6dp"
-                app:cardUseCompatPadding="true">
+                app:cardElevation="2dp">
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -85,71 +71,46 @@
                             android:layout_marginStart="12dp"
                             android:orientation="vertical">
                             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="ธนาคารกสิกรไทย" android:textStyle="bold" android:textColor="#333333"/>
-                            <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical">
+                            <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:orientation="horizontal">
                                 <TextView android:id="@+id/tv_acc_number" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="เลขบัญชี 001-443-5771" android:textColor="#666666"/>
-                                <ImageView android:id="@+id/btn_copy_acc" 
-                                    android:layout_width="32dp" 
-                                    android:layout_height="32dp" 
-                                    android:layout_marginStart="4dp" 
-                                    android:padding="8dp"
-                                    android:src="@drawable/ic_copy_gg" 
-                                    android:background="?attr/selectableItemBackgroundBorderless"
-                                    app:tint="#888888" />
+                                <ImageView android:id="@+id/btn_copy_acc" android:layout_width="16dp" android:layout_height="16dp" android:layout_marginStart="8dp" android:src="@drawable/ic_copy_gg" app:tint="#888888" />
                             </LinearLayout>
                             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="ชื่อบัญชี golden key2" android:textColor="#666666"/>
                         </LinearLayout>
                     </RelativeLayout>
 
-                    <!-- QR Code PromptPay -->
                     <ImageView
                         android:id="@+id/iv_qr_code"
-                        android:layout_width="200dp"
-                        android:layout_height="220dp"
+                        android:layout_width="150dp"
+                        android:layout_height="150dp"
                         android:layout_gravity="center"
                         android:layout_marginTop="20dp"
-                        android:scaleType="fitCenter"
-                        android:src="@drawable/promptpay_qr" />
-                    
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:layout_marginTop="8dp"
-                        android:text="สแกนเพื่อจ่ายเงิน"
-                        android:textColor="#666666"
-                        android:textSize="12sp" />
+                        android:src="@android:drawable/ic_menu_crop" />
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
             <!-- Amount Section -->
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="24dp" android:text="ยอดโอน" android:textColor="#333333" android:textStyle="bold"/>
-
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="20dp" android:text="ยอดโอน" android:textColor="#333333" android:textStyle="bold"/>
             <TextView
                 android:id="@+id/tv_amount"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:background="@drawable/shape_edittext_bg"
-                android:backgroundTint="#EFEFEF"
-                android:gravity="end"
-                android:padding="16dp"
+                android:padding="12dp"
                 android:textColor="#333333"
-                android:textSize="20sp"
-                android:textStyle="bold" />
+                android:textSize="16sp"
+                android:gravity="end" />
 
             <!-- Upload Section -->
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="24dp" android:text="อัพโหลดหลักฐานการชำระเงิน" android:textColor="#333333" android:textStyle="bold"/>
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="20dp" android:text="อัพโหลดหลักฐานการชำระเงิน" android:textColor="#333333" android:textStyle="bold"/>
             <androidx.cardview.widget.CardView
                 android:id="@+id/btn_select_image"
                 android:layout_width="match_parent"
-                android:layout_height="180dp"
-                android:layout_margin="4dp"
-                android:clickable="true"
-                android:focusable="true"
-                android:foreground="?attr/selectableItemBackground"
+                android:layout_height="160dp"
+                android:layout_marginTop="8dp"
                 app:cardCornerRadius="16dp"
-                app:cardElevation="6dp"
-                app:cardUseCompatPadding="true"
+                app:cardElevation="0dp"
                 app:cardBackgroundColor="#F8F9FA">
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -175,7 +136,7 @@
             </androidx.cardview.widget.CardView>
 
         </LinearLayout>
-    </androidx.core.widget.NestedScrollView>
+    </ScrollView>
 
     <Button
         android:id="@+id/btn_next"
@@ -186,8 +147,6 @@
         android:text="Next"
         android:textAllCaps="false"
         android:textColor="#FFFFFF"
-        android:textSize="16sp"
-        android:textStyle="bold"
         app:cornerRadius="28dp"
         app:layout_constraintBottom_toBottomOf="parent" />
 
