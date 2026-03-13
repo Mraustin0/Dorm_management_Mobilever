@@ -199,10 +199,10 @@ class AdminMoveInActivity : AppCompatActivity() {
                 batch.set(userRef, userData)
 
                 val roomRef = db.collection("rooms").document(roomNumber)
-                batch.update(roomRef, mapOf(
+                batch.set(roomRef, mapOf(
                     "isVacant" to false,
                     "tenantId" to newUserId
-                ))
+                ), com.google.firebase.firestore.SetOptions.merge())
 
                 batch.commit()
                     .addOnSuccessListener {

@@ -1,21 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:gravity="start"
-    android:padding="8dp">
-    <ImageView
-        android:layout_width="24dp"
-        android:layout_height="24dp"
-        android:layout_marginTop="8dp"
-        android:src="@drawable/shape_circle_black" />
+    android:paddingHorizontal="8dp"
+    android:paddingVertical="4dp">
+
+    <com.google.android.material.imageview.ShapeableImageView
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_gravity="bottom"
+        android:layout_marginBottom="4dp"
+        android:background="#E0E0E0"
+        android:padding="4dp"
+        android:src="@drawable/ic_person"
+        app:shapeAppearanceOverlay="@style/ShapeAppearance.MaterialComponents.SmallComponent"
+        app:tint="@color/gray_text" />
+
     <TextView
         android:id="@+id/tv_received_message"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
         android:layout_marginStart="8dp"
+        android:layout_marginBottom="4dp"
+        android:maxWidth="240dp"
         android:background="@drawable/shape_chat_bubble_admin"
         android:padding="12dp"
         android:text="Message"
-        android:textColor="#FFFFFF" />
+        android:textColor="#FFFFFF"
+        android:textSize="14sp" />
+
 </LinearLayout>

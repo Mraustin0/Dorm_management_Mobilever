@@ -47,9 +47,11 @@ class AdminCreateBillActivity : AppCompatActivity() {
     private val db = FirebaseFirestore.getInstance()
     private var selectedElecRate: Int = 8
     private val dynamicItemPrices = mutableMapOf<View, Int>()
-    
+
     private var roomNumber = ""
     private var tenantId = ""
+    private var billMonth = ""
+    private var billYear = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -63,10 +65,19 @@ class AdminCreateBillActivity : AppCompatActivity() {
         }
 
         initViews()
-        
+
+        // รับเดือน/ปีที่ admin เลือกจากหน้าก่อน
+        val calendar = Calendar.getInstance()
+        val months = arrayOf(
+            "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน",
+            "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"
+        )
+        billMonth = intent.getStringExtra("BILL_MONTH") ?: months[calendar.get(Calendar.MONTH)]
+        billYear = intent.getStringExtra("BILL_YEAR") ?: calendar.get(Calendar.YEAR).toString()
+
         val roomName = intent.getStringExtra("ROOM_NAME") ?: ""
         if (roomName.isNotEmpty()) {
-            tvBillRoomNumber.text = "บิลค่าเช่า $roomName"
+            tvBillRoomNumber.text = "บิลค่าเช่า $roomName ($billMonth $billYear)"
             roomNumber = roomName.replace("ห้อง ", "").trim()
             fetchTenantInfo(roomNumber)
         }
@@ -112,6 +123,12 @@ class AdminCreateBillActivity : AppCompatActivity() {
     private fun fetchTenantInfo(roomNum: String) {
         db.collection("rooms").document(roomNum).get()
             .addOnSuccessListener { doc ->
+                // โหลดค่าห้องถ้ามีใน Firestore
+                val price = doc.getLong("price")?.toInt()
+                if (price != null) {
+                    tvRoomPrice.text = String.format("%,d บาท", price)
+                }
+
                 val uid = doc.getString("tenantId")
                 if (uid != null) {
                     tenantId = uid
@@ -124,7 +141,50 @@ class AdminCreateBillActivity : AppCompatActivity() {
                             tvAdminUserPhone.text = phone
                         }
                 }
+
+                // ดึงข้อมูลมิเตอร์จาก meter_history ของเดือนที่เลือก
+                fetchMeterHistory(roomNum)
             }
+    }
+
+    private fun fetchMeterHistory(roomNum: String) {
+        val col = db.collection("meter_history")
+        val waterRef = col.document("${roomNum}_${billMonth}_${billYear}_water")
+        val elecRef  = col.document("${roomNum}_${billMonth}_${billYear}_electric")
+
+        var waterDone = false
+        var elecDone  = false
+        var anyFound  = false
+
+        fun tryShowToast() {
+            if (waterDone && elecDone && anyFound) {
+                Toast.makeText(
+                    this,
+                    "ดึงข้อมูลมิเตอร์เดือน $billMonth $billYear แล้ว",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
+
+        waterRef.get().addOnSuccessListener { doc ->
+            if (doc.exists()) {
+                anyFound = true
+                etWaterBefore.setText(doc.getString("previousValue") ?: "0")
+                etWaterAfter.setText(doc.getString("currentValue") ?: "0")
+            }
+            waterDone = true
+            tryShowToast()
+        }
+
+        elecRef.get().addOnSuccessListener { doc ->
+            if (doc.exists()) {
+                anyFound = true
+                etElecBefore.setText(doc.getString("previousValue") ?: "0")
+                etElecAfter.setText(doc.getString("currentValue") ?: "0")
+            }
+            elecDone = true
+            tryShowToast()
+        }
     }
 
     private fun setupElecRateSpinner() {
@@ -219,9 +279,6 @@ class AdminCreateBillActivity : AppCompatActivity() {
     private fun sendBillToFirestore() {
         val totalAmount = tvTotalPrice.text.toString().replace(Regex("[^0-9]"), "").toDoubleOrNull() ?: 0.0
         val calendar = Calendar.getInstance()
-        val months = arrayOf("มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม")
-        val currentMonth = months[calendar.get(Calendar.MONTH)]
-        val currentYear = calendar.get(Calendar.YEAR).toString()
         calendar.add(Calendar.DAY_OF_YEAR, 7)
         val dueDate = Timestamp(calendar.time)
 
@@ -229,8 +286,8 @@ class AdminCreateBillActivity : AppCompatActivity() {
             "userId" to tenantId,
             "roomNumber" to roomNumber,
             "amount" to totalAmount,
-            "month" to currentMonth,
-            "year" to currentYear,
+            "month" to billMonth,
+            "year" to billYear,
             "status" to "unpaid",
             "dueDate" to dueDate,
             "createdAt" to FieldValue.serverTimestamp(),
@@ -248,7 +305,7 @@ class AdminCreateBillActivity : AppCompatActivity() {
             val notification = hashMapOf(
                 "userId" to tenantId,
                 "title" to "บิลค่าเช่าใหม่",
-                "message" to "แอดมินได้ส่งบิลประจำเดือน $currentMonth $currentYear ให้คุณแล้ว กรุณาชำระเงินภายในวันที่ ${SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(dueDate.toDate())}",
+                "message" to "แอดมินได้ส่งบิลประจำเดือน $billMonth $billYear ให้คุณแล้ว กรุณาชำระเงินภายในวันที่ ${SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(dueDate.toDate())}",
                 "type" to "new_bill",
                 "timestamp" to FieldValue.serverTimestamp(), // แก้ไข: ใช้ serverTimestamp เพื่อให้ตรงกับ Model
                 "isRead" to false

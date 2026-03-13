@@ -41,7 +41,14 @@ class ChatDetailActivity : AppCompatActivity() {
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.layout_top_bar_detail)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, 0)
+            insets
+        }
+
+        val dp12 = (12 * resources.displayMetrics.density).toInt()
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.layout_input)) { v, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.setPadding(dp12, dp12, dp12, systemBars.bottom + dp12)
             insets
         }
 

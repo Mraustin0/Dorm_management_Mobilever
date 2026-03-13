@@ -16,6 +16,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.horganized.R
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
@@ -46,7 +47,9 @@ class ChatListActivity : AppCompatActivity() {
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.layout_top_bar_chat)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
+            val dp20 = (20 * resources.displayMetrics.density).toInt()
+            val dp14 = (14 * resources.displayMetrics.density).toInt()
+            v.setPadding(dp20, systemBars.top + dp14, dp20, dp14)
             insets
         }
 
@@ -62,12 +65,15 @@ class ChatListActivity : AppCompatActivity() {
         }
         rvChatList.layoutManager = LinearLayoutManager(this)
         rvChatList.adapter = adapter
+        rvChatList.addItemDecoration(
+            androidx.recyclerview.widget.DividerItemDecoration(this, androidx.recyclerview.widget.DividerItemDecoration.VERTICAL)
+        )
 
         listenChatRooms()
         setupBottomNavigation()
 
         // ปุ่ม + เริ่มแชทห้องใหม่ → เลือกห้องแบบ Dialog
-        findViewById<ImageView>(R.id.iv_new_chat).setOnClickListener {
+        findViewById<android.view.View>(R.id.iv_new_chat).setOnClickListener {
             openNewChatDialog()
         }
     }
@@ -109,7 +115,7 @@ class ChatListActivity : AppCompatActivity() {
             .addOnSuccessListener { snapshot ->
                 val users = snapshot.documents
                 if (users.isEmpty()) {
-                    androidx.appcompat.app.AlertDialog.Builder(this)
+                    AlertDialog.Builder(this)
                         .setTitle("ไม่พบผู้เช่า")
                         .setMessage("ยังไม่มีผู้เช่าในระบบ")
                         .setPositiveButton("ตกลง", null)
@@ -117,30 +123,25 @@ class ChatListActivity : AppCompatActivity() {
                     return@addOnSuccessListener
                 }
 
-                // สร้าง label แสดงในรายการ เช่น "ห้อง 101 - คุณ สมชาย"
-                val labels = users.map { doc ->
-                    val room = doc.getString("roomNumber") ?: "-"
-                    val name = doc.getString("name") ?: "-"
-                    "ห้อง $room  $name"
-                }.toTypedArray()
+                val bottomSheet = BottomSheetDialog(this)
+                val sheetView = layoutInflater.inflate(R.layout.bottom_sheet_select_chat_user, null)
+                bottomSheet.setContentView(sheetView)
 
-                AlertDialog.Builder(this)
-                    .setTitle("เลือกห้องที่ต้องการแชท")
-                    .setItems(labels) { _, index ->
-                        val userDoc  = users[index]
-                        val userId   = userDoc.id
-                        val roomNum  = userDoc.getString("roomNumber") ?: ""
-                        val userName = userDoc.getString("name") ?: ""
-
-                        val intent = Intent(this, ChatDetailActivity::class.java).apply {
-                            putExtra("CHAT_ROOM_ID", userId)
-                            putExtra("ROOM_NAME", "ห้อง $roomNum")
-                            putExtra("USER_NAME", userName)
-                        }
-                        startActivity(intent)
+                val rv = sheetView.findViewById<RecyclerView>(R.id.rv_select_chat_user)
+                rv.layoutManager = LinearLayoutManager(this)
+                rv.adapter = SelectChatUserAdapter(users) { userDoc ->
+                    bottomSheet.dismiss()
+                    val roomNum  = userDoc.getString("roomNumber") ?: ""
+                    val userName = userDoc.getString("name") ?: ""
+                    val intent = Intent(this, ChatDetailActivity::class.java).apply {
+                        putExtra("CHAT_ROOM_ID", userDoc.id)
+                        putExtra("ROOM_NAME", "ห้อง $roomNum")
+                        putExtra("USER_NAME", userName)
                     }
-                    .setNegativeButton("ยกเลิก", null)
-                    .show()
+                    startActivity(intent)
+                }
+
+                bottomSheet.show()
             }
     }
 
@@ -175,9 +176,10 @@ class ChatRoomAdapter(
 ) : RecyclerView.Adapter<ChatRoomAdapter.VH>() {
 
     class VH(view: View) : RecyclerView.ViewHolder(view) {
+        val tvAvatar:   TextView = view.findViewById(R.id.tv_chat_avatar)
         val tvRoomName: TextView = view.findViewById(R.id.tv_chat_room_name)
-        val tvLastMsg: TextView  = view.findViewById(R.id.tv_last_message)
-        val tvTime: TextView     = view.findViewById(R.id.tv_chat_time)
+        val tvLastMsg:  TextView = view.findViewById(R.id.tv_last_message)
+        val tvTime:     TextView = view.findViewById(R.id.tv_chat_time)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
@@ -185,6 +187,7 @@ class ChatRoomAdapter(
 
     override fun onBindViewHolder(holder: VH, position: Int) {
         val room = rooms[position]
+        holder.tvAvatar.text   = room.roomNumber.firstOrNull()?.toString() ?: "?"
         holder.tvRoomName.text = "ห้อง ${room.roomNumber}  ${room.userName}"
         holder.tvLastMsg.text  = room.lastMessage.ifEmpty { "ยังไม่มีข้อความ" }
         holder.tvTime.text     = room.lastTimestamp?.toDate()?.let { formatTime(it) } ?: ""
@@ -201,4 +204,34 @@ class ChatRoomAdapter(
             else -> SimpleDateFormat("d MMM", Locale("th")).format(date)
         }
     }
+}
+
+class SelectChatUserAdapter(
+    private val users: List<com.google.firebase.firestore.DocumentSnapshot>,
+    private val onClick: (com.google.firebase.firestore.DocumentSnapshot) -> Unit
+) : RecyclerView.Adapter<SelectChatUserAdapter.VH>() {
+
+    class VH(view: View) : RecyclerView.ViewHolder(view) {
+        val tvAvatar:   TextView  = view.findViewById(R.id.tv_avatar_initial)
+        val tvRoom:     TextView  = view.findViewById(R.id.tv_room_number)
+        val tvUserName: TextView  = view.findViewById(R.id.tv_user_name)
+    }
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
+        VH(LayoutInflater.from(parent.context).inflate(R.layout.item_select_chat_user, parent, false))
+
+    override fun onBindViewHolder(holder: VH, position: Int) {
+        val doc      = users[position]
+        val roomNum  = doc.getString("roomNumber") ?: "-"
+        val name     = doc.getString("name") ?: "-"
+        val surname  = doc.getString("surname") ?: ""
+        val fullName = "$name $surname".trim()
+
+        holder.tvRoom.text     = "ห้อง $roomNum"
+        holder.tvUserName.text = fullName
+        holder.tvAvatar.text   = name.firstOrNull()?.uppercase() ?: "?"
+        holder.itemView.setOnClickListener { onClick(doc) }
+    }
+
+    override fun getItemCount() = users.size
 }
