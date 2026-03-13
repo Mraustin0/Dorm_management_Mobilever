@@ -183,7 +183,7 @@ class HomeUserActivity : AppCompatActivity() {
         findViewById<TextView>(R.id.tv_other_price)?.text = String.format("%,.0f บาท", bill.details.otherPrice)
         findViewById<TextView>(R.id.tv_total_price)?.text = String.format("%,.2f บาท", bill.amount)
 
-        tvBadge?.visibility = View.VISIBLE
+        tvBadge?.visibility = View.GONE
         val greenColor = android.graphics.Color.parseColor("#1B9E44")
         val redColor = android.graphics.Color.parseColor("#E53935")
         val orangeColor = android.graphics.Color.parseColor("#FF9800")
@@ -192,9 +192,11 @@ class HomeUserActivity : AppCompatActivity() {
             bill.isPaid -> {
                 tvLabel?.visibility = View.GONE // เอา "ยอดค้างชำระ" ออก
                 tvAmount?.setTextColor(greenColor) // เปลี่ยนตัวเลขเป็นสีเขียว
-                
+
+                tvBadge?.visibility = View.VISIBLE
                 tvBadge?.text = "ชำระแล้ว"
-                setBadgeColor(tvBadge, greenColor)
+                tvBadge?.background = null
+                tvBadge?.setTextColor(android.graphics.Color.parseColor("#555555"))
                 btnPay?.text = "ชำระแล้ว"
                 btnPay?.backgroundTintList = android.content.res.ColorStateList.valueOf(greenColor)
                 btnPay?.isEnabled = false
