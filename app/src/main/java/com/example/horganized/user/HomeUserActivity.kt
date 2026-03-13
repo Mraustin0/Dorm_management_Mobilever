@@ -77,36 +77,25 @@ class HomeUserActivity : AppCompatActivity() {
         findViewById<CardView>(R.id.bill_card)?.applyHoverAnimation()
 
         // ปุ่มบริการ - เอกสารสัญญาเช่า
-        val cardParcel = findViewById<CardView>(R.id.card_parcel)
-        cardParcel?.setOnClickListener {
-            val intent = Intent(this, ContractListActivity::class.java)
-            startActivity(intent)
+        findViewById<CardView>(R.id.card_parcel)?.setOnClickListener {
+            startActivity(Intent(this, ContractListActivity::class.java))
             overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
         }
-        cardParcel?.applyHoverAnimation()
 
         // ปุ่มบริการ - แจ้งซ่อม
-        val cardRepair = findViewById<CardView>(R.id.card_repair)
-        cardRepair?.setOnClickListener {
-            val intent = Intent(this, RepairActivity::class.java)
-            startActivity(intent)
+        findViewById<CardView>(R.id.card_repair)?.setOnClickListener {
+            startActivity(Intent(this, RepairActivity::class.java))
             overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
         }
-        cardRepair?.applyHoverAnimation()
 
         // ปุ่มบริการ - ประกาศ
-        val cardAnnouncement = findViewById<CardView>(R.id.card_announcement)
-        cardAnnouncement?.setOnClickListener {
-            val intent = Intent(this, AnnouncementActivity::class.java)
-            startActivity(intent)
+        findViewById<CardView>(R.id.card_announcement)?.setOnClickListener {
+            startActivity(Intent(this, AnnouncementActivity::class.java))
             overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
         }
-        cardAnnouncement?.applyHoverAnimation()
 
         // ปุ่มบริการ - แจ้งย้ายออก
-        // ถ้าเคยแจ้งไปแล้ว → ไปหน้าประวัติโดยตรง / ยังไม่เคย → เปิดฟอร์ม
-        val cardMoveOut = findViewById<CardView>(R.id.card_move_out)
-        cardMoveOut?.setOnClickListener {
+        findViewById<CardView>(R.id.card_move_out)?.setOnClickListener {
             val uid = auth.currentUser?.uid ?: return@setOnClickListener
             db.collection("move_out_requests")
                 .whereEqualTo("userId", uid)
@@ -120,13 +109,7 @@ class HomeUserActivity : AppCompatActivity() {
                     }
                     overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
                 }
-                .addOnFailureListener {
-                    // query ล้มเหลว → เปิดฟอร์มตามปกติ
-                    startActivity(Intent(this, UserMoveOutActivity::class.java))
-                    overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
-                }
         }
-        cardMoveOut?.applyHoverAnimation()
 
         loadUserData()
         loadBillData()
@@ -145,28 +128,22 @@ class HomeUserActivity : AppCompatActivity() {
                     v.animate().scaleX(1f).scaleY(1f).setDuration(100).start()
                 }
             }
-            false // return false so onClickListener still works
+            false
         }
     }
 
     private fun loadUserData() {
         val uid = auth.currentUser?.uid ?: return
-
         db.collection("users").document(uid).addSnapshotListener { doc, _ ->
             if (doc != null && doc.exists()) {
                 val name = doc.getString("name") ?: ""
                 val room = doc.getString("roomNumber") ?: ""
                 findViewById<TextView>(R.id.user_name)?.text = "$name ห้อง $room"
                 
-                // เพิ่มการโหลดรูปโปรไฟล์
                 val photoUrl = doc.getString("photoUrl")
                 val ivAvatar = findViewById<ImageView>(R.id.user_avatar)
                 if (!photoUrl.isNullOrEmpty() && ivAvatar != null) {
-                    Glide.with(this)
-                        .load(photoUrl)
-                        .transform(CircleCrop())
-                        .placeholder(R.drawable.u1)
-                        .into(ivAvatar)
+                    Glide.with(this).load(photoUrl).transform(CircleCrop()).into(ivAvatar)
                 }
             }
         }
@@ -174,7 +151,6 @@ class HomeUserActivity : AppCompatActivity() {
 
     private fun loadBillData() {
         val uid = auth.currentUser?.uid ?: return
-
         db.collection("bills").whereEqualTo("userId", uid)
             .orderBy("dueDate", Query.Direction.DESCENDING).limit(1)
             .addSnapshotListener { snapshots, _ ->
@@ -196,10 +172,11 @@ class HomeUserActivity : AppCompatActivity() {
         val btnPay  = findViewById<Button>(R.id.btn_view_pay_bill)
         val tvAmount = findViewById<TextView>(R.id.outstanding_amount)
         val tvBadge = findViewById<TextView>(R.id.tv_bill_status_badge)
+        val tvLabel = findViewById<TextView>(R.id.tv_outstanding_label)
 
         tvAmount?.text = String.format("%,.2f บาท", bill.amount)
 
-        // แสดงข้อมูลการใช้งาน
+        // รายละเอียดการใช้งาน
         findViewById<TextView>(R.id.tv_room_price)?.text = String.format("%,.0f บาท", bill.details.roomPrice)
         findViewById<TextView>(R.id.tv_electric_price)?.text = "${bill.details.electricUnit} หน่วย = ${String.format("%,.0f", bill.details.electricPrice)} บาท"
         findViewById<TextView>(R.id.tv_water_price)?.text = String.format("%,.0f บาท", bill.details.waterPrice)
@@ -207,33 +184,41 @@ class HomeUserActivity : AppCompatActivity() {
         findViewById<TextView>(R.id.tv_total_price)?.text = String.format("%,.2f บาท", bill.amount)
 
         tvBadge?.visibility = View.VISIBLE
+        val greenColor = android.graphics.Color.parseColor("#1B9E44")
+        val redColor = android.graphics.Color.parseColor("#E53935")
+        val orangeColor = android.graphics.Color.parseColor("#FF9800")
 
         when {
             bill.isPaid -> {
-                // ยืนยันแล้ว → เขียว
-                val green = android.graphics.Color.parseColor("#1B9E44")
+                tvLabel?.visibility = View.GONE // เอา "ยอดค้างชำระ" ออก
+                tvAmount?.setTextColor(greenColor) // เปลี่ยนตัวเลขเป็นสีเขียว
+                
                 tvBadge?.text = "ชำระแล้ว"
-                setBadgeColor(tvBadge, green)
+                setBadgeColor(tvBadge, greenColor)
                 btnPay?.text = "ชำระแล้ว"
-                btnPay?.backgroundTintList = android.content.res.ColorStateList.valueOf(green)
+                btnPay?.backgroundTintList = android.content.res.ColorStateList.valueOf(greenColor)
                 btnPay?.isEnabled = false
             }
             bill.isPending -> {
-                // user ส่งสลิปแล้ว รอ admin ยืนยัน → ส้ม
-                val orange = android.graphics.Color.parseColor("#FF9800")
+                tvLabel?.visibility = View.VISIBLE
+                tvLabel?.text = "รอการยืนยัน"
+                tvAmount?.setTextColor(orangeColor)
+                
                 tvBadge?.text = "รอการยืนยัน"
-                setBadgeColor(tvBadge, orange)
+                setBadgeColor(tvBadge, orangeColor)
                 btnPay?.text = "รอการยืนยัน"
-                btnPay?.backgroundTintList = android.content.res.ColorStateList.valueOf(orange)
+                btnPay?.backgroundTintList = android.content.res.ColorStateList.valueOf(orangeColor)
                 btnPay?.isEnabled = false
             }
             else -> {
-                // "unpaid" (admin ส่งบิลใหม่) หรือ "rejected" (สลิปถูกปฏิเสธ) → แดง กดได้
-                val red = android.graphics.Color.parseColor("#E53935")
+                tvLabel?.visibility = View.VISIBLE
+                tvLabel?.text = "ยอดค้างชำระ"
+                tvAmount?.setTextColor(redColor)
+                
                 tvBadge?.text = "ค้างชำระ"
-                setBadgeColor(tvBadge, red)
+                setBadgeColor(tvBadge, redColor)
                 btnPay?.text = "จ่ายเลย"
-                btnPay?.backgroundTintList = android.content.res.ColorStateList.valueOf(red)
+                btnPay?.backgroundTintList = android.content.res.ColorStateList.valueOf(redColor)
                 btnPay?.isEnabled = true
             }
         }
@@ -255,45 +240,23 @@ class HomeUserActivity : AppCompatActivity() {
         bottomNav.setOnItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.navigation_home -> true
-                R.id.navigation_bill -> {
-                    startActivity(Intent(this, DetailBillActivity::class.java))
-                    overridePendingTransition(0, 0)
-                    finish()
-                    true
-                }
-                R.id.navigation_notifications -> {
-                    startActivity(Intent(this, DormInfoActivity::class.java))
-                    overridePendingTransition(0, 0)
-                    finish()
-                    true
-                }
-                R.id.navigation_chat -> {
-                    startActivity(Intent(this, ChatActivity::class.java))
-                    overridePendingTransition(0, 0)
-                    finish()
-                    true
-                }
+                R.id.navigation_bill -> { startActivity(Intent(this, DetailBillActivity::class.java)); true }
+                R.id.navigation_notifications -> { startActivity(Intent(this, DormInfoActivity::class.java)); true }
+                R.id.navigation_chat -> { startActivity(Intent(this, ChatActivity::class.java)); true }
                 else -> false
             }
         }
     }
 
-    /** ฟังก์ชันดู hasUnreadForUser จาก Firestore แบบ real-time
-     *  ถ้า admin ส่งข้อความมา → แสดงจุดแดงบน chat icon ใน bottom nav */
     private fun observeUnreadChat() {
         val uid = auth.currentUser?.uid ?: return
         val bottomNav = findViewById<BottomNavigationView>(R.id.bottom_nav)
-
-        db.collection("chats").document(uid)
-            .addSnapshotListener { doc, _ ->
-                val hasUnread = doc?.getBoolean("hasUnreadForUser") ?: false
-                if (hasUnread) {
-                    // แสดงจุดแดง (ไม่มีตัวเลข) บน chat icon
-                    bottomNav.getOrCreateBadge(R.id.navigation_chat).isVisible = true
-                } else {
-                    // ลบจุดแดงออก
-                    bottomNav.removeBadge(R.id.navigation_chat)
-                }
+        db.collection("chats").document(uid).addSnapshotListener { doc, _ ->
+            if (doc?.getBoolean("hasUnreadForUser") == true) {
+                bottomNav.getOrCreateBadge(R.id.navigation_chat).isVisible = true
+            } else {
+                bottomNav.removeBadge(R.id.navigation_chat)
             }
+        }
     }
 }
