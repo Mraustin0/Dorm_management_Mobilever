@@ -80,6 +80,7 @@
         <activity android:name=".admin.ChatListActivity" android:exported="false" />
         <activity android:name=".admin.AdminVacantRoomActivity" android:exported="false" />
         <activity android:name=".admin.AdminNotificationActivity" android:exported="false" />
+        <activity android:name=".admin.AdminViewBillActivity" android:exported="false" />
     </application>
 
 </manifest>

@@ -108,26 +108,60 @@ class AdminSelectRoomBillActivity : AppCompatActivity() {
                     return@addSnapshotListener
                 }
 
-                val statusMap = snapshots?.documents?.associate { 
-                    it.getString("roomNumber") to (it.getBoolean("isVacant") ?: true) 
+                val statusMap = snapshots?.documents?.associate {
+                    it.getString("roomNumber") to (it.getBoolean("isVacant") ?: true)
                 } ?: emptyMap()
 
-                val rooms = List(10) { i ->
-                    val roomNum = "${floor}${String.format("%02d", i + 1)}"
-                    Room("ห้อง $roomNum", statusMap[roomNum] ?: true)
-                }
-                
-                rvRooms.adapter = RoomAdapter(rooms) { room ->
-                    if (room.isVacant) {
-                        Toast.makeText(this, "ห้องว่าง ไม่สามารถสร้างบิลได้", Toast.LENGTH_SHORT).show()
-                    } else {
-                        val intent = Intent(this, AdminCreateBillActivity::class.java)
-                        intent.putExtra("ROOM_NAME", room.name)
-                        intent.putExtra("BILL_MONTH", spinnerMonth.selectedItem.toString())
-                        intent.putExtra("BILL_YEAR", spinnerYear.selectedItem.toString())
-                        startActivity(intent)
+                val selectedMonth = spinnerMonth.selectedItem.toString()
+                val selectedYear  = spinnerYear.selectedItem.toString()
+
+                // ดึงบิลของเดือน/ปีที่เลือก เพื่อเช็คว่าห้องไหนส่งบิลไปแล้ว
+                db.collection("bills")
+                    .whereEqualTo("month", selectedMonth)
+                    .whereEqualTo("year", selectedYear)
+                    .get()
+                    .addOnSuccessListener { billSnapshots ->
+                        // billMap: roomNumber → Pair(billId, status)
+                        val billMap = billSnapshots.documents.associate { doc ->
+                            (doc.getString("roomNumber") ?: "") to Pair(
+                                doc.id,
+                                doc.getString("status") ?: ""
+                            )
+                        }
+
+                        val rooms = List(10) { i ->
+                            val roomNum = "${floor}${String.format("%02d", i + 1)}"
+                            val billInfo = billMap[roomNum]
+                            Room(
+                                name       = "ห้อง $roomNum",
+                                isVacant   = statusMap[roomNum] ?: true,
+                                hasBill    = billInfo != null,
+                                billId     = billInfo?.first ?: "",
+                                billStatus = billInfo?.second ?: ""
+                            )
+                        }
+
+                        rvRooms.adapter = RoomAdapter(rooms) { room ->
+                            when {
+                                room.isVacant -> Toast.makeText(
+                                    this, "ห้องว่าง ไม่สามารถสร้างบิลได้", Toast.LENGTH_SHORT
+                                ).show()
+                                room.hasBill -> {
+                                    val intent = Intent(this, AdminViewBillActivity::class.java)
+                                    intent.putExtra("BILL_ID", room.billId)
+                                    intent.putExtra("ROOM_NAME", room.name)
+                                    startActivity(intent)
+                                }
+                                else -> {
+                                    val intent = Intent(this, AdminCreateBillActivity::class.java)
+                                    intent.putExtra("ROOM_NAME", room.name)
+                                    intent.putExtra("BILL_MONTH", selectedMonth)
+                                    intent.putExtra("BILL_YEAR", selectedYear)
+                                    startActivity(intent)
+                                }
+                            }
+                        }
                     }
-                }
             }
     }
 
