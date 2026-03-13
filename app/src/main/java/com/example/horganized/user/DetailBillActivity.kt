@@ -182,6 +182,7 @@ class DetailBillActivity : AppCompatActivity() {
                 btnPay.isEnabled = false
                 tvDue.text = "ชำระแล้ว"
                 tvDue.setTextColor(android.graphics.Color.parseColor("#1B9E44"))
+                tvAmount.setTextColor(android.graphics.Color.parseColor("#1B9E44"))
             }
             bill.isPending -> {
                 // user ส่งสลิปแล้ว รอ admin ยืนยัน → ส้ม
