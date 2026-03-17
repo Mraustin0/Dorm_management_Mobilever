@@ -45,7 +45,7 @@ class UserMoveOutActivity : AppCompatActivity() {
         auth = FirebaseAuth.getInstance()
 
         initViews()
-        loadUserData()
+        checkExistingRequestThenLoad()
 
         findViewById<ImageView>(R.id.btn_back).setOnClickListener { finish() }
 
@@ -82,6 +82,25 @@ class UserMoveOutActivity : AppCompatActivity() {
                 Toast.makeText(this, "ไม่มีไฟล์สัญญาในระบบ", Toast.LENGTH_SHORT).show()
             }
         }
+    }
+
+    private fun checkExistingRequestThenLoad() {
+        val userId = auth.currentUser?.uid ?: return
+        db.collection("move_out_requests")
+            .whereEqualTo("userId", userId)
+            .limit(1)
+            .get()
+            .addOnSuccessListener { docs ->
+                if (!docs.isEmpty) {
+                    startActivity(Intent(this, MoveOutHistoryActivity::class.java))
+                    finish()
+                } else {
+                    loadUserData()
+                }
+            }
+            .addOnFailureListener {
+                loadUserData()
+            }
     }
 
     private fun loadUserData() {

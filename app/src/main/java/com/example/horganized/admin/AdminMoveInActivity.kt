@@ -70,6 +70,7 @@ class AdminMoveInActivity : AppCompatActivity() {
         spinnerContract = findViewById(R.id.spinner_contract_term)
 
         setupContractSpinner()
+        loadLastMeterReadings()
 
         findViewById<ImageView>(R.id.btn_back_move_in).setOnClickListener {
             finish()
@@ -80,6 +81,24 @@ class AdminMoveInActivity : AppCompatActivity() {
                 showSaveConfirmationDialog()
             }
         }
+    }
+
+    /** ดึงเลขมิเตอร์ล่าสุดของห้องจาก rooms collection มา pre-fill ให้ */
+    private fun loadLastMeterReadings() {
+        if (roomNumber.isEmpty()) return
+        db.collection("rooms").document(roomNumber).get()
+            .addOnSuccessListener { doc ->
+                val lastWater    = doc.getLong("lastWaterMeter")
+                val lastElectric = doc.getLong("lastElectricMeter")
+                if (lastWater != null) {
+                    etWater.setText(lastWater.toString())
+                    etWater.hint = "มิเตอร์น้ำล่าสุด: $lastWater"
+                }
+                if (lastElectric != null) {
+                    etElectric.setText(lastElectric.toString())
+                    etElectric.hint = "มิเตอร์ไฟล่าสุด: $lastElectric"
+                }
+            }
     }
 
     private fun setupContractSpinner() {

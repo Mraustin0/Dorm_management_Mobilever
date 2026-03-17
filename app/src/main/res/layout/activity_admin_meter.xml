@@ -72,7 +72,8 @@
             android:gravity="center"
             android:padding="12dp"
             android:text="จดมิเตอร์ค่าน้ำ"
-            android:textColor="@color/gray_text" />
+            android:textColor="@color/gray_text"
+            android:textSize="15sp" />
 
         <TextView
             android:id="@+id/tv_tab_electric"
@@ -82,8 +83,8 @@
             android:gravity="center"
             android:padding="12dp"
             android:text="จดมิเตอร์ค่าไฟ"
-            android:textColor="@color/black"
-            android:textStyle="bold" />
+            android:textColor="@color/gray_text"
+            android:textSize="15sp" />
     </LinearLayout>
 
     <View

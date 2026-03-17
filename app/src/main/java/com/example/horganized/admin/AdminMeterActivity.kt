@@ -119,18 +119,31 @@ class AdminMeterActivity : AppCompatActivity() {
         val tvWater = findViewById<TextView>(R.id.tv_tab_water)
         val tvElectric = findViewById<TextView>(R.id.tv_tab_electric)
 
+        setTabSelected(tvWater, isWaterTab)
+        setTabSelected(tvElectric, !isWaterTab)
+
         tvWater.setOnClickListener {
             isWaterTab = true
-            tvWater.setTextColor(resources.getColor(R.color.black, null))
-            tvElectric.setTextColor(resources.getColor(R.color.gray_text, null))
+            setTabSelected(tvWater, true)
+            setTabSelected(tvElectric, false)
             refreshList()
         }
 
         tvElectric.setOnClickListener {
             isWaterTab = false
-            tvElectric.setTextColor(resources.getColor(R.color.black, null))
-            tvWater.setTextColor(resources.getColor(R.color.gray_text, null))
+            setTabSelected(tvElectric, true)
+            setTabSelected(tvWater, false)
             refreshList()
+        }
+    }
+
+    private fun setTabSelected(tab: TextView, selected: Boolean) {
+        if (selected) {
+            tab.setTextColor(resources.getColor(R.color.black, null))
+            tab.setTypeface(null, android.graphics.Typeface.BOLD)
+        } else {
+            tab.setTextColor(resources.getColor(R.color.gray_text, null))
+            tab.setTypeface(null, android.graphics.Typeface.NORMAL)
         }
     }
 
